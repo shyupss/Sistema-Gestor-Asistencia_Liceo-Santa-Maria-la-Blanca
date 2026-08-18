@@ -1,4 +1,4 @@
-# GestorAsistencia_SantaMariaDeLaBlanca
+# GestorAsistencia_SantaMariaLaBlanca
 
 ## HOLA AMIGOS
 
