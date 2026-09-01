@@ -16,7 +16,10 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from inicio import views # <-- Debes importar las vistas de tu app
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('', views.pagina_principal, name='home'), # <-- El '' (string vacío) es lo que oculta el cohete
+    path('segunda/', views.pagina_segunda, name='nothome'),
 ]

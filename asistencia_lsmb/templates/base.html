@@ -1,0 +1,18 @@
+<!-- templates/base.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Mi Sitio{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+    <header><h1>Esto es de Base.HTML (wow)</h1></header>
+    
+    <main>
+        {% block content %}
+        <!-- App content will load here -->
+        {% endblock %}
+    </main>
+</body>
+</html>
