@@ -16,10 +16,13 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from inicio import views # <-- Debes importar las vistas de tu app
+from inicio import views as inicio_views
+from academico import views as academico_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', views.pagina_principal, name='home'), # <-- El '' (string vacío) es lo que oculta el cohete
-    path('segunda/', views.pagina_segunda, name='nothome'),
+    path('', inicio_views.pagina_principal, name='home'), # <-- El '' (string vacío) es lo que oculta el cohete
+    path('segunda/', inicio_views.pagina_segunda, name='nothome'),
+    path('alumnos/', academico_views.pagina_alumnos, name = 'alumnos'),
+    path('cursos/', academico_views.pagina_cursos, name= 'cursos'),
 ]

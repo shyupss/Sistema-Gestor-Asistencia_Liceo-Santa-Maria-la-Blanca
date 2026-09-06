@@ -24,6 +24,9 @@ services:
     command: uv run manage.py runserver 0.0.0.0:8000
     ports:
       - "8000:8000" 
+    # agregado para poder desarrollar en docker
+    volumes:
+      - ./asistencia_lsmb:/app
     env_file:
       - path: .env
         required: false
