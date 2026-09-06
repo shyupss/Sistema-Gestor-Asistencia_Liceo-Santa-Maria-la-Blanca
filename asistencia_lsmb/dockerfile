@@ -1,0 +1,33 @@
+# comenzamos con una imagen ligera de python
+FROM python:3.11-slim
+
+# evita la creación de archivos .pyc y forzar salida sin buffer para logs
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PATH="/app/.venv/bin:$PATH"
+
+    # directorio de trabajo dentro del contenedor
+WORKDIR /app
+
+# -- dependencias del sistema necesarias para PostgreSQL --
+RUN apt-get update && apt-get install -y \
+        libpq-dev gcc \
+        && rm -rf /var/lib/apt/lists/*
+
+# descargamos uv
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
+
+# copiamos los archivos de dependencias
+COPY pyproject.toml uv.lock ./
+
+# instalamos las dependencias
+RUN uv sync --frozen --no-dev
+
+# 1. se crea el usuario no privilegiado
+RUN useradd -m web-user
+# 2. cambiar al usuario 'appuser' para las siguientes instrucciones
+USER web-user
+# propiedad al usuario y grupo 'appuser'
+COPY --chown=web-user:web-user . .
+
+EXPOSE 8000
