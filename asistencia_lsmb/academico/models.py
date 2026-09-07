@@ -1,3 +1,5 @@
+import re
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Q
 
@@ -51,6 +53,15 @@ class Apoderado(models.Model):
     def __str__(self):
         return f"{self.nombre} - {self.rut}"
 
+def normalizar_rut(rut):
+    # Elimina puntos y guiones, y convierte a mayúsculas
+    if not rut:
+        return ""
+    rut_limpio = re.sub(r'[^0-9kK]', '', str((rut)).upper())
+    if len(rut_limpio) > 1:
+        return f"{rut_limpio[:-1]}-{rut_limpio[-1]}"
+    return rut_limpio
+
 
 class Alumno(models.Model):
     rut = models.CharField(max_length=15, unique=True)
@@ -60,6 +71,23 @@ class Alumno(models.Model):
     
     # Declaramos la relación N:M pasando por nuestra tabla intermedia
     apoderados = models.ManyToManyField(Apoderado, through='AlumnoApoderado')
+
+    def clean(self):
+        super().clean()
+        # Normaliza el RUT antes de guardarlo
+        self.rut = normalizar_rut(self.rut)
+
+        # Verifica duplicidad
+        queryset = Alumno.objects.filter(rut=self.rut)
+        if self.pk:
+            query = queryset.exclude(pk=self.pk)
+
+        if query.exists():
+            raise ValidationError({'rut': 'El RUT ya está registrado para otro alumno.'})
+
+    def save(self, *args, **kwargs):
+        self.full_clean()  # Llama a clean() antes de guardar
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.nombre} - {self.rut}"
