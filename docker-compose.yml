@@ -1,20 +1,21 @@
 services:
   db:
     image: postgres:15-alpine
-    # variables de entorno - docker autoconfigura postgresql
-    env_file: # produccion - se busca el .env
-      - path: .env
-        required: false
-    environment: # si no (producción), se busca en el sistema (se deben añadir al path mediante ssh)
+    environment: 
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_DB=${POSTGRES_DB}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - POSTGRES_HOST=${POSTGRES_HOST}
       - POSTGRES_PORT=${POSTGRES_PORT}
-
     # persistencia de datos
     volumes:
       - postgres_data:/var/lib/postgresql/data/
+    # saber si el servicio está realmente funcionando (no solo corriendo)
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     
   web:
     build:
@@ -27,9 +28,6 @@ services:
     # agregado para poder desarrollar en docker
     volumes:
       - ./asistencia_lsmb:/app
-    env_file:
-      - path: .env
-        required: false
     environment:
       - SECRET_KEY=${SECRET_KEY}
       - POSTGRES_USER=${POSTGRES_USER}
@@ -39,7 +37,8 @@ services:
       - POSTGRES_PORT=${POSTGRES_PORT}
 
     depends_on:
-      - db
+      db:
+        condition: service_healthy
 
 volumes:
   postgres_data:

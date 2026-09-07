@@ -16,22 +16,21 @@ import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# ---- AÑADIDO ----
-
-# ruta del env
-env_path = BASE_DIR.parent / '.env'
-# Cargamos el archivo (no se sobre-escriben las variables)
-load_dotenv(env_path)
-
-# ----------------- clave secreta
-# SECRET_KEY = os.getenv('SECRET_KEY')
-# -----------------
+# ---- SI EJECUTAS EN LOCAL, SE DEBEN CARGAR MANUALMENTE LAS VARIBALES ----
+# ---- POR LO CUAL, DESCOMENTAR EL BLOQUE DE ABAJO ----
+# ---- PARA ESTO SE DEBE TENER LEVANTADO EL SERVICIO "db" CON DOCKER O TENERLO CORRIENDO LOCALMENTE ----
+#begin bloque ----
+# env_path = BASE_DIR.parent / '.env'
+# load_dotenv(env_path) # si hay variables ya cargadas en el sistema, no se pisan.
+#end bloque ----
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-000_*gmy5nq-hdjm@00fwtpp+ke57$ve1@i=0643+61gnezibd'
+# ---- clave secreta
+SECRET_KEY = os.getenv('SECRET_KEY')
+# ------------------
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -85,15 +84,15 @@ WSGI_APPLICATION = 'project.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-# configurado para postgres
+# configurado para postgres (toma las variables de entorno)
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('POSTGRES_DB', 'asistencia_db'),
-        'USER': os.getenv('POSTGRES_USER', 'postgres'),
+        'NAME': os.getenv('POSTGRES_DB'),
+        'USER': os.getenv('POSTGRES_USER'),
         'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
-        'HOST': os.getenv('POSTGRES_HOST', 'db'),
-        'PORT': os.getenv('POSTGRES_PORT', '5432'),
+        'HOST': os.getenv('POSTGRES_HOST'),
+        'PORT': os.getenv('POSTGRES_PORT'),
     }
 }
 
