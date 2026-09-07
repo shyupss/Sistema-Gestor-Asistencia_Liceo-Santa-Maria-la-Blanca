@@ -1,0 +1,23 @@
+<!-- Pastilla -->
+{% if color == "verde" %}
+<span
+    class="px-3 py-1 bg-verde-fondo text-verde-oscuro text-sm font-bold rounded-full">
+    {{ texto }}
+</span>
+{% elif color == "amarillo" %}
+<span
+    class="px-3 py-1 bg-amarillo-fondo text-amarillo-oscuro text-sm font-bold rounded-full">
+    {{ texto }}
+</span>
+{% elif color == "rojo" %}
+<span
+    class="px-3 py-1 bg-rojo-fondo text-rojo-oscuro text-sm font-bold rounded-full">
+    {{ texto }}
+</span>
+{% else %}
+<span
+    class="px-3 py-1 bg-azul-fondo text-azul-profundo text-sm font-bold rounded-full">
+    {{ texto }}
+</span>
+{% endif %}
+

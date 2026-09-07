@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block title %}Pagina Primera{% endblock %}
+
+{% block content %}
+
+<!-- Contenedor principal del contenido -->
+<div class="p-4">
+    <!-- Encabezado -->
+    <div class="flex items-end justify-between mb-4 px-1">
+        <h1 class="text-2xl font-bold text-negro-texto">{{ page_title }}</h1>
+        <span
+            class="px-3.5 py-1 bg-celeste-claro text-azul-primario border border-azul-medio rounded-full text-sm font-semibold">
+            {{ fecha_hoy|date:"d/m/Y" }}
+        </span>
+    </div>
+
+    {% include 'academico/components/dashboard-card.html' %}
+</div>
+
+{% endblock %}

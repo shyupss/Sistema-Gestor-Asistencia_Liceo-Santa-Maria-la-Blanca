@@ -4,6 +4,7 @@ from django.core.paginator import Paginator
 from django.db.models import Q, Prefetch
 from datetime import timedelta
 from .models import Alumno, Curso, Matricula #Importa modelos a cargar
+from babel.dates import format_date
 
 # Create your views here.
 def pagina_alumnos(request):
@@ -43,6 +44,7 @@ def pagina_alumnos(request):
     page_obj = paginator.get_page(page_number)
 
     contexto = {
+        'page_title': "Estudiantes",
         'page_obj': page_obj,
         'search_query': search_query,
         'per_page': per_page,
@@ -50,8 +52,8 @@ def pagina_alumnos(request):
         'is_24': per_page == 24,
         'is_48': per_page == 48,
         'fecha_hoy': fecha_hoy,
-        'inicio_semana': inicio_semana,
-        'fin_semana': fin_semana,
+        'inicio_semana': format_date(inicio_semana, format = "dd MMM", locale = "es"),
+        'fin_semana': format_date(fin_semana, format = "dd MMM", locale = "es"),
     }
     
     return render (request, 'academico/alumnos.html', contexto)
@@ -60,9 +62,24 @@ def pagina_alumnos(request):
 def pagina_cursos(request):
     # Busca los registros del modelo en la tabla
     cursos = Curso.objects.all()
+    fecha_hoy = timezone.localdate()
+    año_actual = fecha_hoy.year
+    inicio_semana = fecha_hoy - timedelta(days=fecha_hoy.weekday())
+    fin_semana = inicio_semana + timedelta(days=6)
+
 
     contexto = {
-        'lista_cursos': cursos
+        'page_title': "Cursos",
+        'lista_cursos': cursos,
+        'fecha_hoy': fecha_hoy,
+        'inicio_semana': format_date(inicio_semana, format = "dd MMM", locale = "es"),
+        'fin_semana': format_date(fin_semana, format = "dd MMM", locale = "es"),
+
+        # TODO: Cambiar por info real
+        'pastillas': [
+            (f"{8} Cursos · Periodo actual", "azul"), 
+            (f"Cumplimiento meta · {93}%", "verde")
+        ],
     }
     
-    return render (request, 'academico/cursos.html', contexto)
+    return render (request, 'academico/base.html', contexto)

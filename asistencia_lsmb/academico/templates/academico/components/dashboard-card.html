@@ -1,12 +1,3 @@
-<!-- Encabezado -->
-<div class="flex items-end justify-between mb-4 px-1">
-    <h1 class="text-2xl font-bold text-negro-texto">Estudiantes</h1>
-    <span
-        class="px-3.5 py-1 bg-celeste-claro text-azul-primario border border-azul-medio rounded-full text-sm font-semibold">
-        {{ fecha_hoy|date:"d/m/Y" }}
-    </span>
-</div>
-
 <!-- Tarjeta Dashboard -->
 <div class="bg-blanco-tarjeta rounded-xl border border-gris-claro shadow-sm p-4 lg:p-6 mb-6">
 
@@ -48,16 +39,10 @@
         <div id="dashboard-content"
             class="hidden lg:flex flex-col xl:flex-row w-full xl:w-2/3 mt-4 pt-4 border-t border-gris-ultraclaro xl:mt-0 xl:pt-0 xl:border-none">
 
-            <!-- Pantalla Informativa Movil -->
             <div class="flex lg:hidden gap-2 flex-wrap mb-4">
-                <span
-                    class="px-3 py-1 bg-celeste-claro text-azul-profundo text-sm font-bold rounded border border-azul-medio">
-                    254 Estudiantes - Periodo actual
-                </span>
-                <span
-                    class="px-3 py-1 bg-amarillo-claro text-amarillo-oscuro text-sm font-bold rounded border border-amarillo-suave">
-                    Estudiantes con alerta - 57
-                </span>
+                {% for texto, color in pastillas %}
+                    {% include 'academico/components/pastilla.html' with texto=texto color=color%}
+                {% endfor %}
             </div>
 
             <!-- Estudiantes por nivel de asistencia -->
