@@ -9,18 +9,17 @@
     <link rel="shortcut icon" href="{% static 'img/favicon.ico' %}" type="image/x-icon">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+
     <!-- Paleta de colores -->
     <script src="{% static 'js/tailwind.config.js' %}"></script>
+    <!-- Carga de fuentes -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
 </head>
-<body>
-    <header>
-        <div class="flex items-center justify-center min-h-[15vh] bg-azul-profundo">
-            <h1 class="flex items-center gap-3 text-4xl font-bold text-white bg-white/10 backdrop-blur-sm px-8 py-6 rounded-2xl shadow-2xl border border-white/20">
-                <span>¡Hola mundo! de parte del grupo 7</span>
-                <i data-lucide="handshake" class="h-10 w-auto text-white shrink-0"></i>
-            </h1>
-        </div>
-    </header>
+<body class="bg-blanco-fondo">
+
+    {% include 'components/header.html' %}
     
     <main>
         {% block content %}

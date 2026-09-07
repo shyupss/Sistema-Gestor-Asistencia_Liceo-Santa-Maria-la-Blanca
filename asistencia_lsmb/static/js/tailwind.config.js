@@ -1,6 +1,10 @@
 tailwind.config = {
     theme: {
         extend: {
+            fontFamily: {
+                sans: ['Inter', 'sans-serif'],
+                serif: ['Lora', 'serif']
+            },
             colors: {
                 azul: {
                     profundo: "#0F3A66",
@@ -22,6 +26,7 @@ tailwind.config = {
                     ultraclaro: "#F3F3F3",
                 },
                 blanco: {
+                    DEFAULT: "#FFFFFF",
                     fondo: "#F3F4F6",
                     tarjeta: "#FFFFFF",
                 },
