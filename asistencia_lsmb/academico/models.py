@@ -32,6 +32,14 @@ class Curso(models.Model):
     
     def __str__(self):
         return f"{self.nivel} {self.grupo} ({self.periodo.anio})"
+    
+    @property
+    def nivel_romano(self):
+        mapa_romanos = {
+            1: 'I', 2: 'II', 3: 'III', 4: 'IV'
+        }
+        # Busca el número en el mapa. Si no lo encuentra, devuelve el número normal.
+        return mapa_romanos.get(self.nivel, self.nivel)
 
 
 class Apoderado(models.Model):
