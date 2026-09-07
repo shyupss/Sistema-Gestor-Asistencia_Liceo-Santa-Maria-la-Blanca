@@ -27,11 +27,37 @@ class Curso(models.Model):
         blank=True
     )'''
     # Temporal mientras no hay app que maneje profesores/cuentas
-    profesor_jefe = models.CharField(max_length=100)
+    profesor_jefe = models.CharField(max_length=100, blank=True, default="")
+    # foreingkey a futuro
+    #profesor_jefe = models.ForeignKey('cuentas.Funcionario', on_delete=models.SET_NULL, null=True, blank=True)
 
     nivel = models.IntegerField()
     grupo = models.CharField(max_length=3)
-    
+
+    def clean(self):
+        super().clean()
+
+        # Validar solo si hay un profesor asignado y un periodo definido
+        if self.profesor_jefe and self.periodo:
+            # Buscar otros cursos en el mismo periodo con el mismo profesor
+            cursos_duplicados = Curso.objects.filter(
+                periodo=self.periodo,
+                profesor_jefe=self.profesor_jefe
+            )
+
+            # Si estamos editando un curso existente, excluimos ese curso de la búsqueda
+            if self.pk:
+                cursos_duplicados = cursos_duplicados.exclude(pk=self.pk)
+            if cursos_duplicados.exists():
+                curso_conflicto = cursos_duplicados.first()
+                raise ValidationError({
+                    'profesor_jefe': f"El profesor {self.profesor_jefe} ya está asignado como profesor jefe del curso {curso_conflicto.nivel} {curso_conflicto.grupo}"
+                })
+
+    def save(self, *args, **kwargs):
+        self.full_clean()  # Llama a clean() antes de guardar
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return f"{self.nivel} {self.grupo} ({self.periodo.anio})"
     
