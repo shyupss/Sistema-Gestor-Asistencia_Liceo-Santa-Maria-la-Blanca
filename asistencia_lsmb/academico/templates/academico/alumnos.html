@@ -3,42 +3,85 @@
 {% block title %}Pagina Primera{% endblock %}
 
 {% block content %}
-<div class="bg-[#F3F4F6] p-8">
-    <div class="border border-solid border-gray-200 rounded-xl bg-[#FFF] p-8 text-center">
-        <h1 class="text-3xl font-bold text-blue-600 mb-4">Prueba Lista Alumnos</h1>
-        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 p-4 max-w-7xl mx-auto">
-            {% for alumno in lista_alumnos %}
-            <div class="bg-[#FFF] rounded-xl border border-gray-200 border-l-[6px] border-l-red-500 shadow-sm flex flex-col h-full overflow-hidden">
+<div class="bg-gris-claro p-4">
+    <!-- Dashboard alumnos, separado por simplicidad-->
+    {% include 'academico/dashboard_alumnos.html' %}
+
+    <!-- Contenedor listas de alumnos -->
+    <div class="border border-solid border-gris-claro rounded-xl bg-blanco-tarjeta text-center">
+        <!-- Buscador y Ordenamiento -->
+        <form method="get"
+            class="flex flex-row items-center justify-between p-2 gap-2 md:gap-4 mb-6 border-b-2 border-gris-claro">
+
+            <!-- Input de Buscador -->
+            <div class="relative flex-1 min-w-0 md:flex-grow p-1">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-gris-icono pointer-events-none">
+                    <i data-lucide="search" class="w-5 h-5"></i>
+                </span>
+                <input type="text" name="q" value="{{ search_query }}" placeholder="Buscar por nombre, curso o RUT"
+                    class="w-full pl-11 pr-4 py-2.5 bg-blanco-tarjeta border border-gris-claro rounded-xl text-sm text-gris-texto placeholder-gris-text-gris-texto focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm">
+            </div>
+
+            <!-- Controles Derechos (Ordenar y Filtro) -->
+            <div class="flex items-center gap-2 md:gap-3 w-auto justify-end">
+                <!-- Selector de Orden -->
+                <div class="relative hidden md:block">
+                    <select
+                        class="appearance-none bg-blanco-tarjeta border border-gris-claro rounded-xl px-4 py-2.5 pr-10 text-sm text-gris-texto focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm">
+                        <option>Ordenar: Asistencia (ascendente)</option>
+                    </select>
+                    <span class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gris-icono">
+                        <i data-lucide="arrow-up-down" class="w-4 h-4"></i>
+                    </span>
+                </div>
+
+                <!-- Botón Ordenar (Solo móvil) -->
+                <button type="button" aria-label="Ordenar" title="Ordenar"
+                    class="md:hidden flex-shrink-0 p-2.5 bg-blanco-tarjeta border border-gris-claro rounded-xl text-gris-icono hover:bg-gris-claro transition-colors shadow-sm">
+                    <i data-lucide="arrow-up-down" class="w-5 h-5"></i>
+                </button>
+
+                <!-- Botón Filtro Avanzado -->
+                <button type="button"
+                    class="p-2.5 bg-blanco-tarjeta border border-gris-claro rounded-xl text-gris-icono hover:bg-gris-claro transition-colors shadow-sm">
+                    <i data-lucide="funnel" class="w-5 h-5"></i>
+                </button>
+            </div>
+        </form>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 md:p-0">
+            {% for alumno in page_obj %}
+            <div
+                class="bg-blanco-tarjeta rounded-xl border border-gris-claro border-l-[6px] border-l-red-500 shadow-sm flex flex-col h-full overflow-hidden">
                 <div class="p-4 flex gap-4 flex-grow items-start">
                     <!-- Icono Estudiante sin foto (por que no hay foto)-->
-                    <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-800 mt-1">
-                        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewbox=" 0 0 24 24 "
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                        </svg>
+                    <div
+                        class="w-12 h-12 rounded-full bg-azul-fondo flex-shrink-0 flex items-center justify-center text-azul-profundo mt-1">
+                        <i data-lucide="user" class="w-6 h-6"></i>
                     </div>
                     <!-- Contenedor Nombre, Curso y RUT-->
                     <div class="flex-grow text-left min-w-0">
-                        <h3 class="text-base font-bold text-[#1F2937] leading-tight truncate">{{ alumno.nombre }}</h3>
-                        <p class="text-xs text-[#6B7280]">{{ alumno.matricula_activa_list.0.curso.nivel_romano}}° Medio
-                            {{alumno.matricula_activa_list.0.curso.grupo }}</p>
-                        <p class="text-xs text-[#6B7280]">RUT {{ alumno.rut }}</p>
+                        <h3 class="text-sm md:text-base font-bold text-negro-texto leading-tight truncate">
+                            {{alumno.nombre }}</h3>
+                        <p class="text-xs text-gris-texto">
+                            {{ alumno.matricula_activa_list.0.curso.nivel_romano }}° Medio
+                            {{ alumno.matricula_activa_list.0.curso.grupo }}
+                        </p>
+                        <p class="text-xs text-gris-texto">RUT {{ alumno.rut }}</p>
                     </div>
-                    <!-- Columna 3: Estadísticas -->
-                    <div class="flex flex-col items-end justify-center">
-                        <!-- El color de fondo (bg-red-100) y texto (text-red-800) será dinámico según el estado -->
+                    <!-- Estadísticas -->
+                    <div class="flex flex-col items-center justify-shrink-0">
+                        <!-- El color de fondo y texto será dinámico según el estado -->
                         <span
-                            class="px-2 py-0.5 rounded-full bg-red-100 text-red-800 text-[11px] font-bold tracking-wide">
+                            class="px-2 py-0.5 rounded-full bg-rojo-fondo text-rojo-oscuro text-[10px] font-bold tracking-wide">
                             Crítico
                         </span>
-                        <span class="text-2xl font-extrabold text-slate-800 mt-1">
+                        <span class="text-base font-extrabold text-negro-texto mt-1">
                             54%
                         </span>
                     </div>
                 </div>
-                <!-- Parte Inferior: Botón Ver Ficha -->
-                <div class="border-t border-gray-100 mt-auto">
+                <!-- Botón Ver Ficha -->
+                <div class="border-t border-gris-claro mt-auto">
                     <a href="#"
                         class="flex items-center justify-center w-full py-2.5 text-sm font-medium text-blue-900 hover:bg-gray-50 transition-colors rounded-b-xl">
                         Ver ficha
@@ -52,7 +95,74 @@
 
             {% endfor %}
         </div>
-        <p class="text-gray-700 mb-2">fin</p>
+        <!-- Paginador -->
+        <div
+            class="flex flex-col md:flex-row items-center justify-between p-2 gap-4 mt-8 pt-4 border-t border-gris-claro text-sm text-gray-500">
+
+            <!-- Texto de conteo -->
+            <div>
+                Mostrando {{ page_obj.start_index }}-{{ page_obj.end_index }} de {{ page_obj.paginator.count }}
+                estudiantes
+            </div>
+
+            <!-- Selector de elementos por página -->
+            <div class="flex items-center gap-2">
+                <span>Por página</span>
+                <select name="per_page" onchange="this.form.submit()"
+                    class="bg-white border border-gris-claro rounded-lg px-2.5 py-1 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-500">
+                    <option value="12" {% if is_12 %}selected{% endif %}>12</option>
+                    <option value="24" {% if is_24 %}selected{% endif %}>24</option>
+                    <option value="48" {% if is_48 %}selected{% endif %}>48</option>
+                </select>
+            </div>
+
+            <!-- Botones de Paginación Numérica -->
+            <div class="flex items-center gap-1">
+                <!-- Botón Anterior -->
+                {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}&q={{ search_query }}&per_page={{ per_page }}"
+                    class="p-2 border border-gris-claro rounded-lg text-gray-600 hover:bg-gray-50">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                </a>
+                {% else %}
+                <span class="p-2 border border-gray-100 rounded-lg text-gray-300 cursor-not-allowed">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                </span>
+                {% endif %}
+
+                <!-- Números de página -->
+                {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                <span class="px-3.5 py-1.5 border border-blue-600 bg-blue-50 text-blue-600 font-semibold rounded-lg">
+                    {{num }}</span>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %} <a
+                    href="?page={{ num }}&q={{ search_query }}&per_page={{ per_page }}"
+                    class="px-3.5 py-1.5 border border-gris-claro text-gray-600 hover:bg-gray-50 rounded-lg">{{ num
+                    }}</a>
+                    {% endif %}
+                    {% endfor %}
+
+                    <!-- Botón Siguiente -->
+                    {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}&q={{ search_query }}&per_page={{ per_page }}"
+                        class="p-2 border border-gris-claro rounded-lg text-gray-600 hover:bg-gray-50">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </a>
+                    {% else %}
+                    <span class="p-2 border border-gray-100 rounded-lg text-gray-300 cursor-not-allowed">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </span>
+                    {% endif %}
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}
