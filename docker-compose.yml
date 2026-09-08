@@ -18,16 +18,19 @@ services:
       retries: 5
     
   web:
-    build:
+    build: 
       context: ./asistencia_lsmb  # contruir esta imagen a partir de esta ruta
       dockerfile: dockerfile
     # comando para iniciar la aplicación django
-    command: uv run manage.py runserver 0.0.0.0:8000
+    command: >
+      sh -c "uv run manage.py migrate &&
+             uv run manage.py runserver 0.0.0.0:8000"
     ports:
       - "8000:8000" 
     # agregado para poder desarrollar en docker
-    volumes:
+    volumes: 
       - ./asistencia_lsmb:/app
+      - /app/.venv # utiliza el venv que creó (ya no se copia desde los archivos)
     environment:
       - SECRET_KEY=${SECRET_KEY}
       - POSTGRES_USER=${POSTGRES_USER}
@@ -35,10 +38,11 @@ services:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - POSTGRES_HOST=${POSTGRES_HOST}
       - POSTGRES_PORT=${POSTGRES_PORT}
-
+      - UV_LINK_MODE=copy 
     depends_on:
       db:
         condition: service_healthy
+  
 
 volumes:
   postgres_data:
