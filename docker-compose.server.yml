@@ -28,7 +28,7 @@ services:
     image: ghcr.io/shyupss/sistema-gestor-asistencia_liceo-santa-maria-la-blanca:latest
     container_name: grupo7_backend
     restart: unless-stopped
-    env_file: .env.server
+    env_file: .env
     depends_on:
       grupo7_db:
         condition: service_healthy

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-SERVER="${SERVER:-vm166@146.83.216.166}"
+SERVER="${SERVER:-grupo7@146.83.216.166}"
 REMOTE_DIR="${REMOTE_DIR:-grupo7}"
 
 echo "==> Servidor: $SERVER   Carpeta: ~/$REMOTE_DIR"
