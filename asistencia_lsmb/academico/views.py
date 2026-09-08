@@ -87,7 +87,7 @@ def pagina_cursos(request):
 
     contexto = {
         'page_title': "Cursos",
-        'lista_cursos': cursos,
+        'page_obj': cursos,
         'fecha_hoy': fecha_hoy,
         'current_year': año_actual,
         'current_month': format_date(fecha_hoy, format = "MMMM", locale = "es").capitalize(),
