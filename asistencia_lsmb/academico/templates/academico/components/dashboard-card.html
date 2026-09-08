@@ -42,7 +42,7 @@
                 <!-- Estudiantes/cursos por nivel de asistencia -->
                 <div class="w-full xl:w-1/2 xl:px-6 xl:border-r xl:border-gris-claro">
                     <p class="text-lg font-semibold text-gris-texto mb-3">{{ page_title }} por nivel de asistencia</p>
-                    <div class="grid grid-cols-4 gap-2 p-1 md:p-2">
+                    <div class="grid grid-cols-4 gap-2 p-2 xl:p-1">
                         {% for nivel, cuenta in alertas.items %}
                             {% include 'academico/components/boton-filtro.html' with cuenta=cuenta nivel=nivel %}
                         {% endfor %}
@@ -83,24 +83,42 @@
 
 <!-- Script JS para animación boton desplegable movil (lo rota en 180°)-->
 <script>
+    const BREAKPOINT = 1280; // xl
+
     function toggleDashboard() {
         const content = document.getElementById('dashboard-content');
         const icon = document.getElementById('chevron-icon');
-
-        // Rotar la flecha
         icon.classList.toggle('rotate-180');
 
         if (content.classList.contains('is-open')) {
-            // Cerrar
             content.style.maxHeight = content.scrollHeight + 'px';
-            content.style.opacity = '0';
             content.classList.remove('is-open');
-        }
-        else {
-            // Abrir
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    content.style.maxHeight = '0px';
+                    content.style.opacity = '0';
+                });
+            });
+        } else {
             content.style.maxHeight = content.scrollHeight + 'px';
             content.style.opacity = '1';
             content.classList.add('is-open');
+            content.addEventListener('transitionend', function handler(e) {
+                if (e.propertyName === 'max-height') {
+                    content.style.maxHeight = 'none';
+                    content.removeEventListener('transitionend', handler);
+                }
+            });
         }
     }
+
+    function resetInlineStylesIfDesktop() {
+        const content = document.getElementById('dashboard-content');
+        if (window.innerWidth >= BREAKPOINT) {
+            content.style.maxHeight = '';
+            content.style.opacity = '';
+        }
+    }
+    window.addEventListener('resize', resetInlineStylesIfDesktop);
+    document.addEventListener('DOMContentLoaded', resetInlineStylesIfDesktop);
 </script>
