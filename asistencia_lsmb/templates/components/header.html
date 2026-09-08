@@ -1,25 +1,27 @@
 {% load static %}
 <header class="bg-azul-profundo text-blanco px-4 py-3 flex items-center justify-between shadow-md min-h-[15vh]">
     <!-- Lado izquierdo -->
-    <div class="flex items-center space-x-3">
-        <!-- Logo -->
-        <img 
-            src="{% static 'img/favicon.ico' %}" 
-            alt="Logo Liceo Santa María la Blanca"
-            class="w-16 h-16 md:w-20 md:h-20 object-contain rounded-full border-2 border-azul-medio"
-        >
-        <!-- Título -->
-        <div class="flex flex-col">
-            <h1 class="text-2xl font-serif font-semibold tracking-wide border-b border-blanco pb-1">
-                <span class="md:hidden">LSMB</span>
-                <span class="hidden md:inline">Liceo Santa María la Blanca</span>
-            </h1>
-            <p class="text-xs pt-1 md:text-sm text-blanco">
-                <span class="md:hidden">Gestión asistencia</span>
-                <span class="hidden md:inline">Sistema de gestión de asistencia y alertas tempranas</span>
-            </p>
+    <a href="{% url 'home' %}" class="block no-underline text-inherit">
+        <div class="flex items-center space-x-3">
+            <!-- Logo -->
+            <img 
+                src="{% static 'img/favicon.ico' %}" 
+                alt="Logo Liceo Santa María la Blanca"
+                class="w-16 h-16 md:w-20 md:h-20 object-contain rounded-full border-2 border-azul-medio"
+            >
+            <!-- Título -->
+            <div class="flex flex-col">
+                <h1 class="text-2xl font-serif font-semibold tracking-wide border-b border-blanco pb-1">
+                    <span class="md:hidden">LSMB</span>
+                    <span class="hidden md:inline">Liceo Santa María la Blanca</span>
+                </h1>
+                <p class="text-xs pt-1 md:text-sm text-blanco">
+                    <span class="md:hidden">Gestión asistencia</span>
+                    <span class="hidden md:inline">Sistema de gestión de asistencia y alertas tempranas</span>
+                </p>
+            </div>
         </div>
-    </div>
+    </a>
 
     <!-- Lado derecho -->
     <div class="flex items-center space-x-4 md:space-x-6">
