@@ -1,0 +1,42 @@
+<div
+    class="bg-blanco-tarjeta rounded-xl border border-gris-claro border-l-[6px] border-l-red-500 shadow-sm flex flex-col h-full overflow-hidden">
+    <div class="p-4 flex gap-4 flex-grow items-start">
+        <!-- Icono Estudiante sin foto (por que no hay foto)-->
+        <div
+            class="w-12 h-12 rounded-full bg-azul-fondo flex-shrink-0 flex items-center justify-center text-azul-profundo mt-1">
+            <i data-lucide="user" class="w-6 h-6"></i>
+        </div>
+        <!-- Contenedor Nombre, Curso y RUT-->
+        <div class="flex-grow text-left min-w-0">
+            <h3 class="text-sm md:text-base font-bold text-negro-texto leading-tight truncate">
+                {{ alumno.nombre }}</h3>
+            <p class="text-xs text-gris-texto">
+                {{ alumno.matricula_activa_list.0.curso.nivel_romano }}° Medio
+                {{ alumno.matricula_activa_list.0.curso.grupo }}
+            </p>
+            <p class="text-xs text-gris-texto">RUT {{ alumno.rut }}</p>
+        </div>
+        <!-- Estadísticas -->
+        <div class="flex flex-col items-center justify-shrink-0">
+            <!-- El color de fondo y texto será dinámico según el estado -->
+            <span
+                class="px-2 py-0.5 rounded-full bg-rojo-fondo text-rojo-oscuro text-[10px] font-bold tracking-wide">
+                Crítico
+            </span>
+            <span class="text-base font-extrabold text-negro-texto mt-1">
+                54%
+            </span>
+        </div>
+    </div>
+    <!-- Botón Ver Ficha -->
+    <div class="border-t border-gris-claro mt-auto">
+        <a href="#"
+            class="flex items-center justify-center w-full py-2.5 text-sm font-medium text-blue-900 hover:bg-gray-50 transition-colors rounded-b-xl">
+            Ver ficha
+            <svg class="w-4 h-4 ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+            </svg>
+        </a>
+    </div>
+</div>

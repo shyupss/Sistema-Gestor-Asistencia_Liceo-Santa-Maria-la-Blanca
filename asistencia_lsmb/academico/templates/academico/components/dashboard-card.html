@@ -53,9 +53,9 @@
                 <div class="hidden lg:flex items-center justify-between w-full xl:w-7/12 mt-5 pt-5 border-t border-gris-ultraclaro xl:mt-0 xl:pt-0 xl:border-none">
                     <!-- Gráfico secundario (Solo visible en Escritorio) -->
                     {% if page_title == "Cursos" %}
-                        {% include 'academico/components/grafico-meta.html' with current_month=current_month current_year=current_year porcentaje_meta=porcentaje_meta %}
+                        {% include 'academico/components/grafico-meta.html' %}
                     {% else %}
-                        {% include 'academico/components/grafico-alertas.html' with current_month=current_month current_year=current_year estudiante_alerta=estudiante_alerta %}
+                        {% include 'academico/components/grafico-alertas.html' %}
                     {% endif %}
 
                     <!-- Recuadro "Ver reporte completo" -->

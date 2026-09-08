@@ -1,0 +1,112 @@
+<!-- TODO: Manejar rueda y badge dinamicamente según umbrales; CONECTAR CON BACKEND -->
+<div class="bg-blanco-tarjeta rounded-2xl border border-gris-claro border-l-[6px] border-l-red-500 shadow-sm flex flex-col h-full overflow-hidden">
+    <!-- Contenido de la tarjeta -->
+    <div class="p-4 flex-grow space-y-4">
+        
+        <!-- Cabecera -->
+        <div class="flex items-start justify-between">
+            <div class="flex items-center space-x-3">
+                <!-- Ícono  -->
+                <div class="w-12 h-12 rounded-xl bg-celeste-claro flex items-center justify-center text-azul-primario shrink-0">
+                    <i data-lucide="book-open" class="w-6 h-6"></i>
+                </div>
+                <!-- Nombre y Periodo -->
+                <div class="flex flex-col items-start">
+                    <!-- {{ curso.nivel_romano }} {{ curso.grupo }} -->
+                    <h3 class="text-base font-bold text-negro-texto leading-tight">IV° Medio B</h3>
+                    <p class="text-xs text-gris-texto mt-0.5">Periodo {{ current_year }}</p>
+                </div>
+            </div>
+
+            <!-- Gráfico de Asistencia -->
+            <div class="flex flex-col items-center">
+                <span class="text-[11px] text-gris-texto font-medium mb-1">Asistencia</span>
+                
+                {% include 'academico/components/rueda-grafico.html' with width='w-14' height='h-14' texto='text-sm' porcentaje=curso.asistencia|default:0 mostrar_texto=True %}
+
+                <!-- Badge de Estado -->
+                <span class="mt-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold 
+                    {% if curso.asistencia >= 85 %}bg-verde-fondo text-verde-oscuro
+                    {% elif curso.asistencia >= 75 %}bg-amarillo-fondo text-amarillo-oscuro
+                    {% else %}bg-rojo-fondo text-rojo-oscuro{% endif %}">
+                    {% if curso.asistencia >= 85 %}Óptimo
+                    {% elif curso.asistencia >= 75 %}Atención
+                    {% else %}Crítico{% endif %}
+                </span>
+            </div>
+        </div>
+
+        <!-- Tarjeta estado de asistencia de hoy -->
+        <div class="bg-blanco-tarjeta border border-gris-claro rounded-xl p-2.5 flex items-center justify-between shadow-xs">
+            <div class="flex items-center space-x-2.5">
+                <i data-lucide="calendar" class="w-5 h-5 text-negro-texto"></i>
+                <div class="flex flex-col items-start">
+                    <span class="text-xs font-bold text-negro-texto leading-tight">Asistencia de hoy</span>
+                    <span class="text-[11px] text-gris-texto">{{ fecha_hoy|date:"d/m/Y" }}</span>
+                </div>
+            </div>
+
+            <!-- Estado de registro hoy -->
+            {% if curso.registrada_hoy %}
+                <span class="inline-flex items-center space-x-1 px-2.5 py-1 bg-verde-fondo text-verde-oscuro border border-verde-suave/50 rounded-full text-[11px] font-semibold">
+                    <i data-lucide="check" class="w-3.5 h-3.5"></i>
+                    <span>Registrada</span>
+                </span>
+            {% else %}
+                <span class="inline-flex items-center space-x-1 px-2.5 py-1 bg-gris-ultraclaro text-gris-texto border border-gris-claro rounded-full text-[11px] font-semibold">
+                    <i data-lucide="clock" class="w-3.5 h-3.5"></i>
+                    <span>Por registrar</span>
+                </span>
+            {% endif %}
+        </div>
+
+        <hr class="border-gris-claro/60 my-2" />
+
+        <!-- Información profesor jefe y estudiantes -->
+        <div class="grid grid-cols-2 gap-2 text-center items-center pt-1">
+            <div class="text-center border-r border-gris-claro/60 pr-2">
+                <span class="text-xs font-bold text-negro-texto block truncate">
+                    {{ curso.profesor_jefe|default:"Sin asignar" }}
+                </span>
+                <span class="text-[11px] text-gris-texto block">Profesor/a jefe</span>
+            </div>
+            
+            <div class="flex flex-col items-center justify-center space-x-1.5 pl-2">
+                <div class="flex flex-row items-center">
+                    <i data-lucide="users" class="w-4 h-4 text-negro-texto pr-1"></i>
+                    <span class="text-xs font-bold text-negro-texto block leading-none">
+                        {{ curso.total_estudiantes|default:0 }}
+                    </span>
+                </div>
+                <span class="text-[11px] text-gris-texto block leading-tight">Estudiantes</span>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Botones inferiores -->
+    <div class="grid grid-cols-2 border-t border-gris-claro mt-auto">
+        
+        <!-- Botón registrar asistencia -->
+        {% if curso.registrada_hoy %}
+            <div class="flex items-center justify-center space-x-1.5 py-3 bg-gris-ultraclaro text-gris-texto font-medium text-xs cursor-not-allowed border-r border-gris-claro">
+                <i data-lucide="check-square" class="w-4 h-4"></i>
+                <span>Asistencia registrada</span>
+            </div>
+        {% else %}
+            <a href="#" 
+               class="group flex items-center justify-center space-x-1.5 py-3 bg-azul-primario hover:bg-azul-profundo text-blanco-tarjeta font-semibold text-xs transition-colors border-r border-azul-primario">
+                <i data-lucide="check-square" class="w-4 h-4 transition-transform duration-200 ease-out group-hover:scale-110 origin-center active:scale-95"></i>
+                <span>Registrar asistencia</span>
+            </a>
+        {% endif %}
+
+        <!-- Botón ver ficha -->
+        <a href="#" 
+           class="group flex items-center justify-center space-x-1 py-3 text-xs font-semibold text-azul-primario hover:text-azul-profundo hover:bg-gris-ultraclaro/50 transition-colors">
+            <span>Ver ficha</span>
+            <i data-lucide="arrow-right" class="w-4 h-4 transition-transform duration-200 ease-out group-hover:scale-110 origin-center active:scale-95"></i>
+        </a>
+    </div>
+
+</div>

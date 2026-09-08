@@ -1,0 +1,130 @@
+<div class="border border-solid border-gris-claro rounded-xl bg-blanco-tarjeta text-center">
+    <!-- Buscador y Ordenamiento -->
+    <form method="get"
+        class="flex flex-row items-center justify-between p-2 gap-2 md:gap-4 mb-6 border-b-2 border-gris-claro pl-4 pr-4">
+
+        <!-- Input de Buscador -->
+        <div class="relative flex-1 min-w-0 md:flex-grow p-1">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-gris-icono pointer-events-none">
+                <i data-lucide="search" class="w-5 h-5"></i>
+            </span>
+            <input type="text" name="q" value="{{ search_query }}" placeholder="Buscar por nombre, curso o RUT"
+                class="w-full pl-11 pr-4 py-2.5 bg-blanco-tarjeta border border-gris-claro rounded-xl text-sm text-gris-texto placeholder-gris-text-gris-texto focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm">
+        </div>
+
+        <!-- Controles Derechos (Ordenar y Filtro) -->
+        <div class="flex items-center gap-2 md:gap-3 w-auto justify-end">
+            <!-- Selector de Orden -->
+            <div class="relative hidden md:block">
+                <select
+                    class="appearance-none bg-blanco-tarjeta border border-gris-claro rounded-xl px-4 py-2.5 pr-10 text-sm text-gris-texto focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm">
+                    <!-- TODO: Pasar opciones dinamicamente según qué página (con un for tal vez) -->
+                    <option>Ordenar: Asistencia (ascendente)</option>
+                    <option>Ordenar: Asistencia (descendente)</option>
+                </select>
+                <span class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gris-icono">
+                    <i data-lucide="arrow-up-down" class="w-4 h-4"></i>
+                </span>
+            </div>
+
+            <!-- Botón Ordenar (Solo móvil) -->
+            <button type="button" aria-label="Ordenar" title="Ordenar"
+                class="md:hidden flex-shrink-0 p-2.5 bg-blanco-tarjeta border border-gris-claro rounded-xl text-gris-icono hover:bg-gris-claro transition-colors shadow-sm">
+                <i data-lucide="arrow-up-down" class="w-5 h-5"></i>
+            </button>
+
+            <!-- Botón Filtro Avanzado -->
+            <button type="button"
+                class="p-2.5 bg-blanco-tarjeta border border-gris-claro rounded-xl text-gris-icono hover:bg-gris-claro transition-colors shadow-sm">
+                <i data-lucide="funnel" class="w-5 h-5"></i>
+            </button>
+        </div>
+    </form>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 pl-4 pr-4">
+        <!-- Condición temporal a falta de conexión con backend -->
+        {% if page_title == "Cursos" %}
+            {% include 'academico/components/tarjeta-curso.html' with curso=entidad %}
+            {% include 'academico/components/tarjeta-curso.html' with curso=entidad %}
+            {% include 'academico/components/tarjeta-curso.html' with curso=entidad %}
+            {% include 'academico/components/tarjeta-curso.html' with curso=entidad %}
+        {% endif %}
+
+        {% for entidad in page_obj %}
+            {% if page_title == "Cursos" %}
+                {% include 'academico/components/tarjeta-curso.html' with curso=entidad %}
+            {% else %}
+                {% include 'academico/components/tarjeta-alumno.html' with alumno=entidad %}
+            {% endif %}
+        {% endfor %}
+    </div>
+        <!-- Paginador -->
+        <!-- TODO: Infinite scroll para mobile -->
+        <div
+            class="flex flex-col md:flex-row items-center justify-between p-2 gap-4 mt-8 pt-4 border-t border-gris-claro text-sm text-gray-500">
+
+            <!-- Texto de conteo -->
+            <div class="pl-3 md:pb-2">
+                Mostrando {{ page_obj.start_index }}-{{ page_obj.end_index }} de {{ page_obj.paginator.count }}
+                {{ page_title|lower }}
+            </div>
+
+            <!-- Selector de elementos por página -->
+            <div class="flex items-center gap-2 md:pb-2">
+                <span>Por página</span>
+                <select name="per_page" onchange="this.form.submit()"
+                    class="bg-white border border-gris-claro rounded-lg px-2.5 py-1 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-500">
+                    <option value="12" {% if is_12 %}selected{% endif %}>12</option>
+                    <option value="24" {% if is_24 %}selected{% endif %}>24</option>
+                    <option value="48" {% if is_48 %}selected{% endif %}>48</option>
+                </select>
+            </div>
+
+            <!-- Botones de Paginación Numérica -->
+            <div class="flex items-center gap-1 pr-3 md:pb-2">
+                <!-- Botón Anterior -->
+                {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}&q={{ search_query }}&per_page={{ per_page }}"
+                    class="p-2 border border-gris-claro rounded-lg text-gray-600 hover:bg-gray-50">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                </a>
+                {% else %}
+                <span class="p-2 border border-gray-100 rounded-lg text-gray-300 cursor-not-allowed">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                </span>
+                {% endif %}
+
+                <!-- Números de página -->
+                {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                <span class="px-3.5 py-1.5 border border-blue-600 bg-blue-50 text-blue-600 font-semibold rounded-lg">
+                    {{num }}</span>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %} <a
+                    href="?page={{ num }}&q={{ search_query }}&per_page={{ per_page }}"
+                    class="px-3.5 py-1.5 border border-gris-claro text-gray-600 hover:bg-gray-50 rounded-lg">{{ num
+                    }}</a>
+                    {% endif %}
+                    {% endfor %}
+
+                    <!-- Botón Siguiente -->
+                    {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}&q={{ search_query }}&per_page={{ per_page }}"
+                        class="p-2 border border-gris-claro rounded-lg text-gray-600 hover:bg-gray-50">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </a>
+                    {% else %}
+                    <span class="p-2 border border-gray-100 rounded-lg text-gray-300 cursor-not-allowed">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </span>
+                    {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
