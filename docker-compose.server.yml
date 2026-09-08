@@ -13,7 +13,7 @@ services:
     image: postgres:15-alpine
     container_name: grupo7_db
     restart: unless-stopped
-    env_file: .env.server
+    env_file: .env
     volumes:
       - data:/var/lib/postgresql/data
     networks:
