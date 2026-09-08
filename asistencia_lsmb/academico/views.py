@@ -52,8 +52,11 @@ def pagina_alumnos(request):
         'is_24': per_page == 24,
         'is_48': per_page == 48,
         'fecha_hoy': fecha_hoy,
-        'inicio_semana': format_date(inicio_semana, format = "dd MMM", locale = "es"),
-        'fin_semana': format_date(fin_semana, format = "dd MMM", locale = "es"),
+        'inicio_semana': inicio_semana,
+        'fin_semana': fin_semana,
+        # 'inicio_semana': format_date(inicio_semana, format = "dd MMM", locale = "es"),
+        # 'fin_semana': format_date(fin_semana, format = "dd MMM", locale = "es"),
+        # 'estudiante_alerta': 57,
     }
     
     return render (request, 'academico/alumnos.html', contexto)
@@ -67,19 +70,29 @@ def pagina_cursos(request):
     inicio_semana = fecha_hoy - timedelta(days=fecha_hoy.weekday())
     fin_semana = inicio_semana + timedelta(days=6)
 
-
     contexto = {
         'page_title': "Cursos",
         'lista_cursos': cursos,
         'fecha_hoy': fecha_hoy,
+        'current_year': año_actual,
+        'current_month': format_date(fecha_hoy, format = "MMMM", locale = "es").capitalize(),
         'inicio_semana': format_date(inicio_semana, format = "dd MMM", locale = "es"),
         'fin_semana': format_date(fin_semana, format = "dd MMM", locale = "es"),
 
         # TODO: Cambiar por info real
+        'total': f"{8} Cursos",
         'pastillas': [
             (f"{8} Cursos · Periodo actual", "azul"), 
             (f"Cumplimiento meta · {93}%", "verde")
         ],
+        'alertas': {
+            "Óptimo": 5,
+            "Adecuado": 2,
+            "Atención": 1,
+            "Crítico": 0,
+        },
+        'estudiante_alerta': 57,
+        'porcentaje_meta': 75, # META DESIGNADA POR EL INSTITUTO
     }
     
     return render (request, 'academico/base.html', contexto)

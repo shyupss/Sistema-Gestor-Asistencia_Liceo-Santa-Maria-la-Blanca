@@ -1,0 +1,16 @@
+{# Llamada: {% include 'academico/components/grafico-meta.html' with current_month=current_month current_year=current_year porcentaje_meta=porcentaje_meta %} #}
+
+<div class="hidden lg:flex flex-1 px-6 items-center gap-4">
+    <div class="flex-1 min-w-0">
+        <span class="text-lg font-bold text-verde-oscuro">Meta institucional</span>
+        <p class="text-sm text-gris-texto mt-1">{{current_month}} · {{ current_year }} </p>
+        <p class="text-xs text-gris-texto mt-2 leading-tight">
+            Cursos que cumplen con <span class="text-negro-texto font-semibold">≥ {{ porcentaje_meta }}%</span> de asistencia
+        </p>
+    </div>
+
+    <!-- Gráfico circular de alertas -->
+    <div class="flex flex-col items-center flex-shrink-0">
+        {% include 'academico/components/rueda-grafico.html' with porcentaje=93 width='w-20' height='h-20' color='text-verde' mostrar_texto=True %}
+    </div>
+</div>

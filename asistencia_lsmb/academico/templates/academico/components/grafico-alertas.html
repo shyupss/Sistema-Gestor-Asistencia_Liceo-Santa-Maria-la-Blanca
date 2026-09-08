@@ -1,0 +1,19 @@
+{# Llamada: {% include 'academico/components/grafico-alertas.html' with current_month=current_month current_year=current_year estudiante_alerta=estudiantes_alerta %} #}
+
+<div class="hidden lg:flex flex-1 px-6 items-center gap-4">
+    <div class="flex-1 min-w-0">
+        <span class="text-lg font-bold text-amarillo-oscuro">Estudiantes con alertas</span>
+        <p class="text-sm text-gris-texto mt-1">{{current_month}} · {{ current_year }} </p>
+        <p class="text-xs text-gris-texto mt-2 leading-tight">
+            Estudiantes que tienen una o más alertas de
+            nivel <span class="text-amarillo-oscuro font-medium">Atención</span> o
+            <span class="text-rojo font-medium">Crítico</span>
+        </p>
+    </div>
+
+    <!-- Gráfico circular de alertas -->
+    <div class="flex flex-col items-center flex-shrink-0">
+        {% include 'academico/components/rueda-grafico.html' with porcentaje=22 width='w-20' height='h-20' color='text-amarillo' mostrar_texto=True %}
+        <span class="text-xs font-medium text-gris-texto mt-1">{{ estudiante_alerta }} Estudiantes</span>
+    </div>
+</div>

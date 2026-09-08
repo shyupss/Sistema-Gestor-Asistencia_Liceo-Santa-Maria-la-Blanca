@@ -1,0 +1,30 @@
+{# Llamada: {% include 'academico/components/pastilla.html' with texto=texto color=color %} #}
+
+<div class="relative p-2.5 rounded-lg flex items-center justify-center gap-3 cursor-pointer group border
+    {% if nivel == 'Óptimo' %}
+        border-verde-fondo bg-verde-fondo text-verde-oscuro hover:border-verde-oscuro
+    {% elif nivel == 'Atención' %}
+        border-amarillo-fondo bg-amarillo-fondo text-amarillo-oscuro hover:border-amarillo-oscuro
+    {% elif nivel == 'Crítico' %}
+        border-rojo-fondo bg-rojo-fondo text-rojo-oscuro hover:border-rojo-oscuro
+    {% else %}
+        border-azul-fondo bg-azul-fondo text-azul-profundo hover:border-azul-profundo
+    {% endif %}
+    transition-colors
+    transition-transform duration-200 ease-out hover:scale-105 origin-center active:scale-95
+    ">
+    
+    <!-- Chevron superior derecho -->
+    <i data-lucide="funnel"
+       class="absolute top-2 right-2 w-3.5 h-3.5 opacity-70 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all">
+    </i>
+
+    <div class="leading-none text-center">
+        <span class="text-xl md:text-2xl font-bold">
+            {{ cuenta }}
+        </span>
+        <p class="text-xs md:text-sm font-medium mt-1">
+            {{ nivel }}
+        </p>
+    </div>
+</div>

@@ -1,0 +1,39 @@
+{# Llamada: {% include 'academico/components/rueda-grafico.html' with porcentaje=81 width='w-20' height='h-20' color='text-azul-primario' mostrar_texto=True %} #}
+
+<div class="relative {{ width|default:'w-16' }} {{ height|default:'h-16' }} flex-shrink-0">
+    <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+        <!-- Círculo base -->
+        <path class="text-gris-ultraclaro"
+                stroke-width="4"
+                stroke="currentColor"
+                fill="none"
+                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+
+        <!-- Círculo de porcentaje -->
+        <path class="{{ color|default:'text-azul-primario' }}"
+                stroke-width="4"
+                stroke-linecap="round"
+                stroke="currentColor"
+                fill="none"
+                stroke-dasharray="{{ porcentaje|default:0 }}, 100"
+                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831">
+
+            <!-- Animación de carga -->
+            <animate attributeName="stroke-dasharray"
+                from="0, 100"
+                to="{{ porcentaje|default:0 }}, 100"
+                dur="1s"
+                calcMode="spline"
+                keyTimes="0; 1"
+                keySplines="0.4 0 0.2 1"
+                fill="freeze" />
+        </path>
+    </svg>
+
+    <!-- Porcentaje en el centro -->
+    {% if mostrar_texto %}
+    <span class="absolute inset-0 flex items-center justify-center text-lg font-bold text-negro-texto">
+        {{ porcentaje }}%
+    </span>
+    {% endif %}
+</div>

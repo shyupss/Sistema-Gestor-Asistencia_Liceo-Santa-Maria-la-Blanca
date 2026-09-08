@@ -24,10 +24,12 @@
     <!-- Lado derecho -->
     <div class="flex items-center space-x-4 md:space-x-6">
         <!-- Notificaciones -->
-        <button type="button" class="group relative p-1.5 text-blanco rounded-md hover:text-celeste-claro hover:bg-azul-primario/60 transition-colors" aria-label="Notificaciones">
+        <button type="button" class="group relative p-1.5 text-blanco rounded-md hover:text-celeste-claro hover:bg-azul-primario/60 transition-colors
+        transition-transform duration-200 ease-out hover:scale-105 origin-center active:scale-95" 
+        aria-label="Notificaciones">
             <i data-lucide="bell" class="w-6 h-6 md:w-7 md:h-7"></i>
             <!-- Badge cantidad alertas -->
-            <span class="absolute top-0 right-0 bg-rojo text-blanco text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center group-hover:bg-azul-primario transition-colors">
+            <span class="absolute top-0 right-0 bg-rojo text-blanco text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center transition-colors">
                 3 <!-- TODO: PENDIENTE HACER QUE CUENTE LA CANTIDAD DE ALERTAS -->
             </span>
         </button>
