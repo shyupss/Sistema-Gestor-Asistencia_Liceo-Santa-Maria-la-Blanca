@@ -23,11 +23,19 @@ COPY pyproject.toml uv.lock ./
 # instalamos las dependencias
 RUN uv sync --frozen --no-dev
 
-# 1. se crea el usuario no privilegiado
+# 1. crear usuario no privilegiado y copiar el código
 RUN useradd -m web-user
-# 2. cambiar al usuario 'appuser' para las siguientes instrucciones
-USER web-user
-# propiedad al usuario y grupo 'appuser'
 COPY --chown=web-user:web-user . .
 
-EXPOSE 8000
+# 2. copiar y hacer ejecutable el entrypoint DESPUÉS del COPY . .
+#    (como root, para que el bit de ejecución no sea sobreescrito ni perdido)
+COPY entrypoint.sh /app/entrypoint.sh
+RUN sed -i 's/\r$//' /app/entrypoint.sh \
+    && chmod +x /app/entrypoint.sh
+
+# 3. cambiar al usuario no privilegiado para la ejecución
+USER web-user
+
+ENTRYPOINT ["/app/entrypoint.sh"]
+
+EXPOSE ${APP_PORT}

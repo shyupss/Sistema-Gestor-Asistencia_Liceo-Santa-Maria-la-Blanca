@@ -1,0 +1,48 @@
+name: Build & Push imagen a GHCR
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  # ghcr.io toma el nombre del repo en minúsculas automáticamente
+  IMAGE: ghcr.io/${{ github.repository_owner }}/sistema-gestor-asistencia_liceo-santa-maria-la-blanca
+
+jobs:
+  build-and-push:
+    name: Construir y subir imagen
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write   # necesario para subir a GHCR
+
+    steps:
+      - name: Checkout del repositorio
+        uses: actions/checkout@v4
+
+      - name: Login en GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extraer metadata (tags, labels)
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE }}
+          tags: |
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=sha,prefix=sha-
+
+      - name: Construir y publicar imagen
+        uses: docker/build-push-action@v6
+        with:
+          context: ./asistencia_lsmb
+          file: ./asistencia_lsmb/dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
