@@ -16,7 +16,7 @@ services:
     # networks:
     #   - red_taller_software
     
-  grupo7_app:
+  grupo7_frontend:
     build: 
       context: ./asistencia_lsmb  # contruir esta imagen a partir de esta ruta
       dockerfile: dockerfile
@@ -31,15 +31,25 @@ services:
     depends_on:
       grupo7_db:
         condition: service_healthy
+    # ==========================================================================
+    # SI SE QUIERE SIMULAR PRODUCCION, COMENTAR 'COMMAND' Y RECREAR CONTENEDORES
+    # SI LUEGO SE VUELVE A DESARROLLO -> TAMBIEN RECREAR CONTENEDORES
+    # ==========================================================================
+    command:
+      sh -c "uv run manage.py runserver 0.0.0.0:${APP_PORT}"
     # red docker en el server del ramo
     # networks:
-    #   - red_taller_software
-  
+    #   - red_taller_software 
 
 volumes:
   postgres_data:
 
 # networks:
 #   red_taller_software:
-#     external: true
-    # driver: bridge # ??
+    # driver: bridge
+
+# ===============================================================
+# Este archivo es SOLO para desarrollo local.
+# Para producción se usa docker-compose.server.yml (ver deploy.sh),
+# que ya tiene la red red_taller_software configurada como externa.
+# ===============================================================

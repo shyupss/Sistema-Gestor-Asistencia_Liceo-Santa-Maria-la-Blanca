@@ -4,7 +4,7 @@ import os
 
 def pagina_principal(request):
     # Datos que queremos enviar desde Python al HTML
-    print("TEST:", os.getenv('POSTGRES_USER', 'fallo')) 
+    print("TEST:", os.getenv('DEBUG', 'fallo')) 
     contexto = {
         'mensaje': '¡Hola equipo! Bienvenidos a nuestro primer proyecto.',
         'tecnologias': ['Django', 'PostgreSQL', 'TailwindCSS']

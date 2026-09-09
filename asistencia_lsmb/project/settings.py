@@ -16,14 +16,6 @@ import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# ---- SI EJECUTAS EN LOCAL, SE DEBEN CARGAR MANUALMENTE LAS VARIBALES ----
-# ---- POR LO CUAL, DESCOMENTAR EL BLOQUE DE ABAJO ----
-# ---- PARA ESTO SE DEBE TENER LEVANTADO EL SERVICIO "db" CON DOCKER O TENERLO CORRIENDO LOCALMENTE ----
-#begin bloque ----
-# env_path = BASE_DIR.parent / '.env'
-# load_dotenv(env_path) # si hay variables ya cargadas en el sistema, no se pisan.
-#end bloque ----
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
@@ -33,9 +25,8 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 # ------------------
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True if os.getenv('DEBUG') else False
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOST').split(',') if os.getenv('ALLOWED_HOST') else []
-
 
 # Application definition
 
