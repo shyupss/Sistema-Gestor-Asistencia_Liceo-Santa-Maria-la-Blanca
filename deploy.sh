@@ -19,6 +19,9 @@ fi
 echo "==> Copiando docker-compose..."
 scp docker-compose.server.yml "$SERVER:$REMOTE_DIR/docker-compose.yml"
 
+echo "==> Bajando contenedores existentes (evita bug 'ContainerConfig' de docker-compose v1 al recrear)..."
+ssh "$SERVER" "cd '$REMOTE_DIR' && docker-compose down"
+
 echo "==> Pull de imagenes + arranque..."
 ssh "$SERVER" "cd '$REMOTE_DIR' && docker-compose pull && docker-compose up -d"
 
