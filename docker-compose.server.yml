@@ -1,0 +1,43 @@
+# SERVIDOR — descarga las imagenes de GHCR, NO construye.
+# NO publica puertos: Caddy (contenedor en red_taller_software) llega por container_name:
+#   prueba.146.83.216.166.nip.io/api/*  ->  grupo0_backend:4000
+#   prueba.146.83.216.166.nip.io/*      ->  grupo0_frontend:3000
+# El .env vive SOLO en el servidor, junto a este archivo. Lo sube deploy.sh como docker-compose.yml.
+
+# version explícita: el servidor tiene un Compose viejo que la exige.
+# (Compose v2 moderno la ignora con un warning inofensivo.)
+version: "3.8"
+
+services:
+  grupo7_db:
+    image: postgres:15-alpine
+    container_name: grupo7_db
+    restart: unless-stopped
+    env_file: .env
+    volumes:
+      - data:/var/lib/postgresql/data
+    networks:
+      - red_taller_software
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  grupo7_frontend:
+    image: ghcr.io/shyupss/sistema-gestor-asistencia_liceo-santa-maria-la-blanca:latest
+    container_name: grupo7_frontend
+    restart: unless-stopped
+    env_file: .env
+    depends_on:
+      grupo7_db:
+        condition: service_healthy
+    networks:
+      - red_taller_software
+
+volumes:
+  data:
+
+networks:
+  red_taller_software:
+    external: true
