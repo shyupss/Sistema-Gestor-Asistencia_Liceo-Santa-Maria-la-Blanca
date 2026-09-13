@@ -31,10 +31,10 @@ services:
     depends_on:
       grupo7_db:
         condition: service_healthy
-    # ==========================================================================
-    # SI SE QUIERE SIMULAR PRODUCCION, COMENTAR 'COMMAND' Y RECREAR CONTENEDORES
+    # ========================================================================================
+    # SI SE QUIERE SIMULAR PRODUCCION, COMENTAR 'COMMAND', RECREAR CONTENEDORES Y DEBUG VACIO
     # SI LUEGO SE VUELVE A DESARROLLO -> TAMBIEN RECREAR CONTENEDORES
-    # ==========================================================================
+    # ========================================================================================
     command:
       sh -c "uv run manage.py runserver 0.0.0.0:${APP_PORT}"
     # red docker en el server del ramo
