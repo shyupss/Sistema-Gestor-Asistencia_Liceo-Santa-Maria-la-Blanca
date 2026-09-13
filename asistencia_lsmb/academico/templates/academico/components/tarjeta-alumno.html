@@ -1,5 +1,11 @@
 <div
-    class="bg-blanco-tarjeta rounded-xl border border-gris-claro border-l-[6px] border-l-red-500 shadow-sm flex flex-col h-full overflow-hidden">
+    class="bg-blanco-tarjeta rounded-xl border border-gris-claro border-l-[6px]
+        {% if alumno.estado_asistencia == 'Optimo' %}border-l-green-500
+        {% elif alumno.estado_asistencia == 'Adecuado' %}border-l-blue-500
+        {% elif alumno.estado_asistencia == 'Alerta' or alumno.estado_asistencia == 'Alerta' %}border-l-yellow-500
+        {% elif alumno.estado_asistencia == 'Crítico' or alumno.estado_asistencia == 'Critico' %}border-l-red-500
+        {% else %}border-l-gray-400{% endif %}
+        shadow-sm flex flex-col h-full overflow-hidden">
     <div class="p-4 flex gap-4 flex-grow items-start">
         <!-- Icono Estudiante sin foto (por que no hay foto)-->
         <div
@@ -19,12 +25,20 @@
         <!-- Estadísticas -->
         <div class="flex flex-col items-center justify-shrink-0">
             <!-- El color de fondo y texto será dinámico según el estado -->
-            <span
-                class="px-2 py-0.5 rounded-full bg-rojo-fondo text-rojo-oscuro text-[10px] font-bold tracking-wide">
-                Crítico
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wide
+                {% if alumno.estado_asistencia == 'Optimo' %}bg-verde-fondo text-verde-oscuro
+                {% elif alumno.estado_asistencia == 'Adecuado' %}bg-azul-fondo text-azul-profundo
+                {% elif alumno.estado_asistencia == 'Atención' or alumno.estado_asistencia == 'Alerta' %}bg-amarillo-fondo text-amarillo-oscuro
+                {% elif alumno.estado_asistencia == 'Crítico' or alumno.estado_asistencia == 'Critico' %}bg-rojo-fondo text-rojo-oscuro
+                {% else %}bg-gris-claro text-gris-texto{% endif %}">
+                {{ alumno.estado_asistencia|default:'Sin datos' }}
             </span>
             <span class="text-base font-extrabold text-negro-texto mt-1">
-                54%
+                {% if alumno.porcentaje_asistencia is not None %}
+                {{ alumno.porcentaje_asistencia }}%
+                {% else %}
+                -
+                {% endif %}
             </span>
         </div>
     </div>

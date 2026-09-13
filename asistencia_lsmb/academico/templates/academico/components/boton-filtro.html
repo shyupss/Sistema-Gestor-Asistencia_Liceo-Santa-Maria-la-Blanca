@@ -1,12 +1,17 @@
 {# Llamada: {% include 'academico/components/pastilla.html' with texto=texto color=color %} #}
 
-<div class="relative p-2.5 rounded-lg flex items-center justify-center gap-3 cursor-pointer group border
-    {% if nivel == 'Óptimo' %}
+<a href="?estado={{ nivel|urlencode }}"
+    class="relative p-2.5 rounded-lg flex items-center justify-center gap-3 cursor-pointer group border
+    {% if nivel == 'Óptimo' or nivel == 'Optimo' %}
         border-verde-fondo bg-verde-fondo text-verde-oscuro hover:border-verde-oscuro
-    {% elif nivel == 'Atención' %}
+    {% elif nivel == 'Adecuado' %}
+        border-azul-fondo bg-azul-fondo text-azul-profundo hover:border-azul-profundo
+    {% elif nivel == 'Atención' or nivel == 'Alerta' %}
         border-amarillo-fondo bg-amarillo-fondo text-amarillo-oscuro hover:border-amarillo-oscuro
-    {% elif nivel == 'Crítico' %}
+    {% elif nivel == 'Crítico' or nivel == 'Critico' %}
         border-rojo-fondo bg-rojo-fondo text-rojo-oscuro hover:border-rojo-oscuro
+    {% elif nivel == 'Sin datos' or nivel == 'Sin configurar' %}
+        border-gris-claro bg-gris-claro text-gris-texto hover:border-gris-texto
     {% else %}
         border-azul-fondo bg-azul-fondo text-azul-profundo hover:border-azul-profundo
     {% endif %}
@@ -27,4 +32,4 @@
             {{ nivel }}
         </p>
     </div>
-</div>
+</a>

@@ -5,15 +5,13 @@
         <span class="text-lg font-bold text-amarillo-oscuro">Estudiantes con alertas</span>
         <p class="text-sm text-gris-texto mt-1">{{current_month}} · {{ current_year }} </p>
         <p class="text-xs text-gris-texto mt-2 leading-tight">
-            Estudiantes que tienen una o más alertas de
-            nivel <span class="text-amarillo-oscuro font-medium">Atención</span> o
-            <span class="text-rojo font-medium">Crítico</span>
+            Estudiantes cuyo estado configurado genera una alerta.
         </p>
     </div>
 
     <!-- Gráfico circular de alertas -->
     <div class="flex flex-col items-center flex-shrink-0">
-        {% include 'academico/components/rueda-grafico.html' with porcentaje=22 width='w-20' height='h-20' color='text-amarillo' mostrar_texto=True %}
+        {% include 'academico/components/rueda-grafico.html' with porcentaje=porcentaje_alertas width='w-20' height='h-20' color='text-amarillo' mostrar_texto=True %}
         <span class="text-xs font-medium text-gris-texto mt-1">{{ estudiante_alerta }} Estudiantes</span>
     </div>
 </div>

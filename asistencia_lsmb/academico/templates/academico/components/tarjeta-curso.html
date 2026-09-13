@@ -21,16 +21,28 @@
             <div class="flex flex-col items-center">
                 <span class="text-[11px] text-gris-texto font-medium mb-1">Asistencia</span>
                 
-                {% include 'academico/components/rueda-grafico.html' with width='w-14' height='h-14' texto='text-sm' porcentaje=curso.asistencia|default:0 mostrar_texto=True %}
+                {% if curso.estado_asistencia == 'Óptimo' or curso.estado_asistencia == 'Optimo' %}
+                    {% include 'academico/components/rueda-grafico.html' with width='w-14' height='h-14' texto='text-sm' porcentaje=curso.asistencia|default:0 mostrar_texto=True color='text-verde' %}
+                {% elif curso.estado_asistencia == 'Adecuado' %}
+                    {% include 'academico/components/rueda-grafico.html' with width='w-14' height='h-14' texto='text-sm' porcentaje=curso.asistencia|default:0 mostrar_texto=True color='text-azul-primario' %}
+                {% elif curso.estado_asistencia == 'Crítico' or curso.estado_asistencia == 'Critico' %}
+                    {% include 'academico/components/rueda-grafico.html' with width='w-14' height='h-14' texto='text-sm' porcentaje=curso.asistencia|default:0 mostrar_texto=True color='text-rojo' %}
+                {% elif curso.estado_asistencia == 'Sin datos' or curso.estado_asistencia == 'Sin configurar' %}
+                    {% include 'academico/components/rueda-grafico.html' with width='w-14' height='h-14' texto='text-sm' porcentaje=curso.asistencia|default:0 mostrar_texto=True color='text-gris-texto' %}
+                {% else %}
+                    {% include 'academico/components/rueda-grafico.html' with width='w-14' height='h-14' texto='text-sm' porcentaje=curso.asistencia|default:0 mostrar_texto=True color='text-amarillo' %}
+                {% endif %}
 
                 <!-- Badge de Estado -->
                 <span class="mt-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold 
-                    {% if curso.asistencia >= 85 %}bg-verde-fondo text-verde-oscuro
-                    {% elif curso.asistencia >= 75 %}bg-amarillo-fondo text-amarillo-oscuro
-                    {% else %}bg-rojo-fondo text-rojo-oscuro{% endif %}">
-                    {% if curso.asistencia >= 85 %}Óptimo
-                    {% elif curso.asistencia >= 75 %}Atención
-                    {% else %}Crítico{% endif %}
+                    {% if curso.estado_asistencia == 'Óptimo' or curso.estado_asistencia == 'Optimo' %}bg-verde-fondo text-verde-oscuro
+                    {% elif curso.estado_asistencia == 'Sin datos' %}bg-gris-ultraclaro text-gris-texto
+                    {% elif curso.estado_asistencia == 'Sin configurar' %}bg-gris-ultraclaro text-gris-texto
+                    {% elif curso.estado_asistencia == 'Adecuado' %}bg-azul-fondo text-azul-profundo
+                    {% elif curso.estado_asistencia == 'Atención' or curso.estado_asistencia == 'Alerta' %}bg-amarillo-fondo text-amarillo-oscuro
+                    {% elif curso.estado_asistencia == 'Crítico' or curso.estado_asistencia == 'Critico' %}bg-rojo-fondo text-rojo-oscuro
+                    {% else %}bg-amarillo-fondo text-amarillo-oscuro{% endif %}">
+                    {{ curso.estado_asistencia }}
                 </span>
             </div>
         </div>
@@ -79,6 +91,17 @@
                 </div>
                 <span class="text-[11px] text-gris-texto block leading-tight">Estudiantes</span>
             </div>
+        </div>
+
+        <div class="border-t border-gris-claro/60 pt-3 text-left">
+            <span class="text-xs font-bold text-negro-texto">Alumnos del curso</span>
+            <ul class="mt-2 space-y-1 text-[11px] text-gris-texto">
+                {% for matricula in curso.matriculas_activas %}
+                    <li>{{ matricula.alumno.nombre }} · {{ matricula.alumno.rut }}</li>
+                {% empty %}
+                    <li>Sin alumnos matriculados</li>
+                {% endfor %}
+            </ul>
         </div>
 
     </div>

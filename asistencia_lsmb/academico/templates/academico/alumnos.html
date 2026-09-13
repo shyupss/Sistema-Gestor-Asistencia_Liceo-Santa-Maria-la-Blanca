@@ -71,12 +71,20 @@
                     <!-- Estadísticas -->
                     <div class="flex flex-col items-center justify-shrink-0">
                         <!-- El color de fondo y texto será dinámico según el estado -->
-                        <span
-                            class="px-2 py-0.5 rounded-full bg-rojo-fondo text-rojo-oscuro text-[10px] font-bold tracking-wide">
-                            Crítico
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wide
+                            {% if alumno.estado_asistencia == 'Sin datos' or alumno.estado_asistencia == 'Sin configurar' %}bg-gris-claro text-gris-texto
+                            {% elif alumno.porcentaje_asistencia >= 90 %}bg-verde-fondo text-verde-oscuro
+                            {% elif alumno.porcentaje_asistencia >= 75 %}bg-azul-fondo text-azul-profundo
+                            {% elif alumno.porcentaje_asistencia >= 60 %}bg-amarillo-fondo text-amarillo-oscuro
+                            {% else %}bg-rojo-fondo text-rojo-oscuro{% endif %}">
+                            {{ alumno.estado_asistencia }}
                         </span>
                         <span class="text-base font-extrabold text-negro-texto mt-1">
-                            54%
+                            {% if alumno.porcentaje_asistencia is not None %}
+                            {{ alumno.porcentaje_asistencia }}%
+                            {% else %}
+                            -
+                            {% endif %}
                         </span>
                     </div>
                 </div>
