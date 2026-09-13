@@ -6,7 +6,7 @@ ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     PATH="/app/.venv/bin:$PATH"
 
-    # directorio de trabajo dentro del contenedor
+# directorio de trabajo dentro del contenedor
 WORKDIR /app
 
 # -- dependencias del sistema necesarias para PostgreSQL --
@@ -28,7 +28,7 @@ RUN useradd -m web-user
 COPY --chown=web-user:web-user . .
 
 # 2. copiar y hacer ejecutable el entrypoint DESPUÉS del COPY . .
-#    (como root, para que el bit de ejecución no sea sobreescrito ni perdido)
+# (como root, para que el bit de ejecución no sea sobreescrito ni perdido)
 COPY entrypoint.sh /app/entrypoint.sh
 RUN sed -i 's/\r$//' /app/entrypoint.sh \
     && chmod +x /app/entrypoint.sh
