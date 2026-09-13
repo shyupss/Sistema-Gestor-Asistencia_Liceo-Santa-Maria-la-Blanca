@@ -26,6 +26,7 @@ services:
     volumes: 
       - ./asistencia_lsmb:/app
       - /app/.venv # utiliza el venv que creó (ya no se copia desde los archivos)
+      - /app/entrypoint.sh # protege el entrypoint limpiado (LF) del host Windows (CRLF)
     env_file:
       - .env
     depends_on:
