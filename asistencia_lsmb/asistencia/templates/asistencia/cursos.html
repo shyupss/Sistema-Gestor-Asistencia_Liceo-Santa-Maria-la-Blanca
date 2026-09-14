@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}Asistencia{% endblock %}
+
+{% block content %}
+	<section class="mx-auto max-w-6xl px-4 py-5 sm:px-6 sm:py-8">
+		<div class="mb-4 flex items-center justify-between gap-4">
+			<h1 class="text-2xl font-bold text-negro-texto sm:text-3xl">Asistencia</h1>
+			<time class="rounded-full border border-azul-medio px-5 py-1 text-[11px] font-semibold text-azul-profundo">
+				{{ fecha_hoy|date:"d/m/Y" }}
+			</time>
+		</div>
+
+		<form method="get" action="{% url 'registrar_asistencia' %}" class="mb-4 rounded-xl border border-gris-claro bg-blanco-tarjeta p-4 shadow-sm">
+			<div class="grid items-end gap-3 md:grid-cols-[1.1fr_1.8fr_auto]">
+				<div class="border-b border-gris-claro pb-2 md:border-b-0 md:border-r md:pb-0 md:pr-4">
+					<p class="text-base font-bold text-azul-profundo">Registrar asistencia</p>
+					<p class="text-[11px] text-gris-texto">Jornada de clases · {{ fecha_hoy|date:"d M Y" }}</p>
+				</div>
+				<label class="sr-only" for="curso">Seleccionar curso</label>
+				<select id="curso" name="curso" required class="w-full rounded-lg border border-gris-medio bg-blanco px-3 py-2 text-sm text-azul-profundo">
+					<option value="">Seleccionar curso</option>
+					{% for curso in cursos_pendientes %}
+						<option value="{{ curso.id }}">{{ curso.nivel_romano }}° Medio {{ curso.grupo }}</option>
+					{% endfor %}
+				</select>
+				<input type="hidden" name="fecha" value="{{ fecha_hoy|date:'Y-m-d' }}">
+				<button type="submit" class="rounded-full bg-azul-primario px-7 py-2.5 text-sm font-semibold text-blanco-tarjeta hover:bg-azul-profundo">
+					Registrar ahora
+				</button>
+			</div>
+		</form>
+
+		<section class="overflow-hidden rounded-xl border border-gris-claro bg-blanco-tarjeta shadow-sm">
+			<div class="flex items-center justify-between border-b border-gris-claro px-5 py-4">
+				<h2 class="flex items-center gap-2 text-base font-bold text-negro-texto">
+					<i data-lucide="clipboard-list" class="h-4 w-4 text-azul-profundo"></i>
+					Cursos pendientes
+				</h2>
+				<span class="text-[10px] text-gris-texto">{{ total_cursos_registrados }} de {{ total_cursos_periodo }} cursos registrados</span>
+			</div>
+			<div class="grid gap-4 p-5 md:grid-cols-2 xl:grid-cols-3">
+				{% for curso in page_obj %}
+					{% include "asistencia/components/tarjeta-curso.html" with curso=curso %}
+				{% empty %}
+					<p class="col-span-full py-8 text-center text-sm text-gris-texto">No hay cursos pendientes para hoy.</p>
+				{% endfor %}
+			</div>
+			<div class="border-t border-gris-claro px-5 py-3 text-right">
+				<a href="{% url 'cursos' %}" class="text-sm font-medium text-azul-profundo hover:underline">Ir a cursos →</a>
+			</div>
+		</section>
+
+	{% if page_obj.has_other_pages %}
+		<nav class="mt-6 flex items-center justify-between" aria-label="Paginación">
+			{% if page_obj.has_previous %}
+				<a href="?q={{ search_query|urlencode }}&page={{ page_obj.previous_page_number }}" class="text-blue-600 hover:underline">
+					Anterior
+				</a>
+			{% else %}
+				<span></span>
+			{% endif %}
+			<span class="text-sm text-gray-600">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+			{% if page_obj.has_next %}
+				<a href="?q={{ search_query|urlencode }}&page={{ page_obj.next_page_number }}" class="text-blue-600 hover:underline">
+					Siguiente
+				</a>
+			{% endif %}
+		</nav>
+	{% endif %}
+</section>
+{% endblock %}
