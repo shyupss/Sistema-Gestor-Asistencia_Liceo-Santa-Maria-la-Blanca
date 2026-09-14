@@ -1,0 +1,18 @@
+{% load static %}
+<!-- Navbar Desktop -->
+<nav class="hidden lg:block w-full bg-blanco-tarjeta border-b border-gris-claro shadow-md">
+    <div class="px-1">
+        <div class="flex items-center space-x-1 py-1">
+            {% include 'components/navbar-desktop-button.html' with url_name='home' icon='house' label='Inicio' %}
+            {% include 'components/navbar-desktop-button.html' with url_name='monitoreo' icon='chart-column' label='Monitoreo' %}
+            {% include 'components/navbar-desktop-button.html' with url_name='asistencia' icon='calendar' label='Asistencia' %}
+            {% include 'components/navbar-desktop-button.html' with url_name='alertas' icon='triangle-alert' label='Alertas' %}
+            {% include 'components/navbar-desktop-button.html' with url_name='justificaciones' icon='pen-line' label='Justificaciones' %}
+            {% include 'components/navbar-desktop-button.html' with url_name='reportes' icon='file-text' label='Reportes' %}
+            {% include 'components/navbar-desktop-button.html' with url_name='alumnos' icon='users' label='Estudiantes' %}
+            {% include 'components/navbar-desktop-button.html' with url_name='cursos' icon='book-open' label='Cursos' %}
+        </div>
+    </div>
+</nav>
+
+<!-- TODO:Navbar Mobile -->

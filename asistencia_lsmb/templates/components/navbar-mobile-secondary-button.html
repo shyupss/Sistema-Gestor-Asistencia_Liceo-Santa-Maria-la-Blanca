@@ -1,0 +1,9 @@
+{% url url_name as btn_url %}
+<a href="{{ btn_url|default:'#' }}"
+   class="flex items-center gap-3 px-4 py-3 mx-2 transition-colors rounded-md
+   {% if request.path == btn_url %}bg-celeste-claro text-azul-primario{% else %}text-negro-texto hover:bg-gris-claro{% endif %}">
+    <i data-lucide="{{ icon|default:'circle-x' }}"
+       class="w-5 h-5 shrink-0 {% if request.path == btn_url %}text-azul-primario{% else %}text-gris-texto{% endif %}">
+    </i>
+    <span class="text-sm font-medium">{{ label }}</span>
+</a>

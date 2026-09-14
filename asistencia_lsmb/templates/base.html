@@ -10,6 +10,7 @@
     <link rel="shortcut icon" href="{% static 'img/favicon.ico' %}" type="image/x-icon">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
     <!-- Paleta de colores -->
     <script src="{% static 'js/tailwind.config.js' %}"></script>
@@ -25,11 +26,15 @@
 
     {% include 'components/header.html' %}
 
+    {% include 'components/navbar-desktop.html' %}
+
     <main>
         {% block content %}
         <!-- App content will load here -->
         {% endblock %}
     </main>
+
+    {% include 'components/navbar-mobile.html' %}
 
     <script>
         lucide.createIcons();
