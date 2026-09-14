@@ -27,13 +27,14 @@ RUN uv sync --frozen --no-dev
 RUN useradd -m web-user
 COPY --chown=web-user:web-user . .
 
-# 2. copiar y hacer ejecutable el entrypoint DESPUÉS del COPY . .
-# (como root, para que el bit de ejecución no sea sobreescrito ni perdido)
-COPY entrypoint.sh /app/entrypoint.sh
-RUN sed -i 's/\r$//' /app/entrypoint.sh \
-    && chmod +x /app/entrypoint.sh
+# 2. copiar y hacer ejecutable el entrypoint FUERA de /app para que el
+# volumen bind-mount (./asistencia_lsmb:/app) no lo sobreescriba en runtime
+# (evita el problema de CRLF en Windows que rompe el shebang)
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN sed -i 's/\r$//' /usr/local/bin/entrypoint.sh \
+    && chmod +x /usr/local/bin/entrypoint.sh
 
 # 3. cambiar al usuario no privilegiado para la ejecución
 USER web-user
 
-ENTRYPOINT ["/app/entrypoint.sh"]
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
