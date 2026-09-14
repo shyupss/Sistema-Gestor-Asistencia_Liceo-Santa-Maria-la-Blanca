@@ -1,11 +1,11 @@
 from django.shortcuts import render
 from django.utils import timezone
 from django.core.paginator import Paginator
-from django.db.models import Case, Count, ExpressionWrapper, F, FloatField, Prefetch, Q, Value, When
+from django.db.models import Case, Count, ExpressionWrapper, F, FloatField, OuterRef, Prefetch, Q, Subquery, Value, When
 from datetime import timedelta
 from .models import Alumno, Curso, Matricula #Importa modelos a cargar
 from asistencia.models import Asistencia_Alumnos
-from alertas.models import Estado
+from alertas.models import Estado, EstadoAlumno
 from babel.dates import format_date
 
 
@@ -43,9 +43,8 @@ def pagina_alumnos(request):
     matriculas_activas = Prefetch(
         'matriculas',
         queryset=Matricula.objects.filter(
-            fecha_termino__isnull=True,
             periodo__anio=año_actual
-        ).select_related('curso', 'curso__periodo'),
+        ).filter(Q(fecha_termino__isnull=True) | Q(fecha_termino__gt=fecha_hoy)).select_related('curso', 'curso__periodo'),
         to_attr='matricula_activa_list'
     )
     # Consultamos todos los alumnos y le inyectamos la consulta de matriculas activas
@@ -54,9 +53,25 @@ def pagina_alumnos(request):
         asistencia_alumnos__paso_lista__fecha__lt=inicio_siguiente_año,
         asistencia_alumnos__paso_lista__curso__matriculas__alumno=F('pk'),
         asistencia_alumnos__paso_lista__curso__matriculas__periodo__anio=año_actual,
-        asistencia_alumnos__paso_lista__curso__matriculas__fecha_termino__isnull=True,
     )
+    asistencia_del_año &= (
+        Q(asistencia_alumnos__paso_lista__curso__matriculas__fecha_termino__isnull=True)
+        | Q(asistencia_alumnos__paso_lista__curso__matriculas__fecha_termino__gt=fecha_hoy)
+    )
+    estado_alumno_actual = EstadoAlumno.objects.filter(
+        alumno=OuterRef('pk'),
+        periodo__anio=año_actual,
+    ).order_by()
     alumnos_base = Alumno.objects.prefetch_related(matriculas_activas).annotate(
+        estado_alumno_porcentaje=Subquery(
+            estado_alumno_actual.values('porcentaje_asistencia')[:1]
+        ),
+        estado_alumno_nombre=Subquery(
+            estado_alumno_actual.values('estado__nombre')[:1]
+        ),
+        estado_alumno_alerta=Subquery(
+            estado_alumno_actual.values('estado__genera_alerta')[:1]
+        ),
         total_asistencias=Count(
             'asistencia_alumnos',
             filter=asistencia_del_año,
@@ -87,15 +102,10 @@ def pagina_alumnos(request):
 
     alumnos_con_datos = []
     for alumno in alumnos_base:
-        if alumno.total_asistencias:
-            alumno.porcentaje_asistencia = round(
-                (alumno.total_asistencias - alumno.total_ausencias)
-                * 100
-                / alumno.total_asistencias
-            )
-            estado = clasificar_asistencia(alumno.porcentaje_asistencia, estados_asistencia)
-            alumno.estado_asistencia = estado.nombre if estado else 'Sin configurar'
-            alumno.genera_alerta = estado.genera_alerta if estado else False
+        if alumno.estado_alumno_porcentaje is not None:
+            alumno.porcentaje_asistencia = round(float(alumno.estado_alumno_porcentaje))
+            alumno.estado_asistencia = alumno.estado_alumno_nombre or 'Sin configurar'
+            alumno.genera_alerta = bool(alumno.estado_alumno_alerta)
         else:
             alumno.porcentaje_asistencia = None
             alumno.estado_asistencia = 'Sin datos'
@@ -113,12 +123,10 @@ def pagina_alumnos(request):
         ).distinct()
 
     if estado_filtro:
-        alumnos_qs = alumnos_qs.filter(
-            pk__in=[
-                alumno.pk for alumno in alumnos_con_datos
-                if alumno.estado_asistencia == estado_filtro
-            ]
-        )
+        if estado_filtro == 'Sin datos':
+            alumnos_qs = alumnos_qs.filter(estado_alumno_nombre__isnull=True)
+        else:
+            alumnos_qs = alumnos_qs.filter(estado_alumno_nombre=estado_filtro)
 
     alumnos_qs = alumnos_qs.order_by(
         F('porcentaje_asistencia').desc(nulls_last=True)
@@ -207,7 +215,8 @@ def pagina_cursos(request):
         'matriculas',
         queryset=Matricula.objects.filter(
             periodo__anio=año_actual,
-            fecha_termino__isnull=True,
+        ).filter(
+            Q(fecha_termino__isnull=True) | Q(fecha_termino__gt=fecha_hoy)
         ).select_related('alumno'),
         to_attr='matriculas_activas',
     )
@@ -217,10 +226,8 @@ def pagina_cursos(request):
     ).order_by('nivel', 'grupo').prefetch_related(matriculas_activas).annotate(
         total_estudiantes=Count(
             'matriculas',
-            filter=Q(
-                matriculas__periodo__anio=año_actual,
-                matriculas__fecha_termino__isnull=True,
-            ),
+            filter=Q(matriculas__periodo__anio=año_actual)
+            & (Q(matriculas__fecha_termino__isnull=True) | Q(matriculas__fecha_termino__gt=fecha_hoy)),
             distinct=True,
         )
     )
@@ -233,7 +240,9 @@ def pagina_cursos(request):
             paso_lista__fecha__lt=inicio_siguiente_año,
             alumno__matriculas__curso=curso,
             alumno__matriculas__periodo__anio=año_actual,
-            alumno__matriculas__fecha_termino__isnull=True,
+        ).filter(
+            Q(alumno__matriculas__fecha_termino__isnull=True)
+            | Q(alumno__matriculas__fecha_termino__gt=fecha_hoy)
         )
         datos_asistencia = asistencias.aggregate(
             total=Count('pk', distinct=True),
@@ -293,6 +302,13 @@ def pagina_cursos(request):
     ) if total_registros else 0
 
     total_cursos = len(cursos_totales)
+    porcentaje_meta = 75
+    cursos_sobre_meta = sum(
+        1 for curso in cursos_totales if curso.asistencia >= porcentaje_meta
+    )
+    cumplimiento_meta = round(
+        cursos_sobre_meta * 100 / total_cursos
+    ) if total_cursos else 0
 
     contexto = {
         'page_title': "Cursos",
@@ -314,10 +330,12 @@ def pagina_cursos(request):
         'total': f"{total_cursos} Cursos",
         'pastillas': [
             (f"{total_cursos} Cursos · Periodo actual", "azul"),
-            (f"Cumplimiento meta · {93}%", "verde")
+            (f"Cumplimiento meta · {cumplimiento_meta}%", "verde")
         ],
         'alertas': conteo_estados,
-        'porcentaje_meta': 75, # META DESIGNADA POR EL INSTITUTO
+        'porcentaje_meta': porcentaje_meta,
+        'cumplimiento_meta': cumplimiento_meta,
+        'cursos_sobre_meta': cursos_sobre_meta,
     }
     
     return render (request, 'academico/base.html', contexto)

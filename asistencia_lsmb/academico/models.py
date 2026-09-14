@@ -17,19 +17,12 @@ class PeriodoAcademico(models.Model):
 
 class Curso(models.Model):
     periodo = models.ForeignKey(PeriodoAcademico, on_delete=models.CASCADE, related_name='cursos')
-    # Usamos string 'cuentas.Funcionario' por si el modelo está en otra app. (a futuro probablemente)
-    # Usamos SET_NULL para que el curso no se borre si el profesor no existe/es despedido.
-    '''
     profesor_jefe = models.ForeignKey(
-        'cuentas.Funcionario', 
+        'alertas.Funcionario',
         on_delete=models.SET_NULL, 
         null=True, 
         blank=True
-    )'''
-    # Temporal mientras no hay app que maneje profesores/cuentas
-    profesor_jefe = models.CharField(max_length=100, blank=True, default="")
-    # foreingkey a futuro
-    #profesor_jefe = models.ForeignKey('cuentas.Funcionario', on_delete=models.SET_NULL, null=True, blank=True)
+    )
 
     nivel = models.IntegerField()
     grupo = models.CharField(max_length=3)
@@ -51,7 +44,7 @@ class Curso(models.Model):
             if cursos_duplicados.exists():
                 curso_conflicto = cursos_duplicados.first()
                 raise ValidationError({
-                    'profesor_jefe': f"El profesor {self.profesor_jefe} ya está asignado como profesor jefe del curso {curso_conflicto.nivel} {curso_conflicto.grupo}"
+                    'profesor_jefe': f"El profesor {self.profesor_jefe.nombre} ya está asignado como profesor jefe del curso {curso_conflicto.nivel} {curso_conflicto.grupo}"
                 })
 
     def save(self, *args, **kwargs):
@@ -104,9 +97,9 @@ class Alumno(models.Model):
         self.rut = normalizar_rut(self.rut)
 
         # Verifica duplicidad
-        queryset = Alumno.objects.filter(rut=self.rut)
+        query = Alumno.objects.filter(rut=self.rut)
         if self.pk:
-            query = queryset.exclude(pk=self.pk)
+            query = query.exclude(pk=self.pk)
 
         if query.exists():
             raise ValidationError({'rut': 'El RUT ya está registrado para otro alumno.'})

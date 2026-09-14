@@ -39,7 +39,7 @@
         <div class="flex items-center justify-between pt-2 text-[11px]">
             <div class="flex min-w-0 items-center gap-1.5 text-negro-texto">
                 <i data-lucide="user" class="h-3.5 w-3.5 shrink-0"></i>
-                <span class="truncate font-semibold">{{ curso.profesor_jefe|default:"Sin asignar" }}</span>
+                <span class="truncate font-semibold">{{ curso.profesor_jefe.nombre|default:"Sin asignar" }}</span>
             </div>
             
             <div class="flex shrink-0 items-center gap-1 font-semibold text-negro-texto">

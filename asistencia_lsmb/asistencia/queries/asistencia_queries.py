@@ -7,12 +7,12 @@ from asistencia.models import Asistencia_Alumnos, Paso_Lista, Tipos_Asistencia
 
 def obtener_cursos(fecha=None):
     fecha = fecha or timezone.localdate()
+    matricula_vigente = Q(fecha_termino__isnull=True) | Q(fecha_termino__gt=fecha)
     matriculas_activas = Prefetch(
         "matriculas",
         queryset=Matricula.objects.filter(
             periodo__anio=fecha.year,
-            fecha_termino__isnull=True,
-        ).select_related("alumno"),
+        ).filter(matricula_vigente).select_related("alumno"),
         to_attr="matriculas_activas",
     )
 
@@ -26,49 +26,46 @@ def obtener_cursos(fecha=None):
     ).annotate(
         total_estudiantes=Count(
             "matriculas",
-            filter=Q(
-                matriculas__periodo__anio=fecha.year,
-                matriculas__fecha_termino__isnull=True,
-            ),
+            filter=Q(matriculas__periodo__anio=fecha.year)
+            & (Q(matriculas__fecha_termino__isnull=True) | Q(matriculas__fecha_termino__gt=fecha)),
             distinct=True,
         ),
         total_registros=Count(
             "paso_lista__asistencia_alumnos",
-            filter=Q(
-                paso_lista__fecha__year=fecha.year,
-                paso_lista__asistencia_alumnos__alumno__matriculas__periodo__anio=fecha.year,
-                paso_lista__asistencia_alumnos__alumno__matriculas__fecha_termino__isnull=True,
-            ),
+            filter=Q(paso_lista__fecha__year=fecha.year)
+            & Q(paso_lista__asistencia_alumnos__alumno__matriculas__periodo__anio=fecha.year)
+            & (Q(paso_lista__asistencia_alumnos__alumno__matriculas__fecha_termino__isnull=True)
+               | Q(paso_lista__asistencia_alumnos__alumno__matriculas__fecha_termino__gt=fecha)),
             distinct=True,
         ),
         total_ausencias=Count(
             "paso_lista__asistencia_alumnos",
-            filter=Q(
-                paso_lista__fecha__year=fecha.year,
-                paso_lista__asistencia_alumnos__tipo_asistencia__cuenta_como_ausencia=True,
-                paso_lista__asistencia_alumnos__alumno__matriculas__periodo__anio=fecha.year,
-                paso_lista__asistencia_alumnos__alumno__matriculas__fecha_termino__isnull=True,
-            ),
+            filter=Q(paso_lista__fecha__year=fecha.year)
+            & Q(paso_lista__asistencia_alumnos__tipo_asistencia__cuenta_como_ausencia=True)
+            & Q(paso_lista__asistencia_alumnos__alumno__matriculas__periodo__anio=fecha.year)
+            & (Q(paso_lista__asistencia_alumnos__alumno__matriculas__fecha_termino__isnull=True)
+               | Q(paso_lista__asistencia_alumnos__alumno__matriculas__fecha_termino__gt=fecha)),
             distinct=True,
         ),
         registros_hoy=Count(
             "paso_lista__asistencia_alumnos",
-            filter=Q(
-                paso_lista__fecha=fecha,
-                paso_lista__asistencia_alumnos__alumno__matriculas__periodo__anio=fecha.year,
-                paso_lista__asistencia_alumnos__alumno__matriculas__fecha_termino__isnull=True,
-            ),
+            filter=Q(paso_lista__fecha=fecha)
+            & Q(paso_lista__asistencia_alumnos__alumno__matriculas__periodo__anio=fecha.year)
+            & (Q(paso_lista__asistencia_alumnos__alumno__matriculas__fecha_termino__isnull=True)
+               | Q(paso_lista__asistencia_alumnos__alumno__matriculas__fecha_termino__gt=fecha)),
             distinct=True,
         ),
         registrada_hoy=Exists(paso_lista_hoy),
     ).filter(periodo__anio=fecha.year).order_by("nivel", "grupo")
 
 
-def obtener_alumnos_curso(curso):
+def obtener_alumnos_curso(curso, fecha=None):
+    fecha = fecha or timezone.localdate()
     return Matricula.objects.filter(
         curso=curso,
         periodo=curso.periodo,
-        fecha_termino__isnull=True,
+    ).filter(
+        Q(fecha_termino__isnull=True) | Q(fecha_termino__gt=fecha),
     ).select_related("alumno").order_by("alumno__nombre")
 
 

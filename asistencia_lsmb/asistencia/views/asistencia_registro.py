@@ -17,6 +17,7 @@ from asistencia.queries.asistencia_queries import (
     obtener_paso_lista,
     obtener_tipos_asistencia,
 )
+from asistencia.services.asistencia_service import recalcular_estado_alumno
 
 
 def pagina_registrar_asistencia(request):
@@ -40,7 +41,7 @@ def pagina_registrar_asistencia(request):
 
     if curso_id:
         curso = get_object_or_404(cursos, pk=curso_id)
-        alumnos = list(obtener_alumnos_curso(curso))
+        alumnos = list(obtener_alumnos_curso(curso, fecha))
         paso_lista = obtener_paso_lista(curso, fecha, jornada)
 
     if request.method == "POST":
@@ -93,11 +94,25 @@ def pagina_registrar_asistencia(request):
                             defaults={"tipo_asistencia_id": tipo_id},
                         )
 
+                    for matricula in alumnos:
+                        recalcular_estado_alumno(
+                            alumno=matricula.alumno,
+                            periodo=curso.periodo,
+                        )
+
                 messages.success(request, "La asistencia fue guardada correctamente.")
+                presentes_guardados = sum(
+                    1
+                    for matricula in alumnos
+                    if str(matricula.alumno_id) in presentes
+                )
                 query = urlencode({
                     "curso": curso.pk,
                     "fecha": fecha.isoformat(),
                     "jornada": jornada,
+                    "guardado": 1,
+                    "presentes": presentes_guardados,
+                    "ausentes": len(alumnos) - presentes_guardados,
                 })
                 return redirect(
                     f"{reverse('registrar_asistencia')}?{query}"
@@ -106,10 +121,34 @@ def pagina_registrar_asistencia(request):
     asistencias_guardadas = {}
     if paso_lista:
         asistencias_guardadas = obtener_asistencias(paso_lista)
+        tipos_por_id = {tipo.pk: tipo for tipo in tipos_asistencia}
+        alumnos_por_id = {matricula.alumno_id: matricula for matricula in alumnos}
+        registro_presentes = []
+        registro_ausentes = []
+
+        for alumno_id, tipo_id in asistencias_guardadas.items():
+            matricula = alumnos_por_id.get(alumno_id)
+            tipo = tipos_por_id.get(tipo_id)
+            if not matricula or not tipo:
+                continue
+            if tipo.cuenta_como_ausencia:
+                registro_ausentes.append(matricula)
+            else:
+                registro_presentes.append(matricula)
+
+        tipos_presentes = {
+            tipo.pk for tipo in tipos_asistencia if not tipo.cuenta_como_ausencia
+        }
         for matricula in alumnos:
             matricula.tipo_asistencia_id = asistencias_guardadas.get(
                 matricula.alumno_id
             )
+            matricula.es_presente = (
+                matricula.tipo_asistencia_id in tipos_presentes
+            )
+    else:
+        registro_presentes = []
+        registro_ausentes = []
 
     total_alumnos = len(alumnos)
     progreso = round(len(asistencias_guardadas) * 100 / total_alumnos) if total_alumnos else 0
@@ -129,5 +168,7 @@ def pagina_registrar_asistencia(request):
             "total_alumnos": total_alumnos,
             "asistencias_registradas": len(asistencias_guardadas),
             "progreso": progreso,
+            "registro_presentes": registro_presentes,
+            "registro_ausentes": registro_ausentes,
         },
     )

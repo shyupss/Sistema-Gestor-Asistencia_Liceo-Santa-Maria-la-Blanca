@@ -77,7 +77,7 @@
         <div class="grid grid-cols-2 gap-2 text-center items-center pt-1">
             <div class="text-center border-r border-gris-claro/60 pr-2">
                 <span class="text-xs font-bold text-negro-texto block truncate">
-                    {{ curso.profesor_jefe|default:"Sin asignar" }}
+                    {{ curso.profesor_jefe.nombre|default:"Sin asignar" }}
                 </span>
                 <span class="text-[11px] text-gris-texto block">Profesor/a jefe</span>
             </div>
@@ -116,7 +116,7 @@
                 <span>Asistencia registrada</span>
             </div>
         {% else %}
-            <a href="#" 
+                <a href="{% url 'registrar_asistencia' %}?curso={{ curso.id }}&fecha={{ fecha_hoy|date:'Y-m-d' }}"
                class="group flex items-center justify-center space-x-1.5 py-3 bg-azul-primario hover:bg-azul-profundo text-blanco-tarjeta font-semibold text-xs transition-colors border-r border-azul-primario">
                 <i data-lucide="check-square" class="w-4 h-4 transition-transform duration-200 ease-out group-hover:scale-110 origin-center active:scale-95"></i>
                 <span>Registrar asistencia</span>
