@@ -1,9 +1,0 @@
-<a href="{% if url_name %}{% url url_name %}{% else %}#{% endif %}"
-    class="flex items-center space-x-2 px-3 py-2 rounded-xl text-sm font-semibold transition-colors whitespace-nowrap
-    {% if request.resolve_match.url_name == url_name %}bg-celeste-claro text-azul-medio{% else %}text-gris-texto hover:bg-gris-claro{% endif %}"
->
-    <i data-lucide="{{ icon|default:'circle-x' }}"
-    class="w-5 h-5 {% if request.resolve_match.url_name == url_name %}text-azul-medio{% else %}text-gris-texto{% endif %}"></i>
-    <span>{{ label }}</span>
-
-</a>
