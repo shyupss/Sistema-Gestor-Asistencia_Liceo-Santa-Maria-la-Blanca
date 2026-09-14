@@ -1,4 +1,4 @@
-from django.db.models import Count, Prefetch, Q
+from django.db.models import Count, Exists, OuterRef, Prefetch, Q
 from django.utils import timezone
 
 from academico.models import Curso, Matricula
@@ -14,6 +14,11 @@ def obtener_cursos(fecha=None):
             fecha_termino__isnull=True,
         ).select_related("alumno"),
         to_attr="matriculas_activas",
+    )
+
+    paso_lista_hoy = Paso_Lista.objects.filter(
+        curso=OuterRef("pk"),
+        fecha=fecha,
     )
 
     return Curso.objects.prefetch_related(
@@ -55,6 +60,7 @@ def obtener_cursos(fecha=None):
             ),
             distinct=True,
         ),
+        registrada_hoy=Exists(paso_lista_hoy),
     ).filter(periodo__anio=fecha.year).order_by("nivel", "grupo")
 
 

@@ -35,7 +35,7 @@ def preparar_cursos(cursos):
             curso.estado_asistencia = "Sin datos"
             curso.genera_alerta = False
 
-        curso.pendiente = curso.registros_hoy < curso.total_estudiantes
+        curso.pendiente = not curso.registrada_hoy
 
     return cursos, {
         "alertas": contar_alertas(cursos),

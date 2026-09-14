@@ -3,86 +3,53 @@
 {% block title %}Asistencia{% endblock %}
 
 {% block content %}
-<section class="mx-auto max-w-6xl px-6 py-8">
-	<div class="mb-6 flex flex-wrap items-end justify-between gap-4">
-		<div>
-			<h1 class="text-3xl font-bold text-gray-900">Asistencia por curso</h1>
-			<p class="mt-1 text-gray-600">Resumen de los registros de asistencia.</p>
+	<section class="mx-auto max-w-6xl px-4 py-5 sm:px-6 sm:py-8">
+		<div class="mb-4 flex items-center justify-between gap-4">
+			<h1 class="text-2xl font-bold text-negro-texto sm:text-3xl">Asistencia</h1>
+			<time class="rounded-full border border-azul-medio px-5 py-1 text-[11px] font-semibold text-azul-profundo">
+				{{ fecha_hoy|date:"d/m/Y" }}
+			</time>
 		</div>
-	</div>
 
-	<form method="get" class="mb-6 flex flex-wrap gap-3">
-		<label class="sr-only" for="buscar">Buscar curso</label>
-		<input
-			id="buscar"
-			name="q"
-			value="{{ search_query }}"
-			placeholder="Buscar curso..."
-			class="rounded border border-gray-300 px-3 py-2"
-		>
-		<button type="submit" class="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700">
-			Buscar
-		</button>
-		{% if search_query %}
-			<a href="{% url 'asistencia' %}" class="rounded border border-gray-300 px-4 py-2 text-gray-700">
-				Limpiar
-			</a>
-		{% endif %}
-	</form>
-
-	<div class="mb-6 flex flex-wrap gap-3">
-		{% for estado, cantidad in alertas.items %}
-			<div class="rounded border border-gray-200 bg-white px-4 py-3">
-				<span class="text-sm text-gray-600">{{ estado }}</span>
-				<strong class="ml-2 text-gray-900">{{ cantidad }}</strong>
+		<form method="get" action="{% url 'registrar_asistencia' %}" class="mb-4 rounded-xl border border-gris-claro bg-blanco-tarjeta p-4 shadow-sm">
+			<div class="grid items-end gap-3 md:grid-cols-[1.1fr_1.8fr_auto]">
+				<div class="border-b border-gris-claro pb-2 md:border-b-0 md:border-r md:pb-0 md:pr-4">
+					<p class="text-base font-bold text-azul-profundo">Registrar asistencia</p>
+					<p class="text-[11px] text-gris-texto">Jornada de clases · {{ fecha_hoy|date:"d M Y" }}</p>
+				</div>
+				<label class="sr-only" for="curso">Seleccionar curso</label>
+				<select id="curso" name="curso" required class="w-full rounded-lg border border-gris-medio bg-blanco px-3 py-2 text-sm text-azul-profundo">
+					<option value="">Seleccionar curso</option>
+					{% for curso in cursos_pendientes %}
+						<option value="{{ curso.id }}">{{ curso.nivel_romano }}° Medio {{ curso.grupo }}</option>
+					{% endfor %}
+				</select>
+				<input type="hidden" name="fecha" value="{{ fecha_hoy|date:'Y-m-d' }}">
+				<button type="submit" class="rounded-full bg-azul-primario px-7 py-2.5 text-sm font-semibold text-blanco-tarjeta hover:bg-azul-profundo">
+					Registrar ahora
+				</button>
 			</div>
-		{% empty %}
-			<p class="text-gray-600">No hay estados configurados.</p>
-		{% endfor %}
-	</div>
+		</form>
 
-	<div class="overflow-x-auto rounded-lg border border-gray-200 bg-white">
-		<table class="min-w-full divide-y divide-gray-200">
-			<thead class="bg-gray-50">
-				<tr>
-					<th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Curso</th>
-					<th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Estudiantes</th>
-					<th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Registros</th>
-					<th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Ausencias</th>
-					<th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Asistencia</th>
-					<th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Estado</th>
-				</tr>
-			</thead>
-			<tbody class="divide-y divide-gray-200">
+		<section class="overflow-hidden rounded-xl border border-gris-claro bg-blanco-tarjeta shadow-sm">
+			<div class="flex items-center justify-between border-b border-gris-claro px-5 py-4">
+				<h2 class="flex items-center gap-2 text-base font-bold text-negro-texto">
+					<i data-lucide="clipboard-list" class="h-4 w-4 text-azul-profundo"></i>
+					Cursos pendientes
+				</h2>
+				<span class="text-[10px] text-gris-texto">{{ total_cursos_registrados }} de {{ total_cursos_periodo }} cursos registrados</span>
+			</div>
+			<div class="grid gap-4 p-5 md:grid-cols-2 xl:grid-cols-3">
 				{% for curso in page_obj %}
-					<tr class="hover:bg-gray-50">
-						<td class="px-4 py-3 text-gray-900">
-							{{ curso.nivel_romano }} medio {{ curso.grupo }}
-							{% if curso.profesor_jefe %}
-								<span class="block text-sm text-gray-500">{{ curso.profesor_jefe }}</span>
-							{% endif %}
-						</td>
-						<td class="px-4 py-3 text-gray-700">{{ curso.total_estudiantes }}</td>
-						<td class="px-4 py-3 text-gray-700">{{ curso.total_registros }}</td>
-						<td class="px-4 py-3 text-gray-700">{{ curso.total_ausencias }}</td>
-						<td class="px-4 py-3 font-semibold text-gray-900">{{ curso.asistencia }}%</td>
-						<td class="px-4 py-3 text-gray-700">
-							{{ curso.estado_asistencia }}
-							<a href="{% url 'registrar_asistencia' %}?curso={{ curso.id }}" class="ml-3 text-blue-600 hover:underline">
-								Registrar
-							</a>
-						</td>
-					</tr>
+					{% include "asistencia/components/tarjeta-curso.html" with curso=curso %}
 				{% empty %}
-					<tr>
-						<td colspan="6" class="px-4 py-8 text-center text-gray-600">
-							No hay cursos para mostrar.
-						</td>
-					</tr>
+					<p class="col-span-full py-8 text-center text-sm text-gris-texto">No hay cursos pendientes para hoy.</p>
 				{% endfor %}
-			</tbody>
-		</table>
-	</div>
+			</div>
+			<div class="border-t border-gris-claro px-5 py-3 text-right">
+				<a href="{% url 'cursos' %}" class="text-sm font-medium text-azul-profundo hover:underline">Ir a cursos →</a>
+			</div>
+		</section>
 
 	{% if page_obj.has_other_pages %}
 		<nav class="mt-6 flex items-center justify-between" aria-label="Paginación">
