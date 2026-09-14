@@ -167,8 +167,6 @@ def pagina_alumnos(request):
         'is_24': per_page == 24,
         'is_48': per_page == 48,
         'fecha_hoy': fecha_hoy,
-        # 'inicio_semana': inicio_semana,
-        # 'fin_semana': fin_semana,
 
         'inicio_semana': format_date(inicio_semana, format = "dd MMM", locale = "es"),
         'current_year': año_actual,

@@ -22,8 +22,10 @@ from academico import views as academico_views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', inicio_views.pagina_principal, name='home'), # <-- El '' (string vacío) es lo que oculta el cohete
-    path('segunda/', inicio_views.pagina_segunda, name='nothome'),
+    # path('segunda/', inicio_views.pagina_segunda, name='nothome'),
     path('alumnos/', academico_views.pagina_alumnos, name = 'alumnos'),
     path('cursos/', academico_views.pagina_cursos, name= 'cursos'),
     path("asistencia/", include("asistencia.urls")),
+    path('reportes/', include("reportes.urls")),
+    path('monitoreo/', include("monitoreo.urls")),
 ]
