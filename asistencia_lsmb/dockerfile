@@ -27,6 +27,10 @@ RUN uv sync --frozen --no-dev
 RUN useradd -m web-user
 COPY --chown=web-user:web-user . .
 
+# crear la carpeta de estáticos con permisos para web-user
+# (no existe en el repo, collectstatic la necesita en runtime)
+RUN mkdir -p /app/staticfiles && chown web-user:web-user /app/staticfiles
+
 # 2. copiar y hacer ejecutable el entrypoint FUERA de /app para que el
 # volumen bind-mount (./asistencia_lsmb:/app) no lo sobreescriba en runtime
 # (evita el problema de CRLF en Windows que rompe el shebang)
