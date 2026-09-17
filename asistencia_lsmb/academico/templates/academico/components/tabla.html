@@ -74,76 +74,79 @@
             {% else %}
                 {% include 'academico/components/tarjeta-alumno.html' with alumno=entidad %}
             {% endif %}
+        {% empty %}
+            <div class="col-span-full text-center py-8 text-gris-texto">
+                No se encontraron {{ page_title|lower }}
+            </div>
         {% endfor %}
     </div>
-        <!-- Paginador -->
-        <!-- TODO: Infinite scroll para mobile -->
-        <div
-            class="flex flex-col md:flex-row items-center justify-between p-2 gap-4 mt-8 pt-4 border-t border-gris-claro text-sm text-gray-500">
+    <!-- Paginador -->
+    <!-- TODO: Infinite scroll para mobile -->
+    <div
+        class="flex flex-col md:flex-row items-center justify-between p-2 gap-4 mt-8 pt-4 border-t border-gris-claro text-sm text-gray-500">
 
-            <!-- Texto de conteo -->
-            <div class="pl-3 md:pb-2">
-                Mostrando {{ page_obj.start_index }}-{{ page_obj.end_index }} de {{ page_obj.paginator.count }}
-                {{ page_title|lower }}
-            </div>
+        <!-- Texto de conteo -->
+        <div class="pl-3 md:pb-2">
+            Mostrando {{ page_obj.start_index }}-{{ page_obj.end_index }} de {{ page_obj.paginator.count }}
+            {{ page_title|lower }}
+        </div>
 
-            <!-- Selector de elementos por página -->
-            <div class="flex items-center gap-2 md:pb-2">
-                <span>Por página</span>
-                <select name="per_page" form="filtro-form" onchange="document.getElementById('filtro-form').submit()"
-                    class="bg-white border border-gris-claro rounded-lg px-2.5 py-1 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-500">
-                    <option value="12" {% if is_12 %}selected{% endif %}>12</option>
-                    <option value="24" {% if is_24 %}selected{% endif %}>24</option>
-                    <option value="48" {% if is_48 %}selected{% endif %}>48</option>
-                </select>
-            </div>
+        <!-- Selector de elementos por página -->
+        <div class="flex items-center gap-2 md:pb-2">
+            <span>Por página</span>
+            <select name="per_page" form="filtro-form" onchange="document.getElementById('filtro-form').submit()"
+                class="bg-white border border-gris-claro rounded-lg px-2.5 py-1 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-500">
+                <option value="12" {% if is_12 %}selected{% endif %}>12</option>
+                <option value="24" {% if is_24 %}selected{% endif %}>24</option>
+                <option value="48" {% if is_48 %}selected{% endif %}>48</option>
+            </select>
+        </div>
 
-            <!-- Botones de Paginación Numérica -->
-            <div class="flex items-center gap-1 pr-3 md:pb-2">
-                <!-- Botón Anterior -->
-                {% if page_obj.has_previous %}
-                <a href="?page={{ page_obj.previous_page_number }}&q={{ search_query|urlencode }}&per_page={{ per_page }}&orden={{ orden }}&estado={{ estado_filtro|urlencode }}"
+        <!-- Botones de Paginación Numérica -->
+        <div class="flex items-center gap-1 pr-3 md:pb-2">
+            <!-- Botón Anterior -->
+            {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}&q={{ search_query|urlencode }}&per_page={{ per_page }}&orden={{ orden }}&estado={{ estado_filtro|urlencode }}"
+                class="p-2 border border-gris-claro rounded-lg text-gray-600 hover:bg-gray-50">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                </svg>
+            </a>
+            {% else %}
+            <span class="p-2 border border-gray-100 rounded-lg text-gray-300 cursor-not-allowed">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                </svg>
+            </span>
+            {% endif %}
+
+            <!-- Números de página -->
+            {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}
+            <span class="px-3.5 py-1.5 border border-blue-600 bg-blue-50 text-blue-600 font-semibold rounded-lg">
+                {{num }}</span>
+            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %} <a
+                href="?page={{ num }}&q={{ search_query|urlencode }}&per_page={{ per_page }}&orden={{ orden }}&estado={{ estado_filtro|urlencode }}"
+                class="px-3.5 py-1.5 border border-gris-claro text-gray-600 hover:bg-gray-50 rounded-lg">{{ num
+                }}</a>
+                {% endif %}
+                {% endfor %}
+
+                <!-- Botón Siguiente -->
+                {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}&q={{ search_query|urlencode }}&per_page={{ per_page }}&orden={{ orden }}&estado={{ estado_filtro|urlencode }}"
                     class="p-2 border border-gris-claro rounded-lg text-gray-600 hover:bg-gray-50">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                     </svg>
                 </a>
                 {% else %}
                 <span class="p-2 border border-gray-100 rounded-lg text-gray-300 cursor-not-allowed">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                     </svg>
                 </span>
-                {% endif %}
-
-                <!-- Números de página -->
-                {% for num in page_obj.paginator.page_range %}
-                {% if page_obj.number == num %}
-                <span class="px-3.5 py-1.5 border border-blue-600 bg-blue-50 text-blue-600 font-semibold rounded-lg">
-                    {{num }}</span>
-                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %} <a
-                    href="?page={{ num }}&q={{ search_query|urlencode }}&per_page={{ per_page }}&orden={{ orden }}&estado={{ estado_filtro|urlencode }}"
-                    class="px-3.5 py-1.5 border border-gris-claro text-gray-600 hover:bg-gray-50 rounded-lg">{{ num
-                    }}</a>
-                    {% endif %}
-                    {% endfor %}
-
-                    <!-- Botón Siguiente -->
-                    {% if page_obj.has_next %}
-                    <a href="?page={{ page_obj.next_page_number }}&q={{ search_query|urlencode }}&per_page={{ per_page }}&orden={{ orden }}&estado={{ estado_filtro|urlencode }}"
-                        class="p-2 border border-gris-claro rounded-lg text-gray-600 hover:bg-gray-50">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                        </svg>
-                    </a>
-                    {% else %}
-                    <span class="p-2 border border-gray-100 rounded-lg text-gray-300 cursor-not-allowed">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                        </svg>
-                    </span>
-                    {% endif %}
-            </div>
+            {% endif %}
         </div>
     </div>
 </div>

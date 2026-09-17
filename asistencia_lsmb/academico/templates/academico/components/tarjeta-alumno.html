@@ -17,8 +17,12 @@
             <h3 class="text-sm md:text-base font-bold text-negro-texto leading-tight truncate">
                 {{ alumno.nombre }}</h3>
             <p class="text-xs text-gris-texto">
-                {{ alumno.matricula_activa_list.0.curso.nivel_romano }}° Medio
-                {{ alumno.matricula_activa_list.0.curso.grupo }}
+                {% if alumno.matricula_activa_list.0.curso.nivel_romano %}
+                    {{ alumno.matricula_activa_list.0.curso.nivel_romano }}° Medio
+                    {{ alumno.matricula_activa_list.0.curso.grupo }}
+                {% else %}
+                    Sin curso
+                {% endif %}
             </p>
             <p class="text-xs text-gris-texto">RUT {{ alumno.rut }}</p>
         </div>

@@ -17,7 +17,7 @@
             </div>
 
             <div class="flex items-center gap-4">
-                <!-- Gráfico Circular 81% -->
+                <!-- Gráfico Circular  -->
                 {% include 'academico/components/rueda-grafico.html' with porcentaje=porcentaje_general width='w-20' height='h-20' %}
                 <!-- Flecha Desplegable (Solo móvil) -->
                 <button type="button" class="lg:hidden text-azul-primario focus:outline-none">
@@ -45,7 +45,7 @@
                     <div class="grid grid-cols-4 gap-2 p-2 xl:p-1">
                         {% for nivel, cuenta in alertas.items %}
                             {% if cuenta > 0 %}
-                                {% include 'academico/components/boton-filtro.html' with cuenta=cuenta nivel=nivel %}
+                                {% include 'academico/components/boton-filtro.html' with cuenta=cuenta nivel=nivel %}                 
                             {% endif %}
                         {% endfor %}
                         

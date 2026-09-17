@@ -26,10 +26,10 @@
         class="relative z-50 bg-blanco-tarjeta border-t-2 border-azul-primario shadow-xl divide-y divide-gris-claro"
         style="display: none;">
 
-        {% include 'components/navbar-mobile-secondary-button.html' with url_name='justificaciones' icon='pen-line' label='Justificaciones' %}
-        {% include 'components/navbar-mobile-secondary-button.html' with url_name='reportes:index' icon='file-text' label='Reportes' %}
-        {% include 'components/navbar-mobile-secondary-button.html' with url_name='alumnos' icon='users' label='Estudiantes' %}
-        {% include 'components/navbar-mobile-secondary-button.html' with url_name='cursos' icon='book-open' label='Cursos' %}
+        {% include 'components/base/navbar-mobile-secondary-button.html' with url_name='justificaciones' icon='pen-line' label='Justificaciones' %}
+        {% include 'components/base/navbar-mobile-secondary-button.html' with url_name='reportes:index' icon='file-text' label='Reportes' %}
+        {% include 'components/base/navbar-mobile-secondary-button.html' with url_name='alumnos' icon='users' label='Estudiantes' %}
+        {% include 'components/base/navbar-mobile-secondary-button.html' with url_name='cursos' icon='book-open' label='Cursos' %}
 
     </div>
 
@@ -54,8 +54,8 @@
 
         <div class="flex items-center justify-between max-w-md mx-auto px-4 py-2">
 
-            {% include 'components/navbar-mobile-main-button.html' with url_name='home' icon='house' label='Inicio' %}
-            {% include 'components/navbar-mobile-main-button.html' with url_name='asistencia' icon='calendar' label='Asistencia' %}
+            {% include 'components/base/navbar-mobile-main-button.html' with url_name='home' icon='house' label='Inicio' %}
+            {% include 'components/base/navbar-mobile-main-button.html' with url_name='asistencia' icon='calendar' label='Asistencia' %}
 
             <!-- Botón + central -->
             <div class="relative flex flex-col items-center" style="margin-top: -1.75rem;">
@@ -73,8 +73,8 @@
                 <span class="text-[11px] font-medium text-gris-texto mt-1">Más</span>
             </div>
 
-            {% include 'components/navbar-mobile-main-button.html' with url_name='monitoreo' icon='chart-column' label='Monitoreo' %}
-            {% include 'components/navbar-mobile-main-button.html' with url_name='alertas' icon='triangle-alert' label='Alertas' %}
+            {% include 'components/base/navbar-mobile-main-button.html' with url_name='monitoreo' icon='chart-column' label='Monitoreo' %}
+            {% include 'components/base/navbar-mobile-main-button.html' with url_name='alertas' icon='triangle-alert' label='Alertas' %}
 
         </div>
     </div>

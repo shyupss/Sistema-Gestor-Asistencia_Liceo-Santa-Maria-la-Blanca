@@ -34,8 +34,8 @@ services:
     # 2. Dejar DEBUG vacío en .env
     # 3. Recrear los contenedores: docker compose up --build --force-recreate
     # ========================================================================================
-    # command:
-    #   sh -c "uv run manage.py runserver 0.0.0.0:${APP_PORT}"
+    command:
+      sh -c "uv run manage.py runserver 0.0.0.0:${APP_PORT}"
 
 volumes:
   postgres_data:

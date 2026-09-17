@@ -24,9 +24,9 @@
 
 <body class="bg-blanco-fondo">
 
-    {% include 'components/header.html' %}
+    {% include 'components/base/header.html' %}
 
-    {% include 'components/navbar-desktop.html' %}
+    {% include 'components/base/navbar-desktop.html' %}
 
     <main>
         {% block content %}
@@ -34,7 +34,7 @@
         {% endblock %}
     </main>
 
-    {% include 'components/navbar-mobile.html' %}
+    {% include 'components/base/navbar-mobile.html' %}
 
     <script>
         lucide.createIcons();
