@@ -1,3 +1,20 @@
-<div class="mt-10">
+{% comment %}
+Requiere:
+    - mostrando:    mostrando --
+    - total:        de --
+    - hay_mas:      bool 
+{% endcomment %}
 
+<div class="p-2 md:p-3 lg:px-4 lg:py-3 flex flex-col items-center gap-3">
+    {% if hay_mas %}
+        <button type="button"
+            class="flex items-center gap-1 text-sm font-medium text-azul hover:underline lg:hidden"
+        >
+            <i data-lucide="plus" class="h-4 w-4"></i>
+            Ver más justificaciones
+        </button>
+    {% endif %}
+    <p class="w-full text-right text-sm text-gris-texto">
+        Mostrando {{ mostrando|default:0 }} de {{ total|default:0 }} justificaciones
+    </p>
 </div>

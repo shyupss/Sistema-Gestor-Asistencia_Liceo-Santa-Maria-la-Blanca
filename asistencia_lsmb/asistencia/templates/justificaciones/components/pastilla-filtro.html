@@ -1,3 +1,10 @@
+{% comment %}
+Requiere:
+    - filtro_actual:    filtro actual seleccionado
+    - estado:           estado diferenciador entre pendientes/aceptadas/rechazadas
+    - cuenta:           cantidad de justificaciones de x estado
+{% endcomment %}
+
 <a href="{% if filtro_actual == estado %}{% url 'justificaciones' %}{% else %}?estado={{ estado }}{% endif %}"
     class="group inline-flex items-center gap-1.5 rounded-full px-2 py-1 text-xs md:text-sm font-medium shadow-sm
     {% if estado == 'pendientes' and filtro_actual == 'pendientes' %}bg-azul-fondo text-azul-profundo border border-azul
