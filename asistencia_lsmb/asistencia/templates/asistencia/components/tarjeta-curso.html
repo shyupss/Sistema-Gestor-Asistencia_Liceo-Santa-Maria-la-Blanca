@@ -16,12 +16,12 @@
                 <!-- Nombre y Periodo -->
                 <div class="flex flex-col items-start">
                     <h3 class="text-sm font-bold text-negro-texto leading-tight">{{ curso.nivel_romano }}° Medio {{ curso.grupo }}</h3>
-                    <p class="text-[11px] text-gris-texto mt-0.5">Periodo {{ current_year }}</p>
+                    <p class="text-sm text-gris-texto mt-0.5">Periodo {{ current_year }}</p>
                 </div>
             </div>
 
             <div class="flex flex-col items-end gap-1">
-                <span class="px-2 py-0.5 rounded-full text-[9px] font-bold 
+                <span class="px-2 py-0.5 rounded-full text-xs font-bold 
                     {% if curso.estado_asistencia == 'Óptimo' or curso.estado_asistencia == 'Optimo' %}bg-verde-fondo text-verde-oscuro
                     {% elif curso.estado_asistencia == 'Sin datos' %}bg-gris-ultraclaro text-gris-texto
                     {% elif curso.estado_asistencia == 'Sin configurar' %}bg-gris-ultraclaro text-gris-texto
@@ -31,12 +31,12 @@
                     {% else %}bg-amarillo-fondo text-amarillo-oscuro{% endif %}">
                     {{ curso.estado_asistencia }}
                 </span>
-                <span class="text-xs font-bold text-negro-texto">{{ curso.asistencia|default:0 }}%</span>
+                <span class="text-sm font-bold text-negro-texto">{{ curso.asistencia|default:0 }}%</span>
             </div>
         </div>
 
         <!-- Información profesor jefe y estudiantes -->
-        <div class="flex items-center justify-between pt-2 text-[11px]">
+        <div class="flex items-center justify-between pt-2 text-sm">
             <div class="flex min-w-0 items-center gap-1.5 text-negro-texto">
                 <i data-lucide="user" class="h-3.5 w-3.5 shrink-0"></i>
                 <span class="truncate font-semibold">{{ curso.profesor_jefe.nombre|default:"Sin asignar" }}</span>
@@ -62,7 +62,7 @@
             </div>
         {% else %}
             <a href="{% url 'registrar_asistencia' %}?curso={{ curso.id }}&fecha={{ fecha_hoy|date:'Y-m-d' }}"
-                class="group flex items-center justify-center space-x-1.5 py-2.5 bg-blanco-tarjeta hover:bg-gris-ultraclaro text-azul-profundo font-semibold text-[11px] transition-colors">
+                class="group flex items-center justify-center space-x-1.5 py-2.5 bg-blanco-tarjeta hover:bg-gris-ultraclaro text-azul-profundo font-semibold text-sm transition-colors">
                 <i data-lucide="check-square" class="w-4 h-4 transition-transform duration-200 ease-out group-hover:scale-110 origin-center active:scale-95"></i>
                 <span>Registrar asistencia de hoy</span>
             </a>
