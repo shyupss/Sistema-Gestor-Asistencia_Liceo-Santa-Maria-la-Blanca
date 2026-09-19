@@ -1,0 +1,24 @@
+<div class="mt-6 border rounded-lg border-gris-claro bg-blanco-tarjeta">
+    {% include 'justificaciones/components/header-tabla.html' %}
+
+    <!-- Contenedor de tarjetas -->
+    <!-- TODO: Conectar justificaciones con el backend (ELIMINAR ESTE COMENTARIO UNA VEZ HECHO) -->
+    <div class="border-t border-b border-gris-claro bg-blanco-tarjeta">
+        {% if justificaciones%}
+            <div class="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {% for justificacion in justificaciones %}
+                    {% include 'justificaciones/components/tarjeta.html' %}
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="flex flex-col items-center gap-2 py-16 text-center">
+                <i data-lucide="pencil-line" class="h-8 w-8 text-gris-texto"></i>
+                <p class="font-medium text-gris-texto">No hay justificaciones que mostrar</p>
+                <p class="text-sm text-gris-texto">Prueba con otro filtro o agrega un nuevo registro</p>
+            </div>
+        {% endif %}
+    </div>
+    
+    {% include 'justificaciones/components/footer-tabla.html' %}
+    
+</div>

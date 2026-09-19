@@ -5,12 +5,12 @@
 {% block content %}
 
 <!-- Contenedor principal del contenido -->
-<div class="mx-auto max-w-[90%] px-4 py-5 sm:px-6 sm:py-8">
+<section class="mx-auto md:max-w-[90%] px-4 py-5 sm:px-6 sm:py-8">
     <!-- Encabezado -->
     {% include 'components/global/page_title.html' with page_title=page_title today=fecha_hoy %}
     
     <!-- Contenido -->
-
-</div>
+    {% include 'justificaciones/components/tabla.html' %}
+</section>
 
 {% endblock %}

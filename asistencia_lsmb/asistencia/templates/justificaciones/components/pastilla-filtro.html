@@ -1,0 +1,18 @@
+<a href="{% if filtro_actual == estado %}{% url 'justificaciones' %}{% else %}?estado={{ estado }}{% endif %}"
+    class="group inline-flex items-center gap-1.5 rounded-full px-2 py-1 text-xs md:text-sm font-medium shadow-sm
+    {% if estado == 'pendientes' and filtro_actual == 'pendientes' %}bg-azul-fondo text-azul-profundo border border-azul
+    {% elif estado == 'aceptadas' and filtro_actual == 'aceptadas' %}bg-verde-fondo text-verde-oscuro border border-verde
+    {% elif estado == 'rechazadas' and filtro_actual == 'rechazadas' %}bg-rojo-fondo text-rojo-oscuro border border-rojo
+    {% else %}text-gris-texto bg-gris-ultraclaro
+        {% if estado == 'pendientes' %}hover:bg-azul-fondo hover:text-azul-profundo
+        {% elif estado == 'aceptadas' %}hover:bg-verde-fondo hover:text-verde-oscuro
+        {% elif estado == 'rechazadas' %}hover:bg-rojo-fondo hover:text-rojo-oscuro
+        {% endif %}
+    {% endif %}
+    transition duration-200 ease-out hover:scale-105 origin-center active:scale-95">
+    <i data-lucide="{% if estado == 'pendientes' %}clock{% elif estado == 'aceptadas' %}circle-check{% elif estado == 'rechazadas' %}circle-x{% else %}clock{% endif %}" class="h-3 w-3 md:h-4 md:w-4"></i> 
+        {{ estado|capfirst }}
+    <span class="rounded-full px-1.5 text-xs font-semibold bg-blanco/60 group-hover:bg-blanco/85">
+        {{ cuenta|default:0 }}
+    </span>
+</a>

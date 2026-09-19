@@ -9,9 +9,11 @@ tailwind.config = {
                 azul: {
                     profundo: "#0F3A66",
                     primario: "#1B5FA8",
+                    DEFAULT: "#1B5FA8",
                     medio: "#5B9BD9",
                     claro: "#5EB0FF",
                     fondo: "#D4EAFF",
+                    contraste: "#B3D9FF",
                 },
                 celeste: {
                     claro: "#EAF4FC",
@@ -35,6 +37,7 @@ tailwind.config = {
                     DEFAULT: "#2F9E58",
                     suave: "#6CAF84",
                     fondo: "#DEFFEA",
+                    contraste: "#B7F9D0",
                     claro: "#EDFAF3",
                 },
                 amarillo: {
@@ -42,6 +45,7 @@ tailwind.config = {
                     DEFAULT: "#E3A72E",
                     suave: "#DEB155",
                     fondo: "#FFF2D8",
+                    contraste: "#FFE7B8",
                     claro: "#FEF7E8",
                 },
                 rojo: {
@@ -49,6 +53,7 @@ tailwind.config = {
                     DEFAULT: "#D9453D",
                     suave: "#DA6862",
                     fondo: "#FFDCDA",
+                    contraste: "#FFC7C7",
                     claro: "#FCEBEB",
                 }
             }

@@ -1,0 +1,58 @@
+<div class="relative flex-1 lg:w-55 lg:flex-none"
+        x-data="{
+        open: false,
+        selected: '{% if type == 'rango' %}{{ request.GET.rango|default:'Últimos 30 días' }}{% else %}{{ request.GET.orden|default:'Recientes primero' }}{% endif %}',
+        opciones: {% if type == 'rango' %}['Últimos 30 días', 'Últimos 7 días', 'Último mes', 'Última semana', 'Todo']
+            {% else %}['Recientes primero', 'Antiguos primero']
+            {% endif %}
+    }"
+    @click.outside="open = false"
+    @keydown.escape.window="open = false"
+>
+    <!-- Input oculto para que Django reciba el valor seleccionado -->
+    <input type="hidden" name="{{ type }}" :value="selected">
+
+    <!-- Botón disparador del selector -->
+    <button type="button"
+        @click="open = !open"
+        class="relative flex w-full items-center justify-between gap-3 rounded-xl border border-gris-iconos bg-blanco
+            py-2.5 pl-10 pr-3.5 text-xs md:text-sm text-negro-texto shadow-sm transition-colors
+            hover:border-azul-primario focus:border-azul-primario focus:outline-none focus:ring-1 focus:ring-azul-primario"
+    >
+        <!-- Icono de calendario -->
+        <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-gris-texto">
+            <i data-lucide="{% if type == 'rango' %}calendar{% else %}arrow-up-down{% endif %}" class="h-4 w-4"></i>
+        </span>
+
+        <!-- Opción seleccionada -->
+        <span x-text="selected" class="font-normal text-negro-texto"></span>
+
+        <!-- Chevron up/down -->
+        <i data-lucide="chevron-down"
+            class="h-4 w-4 text-gris-texto transition-transform duration-200 origin-center"
+            :class="open ? 'rotate-180' : ''">
+        </i>
+    </button>
+
+    <!-- Menú de opciones -->
+    <div x-show="open"
+        x-transition:enter="transition ease-out duration-100"
+        x-transition:enter-start="opacity-0 scale-95"
+        x-transition:enter-end="opacity-100 scale-100"
+        x-transition:leave="transition ease-in duration-75"
+        x-transition:leave-start="opacity-100 scale-100"
+        x-transition:leave-end="opacity-0 scale-95"
+        class="absolute right-0 z-30 mt-1.5 w-full min-w-[160px] rounded-xl border border-gris-claro bg-blanco py-1 shadow-lg"
+        style="display: none;"
+    >
+        <template x-for="opcion in opciones" :key="opcion">
+            <button type="button"
+                @click="selected = opcion; open = false;"
+                class="flex w-full items-center px-4 py-2 text-left text-xs md:text-sm transition-colors hover:bg-gris-ultraclaro"
+                :class="selected === opcion ? 'font-medium text-azul-profundo bg-azul-fondo/30' : 'text-negro-texto'"
+                x-text="opcion"
+            >
+            </button>
+        </template>
+    </div>
+</div>

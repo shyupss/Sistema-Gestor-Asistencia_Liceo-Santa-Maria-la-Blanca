@@ -1,0 +1,47 @@
+<div class="space-y-3 p-2 md:p-3 lg:px-4 lg:py-3">
+    <!-- Filtros superiores por estado -->
+    <div class="flex flex-wrap items-center justify-between gap-2">
+        <div class="flex flex-wrap gap-y-3 gap-x-1.5">
+            {% include 'justificaciones/components/pastilla-filtro.html' with estado='pendientes' cuenta=pendientes_count %}
+            {% include 'justificaciones/components/pastilla-filtro.html' with estado='aceptadas' cuenta=aceptadas_count %}
+            {% include 'justificaciones/components/pastilla-filtro.html' with estado='rechazadas' cuenta=rechazadas_count %}
+        </div>
+
+        <button 
+            type="button"
+            class="hidden shrink-0 items-center gap-1.5 rounded-lg bg-azul-primario px-3 py-1 text-sm font-medium text-blanco lg:inline-flex shadow-sm
+            transition duration-200 ease-out hover:scale-105 origin-center active:scale-95 hover:bg-azul-profundo"
+        >
+            <i data-lucide="plus" class="h-7 w-7"></i>
+            Añadir nuevo registro
+        </button>
+    </div>
+
+    <!-- Buscador, rango de fechas y órden -->
+    <div class="flex flex-col gap-3 lg:flex-row lg:items-center">
+        <div class="order-2 lg:order-1 lg:flex-1">
+            <div class="relative">
+                <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-gris-texto">
+                    <i data-lucide="search" class="h-5 w-5"></i>
+                </span>
+                <input type="search" name="q" value="{{ busqueda }}" placeholder="Buscar por estudiante, RUT o curso"
+                    class="w-full rounded-xl border border-gris-iconos py-2.5 pl-10 pr-3 text-sm text-negro-texto shadow-sm
+                    placeholder:text-gris-iconos focus:border-azul focus:outline-none focus:ring-1 focus:ring-azul"
+                >
+            </div>
+        </div>
+        <div class="order-1 flex gap-3 lg:order-2">
+            {% include 'justificaciones/components/input-vista.html' with type='rango' %}
+            {% include 'justificaciones/components/input-vista.html' with type='orden' %}
+        </div>
+    </div>
+
+    <!-- Botón agregar registro mobile -->
+    <button type="button"
+        class="lg:hidden flex w-full items-center justify-center gap-1.5 rounded-lg bg-azul px-4 py-2.5 text-sm
+        font-semibold text-blanco transition-colors hover:bg-azul-profundo"
+    >
+        <i data-lucide="plus" class="h-7 w-7"></i>
+        Añadir nuevo registro
+    </button>
+</div>
