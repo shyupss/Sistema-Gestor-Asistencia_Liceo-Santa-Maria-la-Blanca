@@ -31,8 +31,8 @@ def pagina_justificaciones(request):
         "justificaciones": justificaciones,
         "filtro_actual": filtro_actual,
         "busqueda": busqueda,
-        "pendientes_count": Justificaciones.objects.filter(estado_solicitud__nombre__iexact = 'pendientes').count(),
-        "aceptadas_count": Justificaciones.objects.filter(estado_solicitud__nombre__iexact = 'aceptadas').count(),
-        "rechazadas_count": Justificaciones.objects.filter(estado_solicitud__nombre__iexact = 'rechazadas').count(),
+        "pendientes_count": Justificaciones.objects.filter(estado_solicitud__nombre__iexact = 'pendiente').count(),
+        "aceptadas_count": Justificaciones.objects.filter(estado_solicitud__nombre__iexact = 'aceptada').count(),
+        "rechazadas_count": Justificaciones.objects.filter(estado_solicitud__nombre__iexact = 'rechazada').count(),
     }
     return render(request, "justificaciones/base.html", contexto)

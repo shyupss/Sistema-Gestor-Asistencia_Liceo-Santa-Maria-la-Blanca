@@ -1,0 +1,62 @@
+{% comment %}
+Requiere:
+    - estudiante.id (para el detalle)
+    - estudiante.nombre
+    - estudiante.curso (y el nivel)
+    - estudiante.rut
+    - estado
+    - resumen_breve
+    - archivo_nombre (únicamente del primero)
+    - archivo_url
+    - duracion (manejar desde python con fecha inicio/fecha final, formatear con babel para '13 de sept 2026') 
+{% endcomment %}
+
+<article class="flex flex-col rounded-lg bg-blanco-tarjeta shadow-md border border-gris-claro border-l-[6px]
+    {% if estado == 'pendiente' %}border-l-azul-claro
+    {% elif estado == 'aceptada' %}border-l-verde
+    {% elif estado == 'rechazada' %}border-l-rojo
+    {% else %}border-l-gris-iconos
+    {% endif %}"
+>
+    <!-- Header de la tarjeta -->
+    <div class="flex items-start justify-between gap-3 px-5 py-4 border-b border-gris-claro">
+        <div class="flex items-center gap-3">
+            <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-celeste-claro">
+                <i data-lucide="file-text" class="h-5 w-5 text-azul"></i>
+            </span>
+            <div>
+                <p class="font-semibold leading-tight text-negro-texto">{{ nombre }}</p>
+                <p class="text-sm text-gris-texto">{{ curso }}° Medio {{ nivel }} · {{ rut }}</p>
+            </div>
+        </div>
+        {% include 'justificaciones/components/pastilla-estado.html' with estado=estado %}
+    </div>
+
+    <!-- Información extra -->
+    <div class="px-5 py-3 space-y-1.5 text-sm text-negro-texto border-b border-gris-claro">
+        <div class="flex items-center justify-between gap-2">
+            <span class="flex items-center gap-1.5">
+                <i data-lucide="file-text" class="h-4 w-4"></i>
+                {{ resumen_breve|default:'-' }}
+            </span>
+            {% if archivo_nombre %}
+                <a href="{{ archivo_url|default:'#' }}" class="group flex items-center gap-1.5 hover:text-azul">
+                    <i data-lucide="link" class="h-4 w-4 group-hover:text-azul"></i>
+                    {{ archivo_nombre }}
+                </a>
+            {% endif %}
+        </div>
+        <p class="flex items-center gap-1.5 text-negro-texto">
+            <i data-lucide="calendar" class="h-4 w-4"></i>
+            {{ duracion|default:'-' }}
+        </p>
+    </div>
+
+    <!-- Botón  -->
+    <a href="{% if id %}{% url 'justificaciones:detalle' id %}{% else %}#{% endif %}"
+        class="py-4 flex items-center justify-center gap-1 text-sm font-medium text-azul transition-colors hover:bg-celeste-claro"
+    >
+        Ver detalle
+        <i data-lucide="arrow-right" class="h-3 w-3"></i>
+    </a>
+</article>
