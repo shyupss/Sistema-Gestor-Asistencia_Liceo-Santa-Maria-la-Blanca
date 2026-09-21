@@ -6,15 +6,7 @@
             {% include 'justificaciones/components/pastilla-filtro.html' with estado='aceptada' cuenta=aceptadas_count %}
             {% include 'justificaciones/components/pastilla-filtro.html' with estado='rechazada' cuenta=rechazadas_count %}
         </div>
-
-        <button 
-            type="button"
-            class="hidden shrink-0 items-center gap-1.5 rounded-lg bg-azul-primario px-3 py-1 text-sm font-medium text-blanco lg:inline-flex shadow-sm
-            transition duration-200 ease-out hover:scale-105 origin-center active:scale-95 hover:bg-azul-profundo"
-        >
-            <i data-lucide="plus" class="h-7 w-7"></i>
-            Añadir nuevo registro
-        </button>
+        {% include 'justificaciones/components/boton-agregar-nuevo.html' %}
     </div>
 
     <!-- Buscador, rango de fechas y órden -->
@@ -37,6 +29,7 @@
     </div>
 
     <!-- Botón agregar registro mobile -->
+    {% comment %}
     <button type="button"
         class="lg:hidden flex w-full items-center justify-center gap-1.5 rounded-lg bg-azul px-4 py-2.5 text-sm
         font-semibold text-blanco transition-colors hover:bg-azul-profundo"
@@ -44,4 +37,5 @@
         <i data-lucide="plus" class="h-7 w-7"></i>
         Añadir nuevo registro
     </button>
+    {% endcomment %}
 </div>
