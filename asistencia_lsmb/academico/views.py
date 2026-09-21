@@ -3,9 +3,10 @@ from datetime import timedelta
 from babel.dates import format_date
 from django.core.paginator import Paginator
 from django.db.models import F, Q
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
 
+from academico.models import Alumno, Matricula
 from academico.queries.academico_queries import (
     obtener_alumnos,
     obtener_cursos,
@@ -15,6 +16,8 @@ from academico.services.academico_service import (
     preparar_alumnos,
     preparar_cursos,
 )
+from alertas.models import Alerta, EstadoAlumno, HistorialEstadoAlumno
+from asistencia.models import Asistencia_Alumnos, Justificaciones
 
 
 def _datos_fecha(fecha):
@@ -172,3 +175,116 @@ def pagina_cursos(request):
         "cursos_sobre_meta": resumen["cursos_sobre_meta"],
     }
     return render(request, "academico/base.html", contexto)
+
+def perfil_alumno(request, alumno_id):
+    fecha_hoy = timezone.localdate()
+    tab = request.GET.get("tab", "informacion")
+    tabs_validas = {"informacion", "asistencia", "justificaciones", "alertas", "historial"}
+    if tab not in tabs_validas:
+        tab = "informacion"
+
+    alumno = get_object_or_404(Alumno, pk=alumno_id)
+    matricula = (
+        Matricula.objects.filter(alumno=alumno, periodo__anio=fecha_hoy.year)
+        .filter(Q(fecha_termino__isnull=True) | Q(fecha_termino__gt=fecha_hoy))
+        .select_related("curso", "periodo")
+        .first()
+    )
+    registros_asistencia = (
+        Asistencia_Alumnos.objects.filter(
+            alumno=alumno,
+            paso_lista__fecha__year=fecha_hoy.year,
+        )
+        .select_related("tipo_asistencia", "paso_lista", "justificacion")
+        .order_by("-paso_lista__fecha")
+    )
+    total_dias_clase = registros_asistencia.values("paso_lista_id").distinct().count()
+    total_ausencias = registros_asistencia.filter(
+        tipo_asistencia__cuenta_como_ausencia=True
+    ).count()
+    total_justificadas = registros_asistencia.filter(
+        tipo_asistencia__cuenta_como_ausencia=True,
+        justificacion__isnull=False,
+    ).count()
+    nombres_meses = ("Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic")
+    mes_inicial = 3
+    intervalos_grafico = len(nombres_meses) - 1
+    evolucion_mensual = []
+    puntos_grafico = []
+    for indice, nombre_mes in enumerate(nombres_meses):
+        registros_mes = registros_asistencia.filter(
+            paso_lista__fecha__month=mes_inicial + indice
+        )
+        dias_mes = registros_mes.values("paso_lista_id").distinct().count()
+        ausencias_mes = registros_mes.filter(
+            tipo_asistencia__cuenta_como_ausencia=True
+        ).count()
+        porcentaje_mes = (
+            round((dias_mes - ausencias_mes) * 100 / dias_mes)
+            if dias_mes
+            else None
+        )
+        punto = None
+        if porcentaje_mes is not None:
+            x = round(8 + indice * (84 / intervalos_grafico), 2)
+            y = round(90 - porcentaje_mes * 0.8, 2)
+            punto = f"{x},{y}"
+            puntos_grafico.append(punto)
+        evolucion_mensual.append({
+            "nombre": nombre_mes,
+            "porcentaje": porcentaje_mes,
+            "x": round(8 + indice * (84 / intervalos_grafico), 2),
+            "y": round(90 - (porcentaje_mes or 0) * 0.8, 2),
+        })
+    justificaciones = Justificaciones.objects.filter(alumno=alumno).select_related(
+        "estado_solicitud", "funcionario_resuelve"
+    ).order_by("-fecha_inicio")
+    alertas = Alerta.objects.filter(alumno=alumno).select_related(
+        "estado", "funcionario", "periodo"
+    ).order_by("-fecha")
+    estado_actual = (
+        EstadoAlumno.objects.filter(alumno=alumno, periodo__anio=fecha_hoy.year)
+        .select_related("estado", "periodo")
+        .first()
+    )
+    historial_estados = HistorialEstadoAlumno.objects.filter(alumno=alumno).select_related(
+        "estado_anterior", "estado_nuevo", "periodo"
+    ).order_by("-fecha_cambio")
+
+    contexto = {
+        "page_title": f"Perfil de {alumno.nombre}",
+        "alumno": alumno,
+        "matricula": matricula,
+        "estado_actual": estado_actual,
+        "registros_asistencia": registros_asistencia,
+        "justificaciones": justificaciones,
+        "alertas": alertas,
+        "historial_estados": historial_estados,
+        "tab": tab,
+        "tab_items": [
+            ("informacion", "Información"),
+            ("asistencia", "Asistencia"),
+            ("justificaciones", "Justificaciones"),
+            ("alertas", "Alertas"),
+            ("historial", "Historial"),
+        ],
+        "total_dias_clase": total_dias_clase,
+        "total_presentes": total_dias_clase - total_ausencias,
+        "total_ausencias": total_ausencias,
+        "total_justificadas": total_justificadas,
+        "total_sin_justificar": max(total_ausencias - total_justificadas, 0),
+        "evolucion_mensual": evolucion_mensual,
+        "puntos_grafico": " ".join(puntos_grafico),
+        "porcentaje_justificaciones": (
+            round(total_justificadas * 100 / total_ausencias)
+            if total_ausencias
+            else 0
+        ),
+        "porcentaje_asistencia": (
+            round((total_dias_clase - total_ausencias) * 100 / total_dias_clase)
+            if total_dias_clase
+            else None
+        ),
+        "fecha_hoy": fecha_hoy,
+    }
+    return render(request, "academico/perfil_alumno.html", contexto)

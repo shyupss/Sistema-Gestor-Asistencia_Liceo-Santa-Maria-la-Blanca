@@ -24,6 +24,7 @@ urlpatterns = [
     path('', inicio_views.pagina_principal, name='home'), # <-- El '' (string vacío) es lo que oculta el cohete
     # path('segunda/', inicio_views.pagina_segunda, name='nothome'),
     path('alumnos/', academico_views.pagina_alumnos, name = 'alumnos'),
+    path('alumnos/<int:alumno_id>/', academico_views.perfil_alumno, name='perfil_alumno'),
     path('cursos/', academico_views.pagina_cursos, name= 'cursos'),
     path("asistencia/", include("asistencia.urls")),
     path('reportes/', include("reportes.urls")),

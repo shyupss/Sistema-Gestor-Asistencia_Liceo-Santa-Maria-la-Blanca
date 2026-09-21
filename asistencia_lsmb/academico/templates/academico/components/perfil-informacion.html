@@ -1,0 +1,49 @@
+<div class="grid gap-8 md:grid-cols-2">
+    <div>
+        <h2 class="mb-4 text-lg font-bold text-azul-profundo">Datos personales</h2>
+        <dl class="divide-y divide-gris-claro border-y border-gris-claro text-sm">
+            <div class="flex justify-between gap-4 py-3">
+                <dt class="text-gris-texto">Nombre completo</dt>
+                <dd class="text-right font-semibold text-negro-texto">{{ alumno.nombre }}</dd>
+            </div>
+            <div class="flex justify-between gap-4 py-3">
+                <dt class="text-gris-texto">RUT</dt>
+                <dd class="font-semibold text-negro-texto">{{ alumno.rut }}</dd>
+            </div>
+            <div class="flex justify-between gap-4 py-3">
+                <dt class="text-gris-texto">Correo</dt>
+                <dd class="text-right font-semibold text-negro-texto">{{ alumno.email|default:'No registrado' }}</dd>
+            </div>
+            <div class="flex justify-between gap-4 py-3">
+                <dt class="text-gris-texto">Teléfono</dt>
+                <dd class="font-semibold text-negro-texto">{{ alumno.telefono|default:'No registrado' }}</dd>
+            </div>
+        </dl>
+    </div>
+    <div>
+        <h2 class="mb-4 text-lg font-bold text-azul-profundo">Matrícula y apoderados</h2>
+        <dl class="divide-y divide-gris-claro border-y border-gris-claro text-sm">
+            <div class="flex justify-between gap-4 py-3">
+                <dt class="text-gris-texto">Curso</dt>
+                <dd class="font-semibold text-negro-texto">
+                    {{ matricula.curso.nivel_romano }}° Medio {{ matricula.curso.grupo }}</dd>
+            </div>
+            <div class="flex justify-between gap-4 py-3">
+                <dt class="text-gris-texto">Período</dt>
+                <dd class="font-semibold text-negro-texto">{{ matricula.periodo.anio|default:'-' }}</dd>
+            </div>{% for apoderado in alumno.apoderados.all %}
+            <div class="flex justify-between gap-4 py-3">
+                <dt class="text-gris-texto">Apoderado</dt>
+                <dd class="mt-1 font-semibold text-negro-texto">{{ apoderado.nombre }}</dd>
+            </div>
+            <div class="flex justify-between gap-4 py-3">
+                <dt class="text-gris-texto">Correo</dt>
+                <dd class="mt-1 font-semibold text-negro-texto">{{ apoderado.email | default:'Sin correo' }}</dd>
+            </div>
+            <div class="flex justify-between gap-4 py-3">
+                <dt class="text-gris-texto">Teléfono</dt>
+                <dd class="mt-1 font-semibold text-negro-texto">{{ apoderado.telefono | default:'Sin teléfono' }}</dd>
+            </div>
+    </div>{% empty %}<div class="py-3 text-gris-texto">No hay apoderados registrados.</div>{% endfor %}
+    </dl>
+</div>

@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block title %}Perfil de {{ alumno.nombre }}{% endblock %}
+
+{% block content %}
+<section class="mx-auto max-w-6xl px-4 py-5 sm:px-6 sm:py-8">
+    <a href="{% url 'alumnos' %}"
+        class="mb-5 inline-flex items-center gap-2 text-sm font-semibold text-azul-profundo hover:underline">
+        <i data-lucide="arrow-left" class="h-4 w-4"></i>
+        Volver a estudiantes
+    </a>
+    <div class="overflow-hidden rounded-xl border border-gris-claro bg-blanco-tarjeta shadow-sm">
+        {% include 'academico/components/perfil-encabezado.html' %}
+        {% include 'academico/components/perfil-metricas.html' %}
+        {% include 'academico/components/perfil-justificaciones-resumen.html' %}
+        {% include 'academico/components/perfil-pestanas.html' %}
+        <div class="p-5 sm:p-8">
+            {% if tab == 'informacion' %}
+            {% include 'academico/components/perfil-informacion.html' %}
+            {% elif tab == 'asistencia' %}
+            {% include 'academico/components/perfil-asistencia.html' %}
+            {% elif tab == 'justificaciones' %}
+            {% include 'academico/components/perfil-justificaciones.html' %}
+            {% elif tab == 'alertas' %}
+            {% include 'academico/components/perfil-alertas.html' %}
+            {% else %}
+            {% include 'academico/components/perfil-historial.html' %}
+            {% endif %}
+        </div>
+    </div>
+</section>
+<script>
+    document.querySelectorAll('[data-progress]').forEach(function (bar) {
+        bar.style.width = `${bar.dataset.progress}%`;
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,18 @@
+<h2 class="mb-4 text-lg font-bold text-azul-profundo">Historial de estados</h2>
+<div class="space-y-3">
+    {% for cambio in historial_estados %}
+    <article class="rounded-lg border border-gris-claro p-4 text-sm">
+        <div class="flex flex-wrap justify-between gap-2">
+            <span class="font-semibold text-negro-texto">
+                {{ cambio.fecha_cambio|date:'d/m/Y H:i' }}
+            </span>
+            <span class="text-gris-texto">
+                Período {{ cambio.periodo.anio }}
+            </span>
+        </div>
+        <p class="mt-2 text-gris-texto">{{ cambio.estado_anterior.nombre|default:'Sin estado' }} 
+            <span class="px-2">→</span> <strong class="text-negro-texto">{{ cambio.estado_nuevo.nombre }}</strong></p>
+    </article>
+    {% empty %}<p class="text-sm text-gris-texto">No hay cambios de estado registrados.</p>
+    {% endfor %}
+</div>
