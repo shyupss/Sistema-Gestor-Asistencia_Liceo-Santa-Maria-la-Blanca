@@ -11,7 +11,8 @@
             </span>
         </div>
         <p class="mt-2 text-gris-texto">{{ cambio.estado_anterior.nombre|default:'Sin estado' }} 
-            <span class="px-2">→</span> <strong class="text-negro-texto">{{ cambio.estado_nuevo.nombre }}</strong></p>
+            <span class="px-2">→</span> 
+            <strong class="text-negro-texto">{{ cambio.estado_nuevo.nombre }}</strong></p>
     </article>
     {% empty %}<p class="text-sm text-gris-texto">No hay cambios de estado registrados.</p>
     {% endfor %}

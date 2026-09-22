@@ -1,24 +1,34 @@
 <header class="border-b border-gris-claro bg-azul-fondo px-5 py-6 sm:px-8">
     <div class="grid grid-cols-[minmax(0,1fr)_5rem] items-center gap-4 sm:grid-cols-[minmax(0,1fr)_6rem]">
         <div class="flex min-w-0 items-center gap-3 sm:gap-4">
-            <div class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-white text-azul-profundo">
+            <div
+                class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-white text-azul-profundo">
                 <i data-lucide="user-round" class="h-8 w-8"></i>
             </div>
             <div class="min-w-0">
-                <p class="text-xs font-semibold uppercase tracking-wide text-azul-profundo">Perfil de estudiante</p>
-                <h1 class="mt-1 truncate text-base font-bold text-negro-texto sm:text-xl">{{ alumno.nombre }}</h1>
+                <p class="text-xs font-semibold uppercase tracking-wide text-azul-profundo">
+                    Perfil de estudiante
+                </p>
+                <h1 class="mt-1 truncate text-base font-bold text-negro-texto sm:text-xl">
+                    {{ alumno.nombre }}
+                </h1>
                 <p class="mt-1 text-xs text-gris-texto">
                     {% if matricula %}
-                        {{ matricula.curso.nivel_romano }}° Medio {{ matricula.curso.grupo }} · {{ alumno.rut }}
+                    {{ matricula.curso.nivel_romano }}° Medio {{ matricula.curso.grupo }} · {{ alumno.rut }}
                     {% else %}
-                        Sin curso asignado · {{ alumno.rut }}
+                    Sin curso asignado · {{ alumno.rut }}
                     {% endif %}
                 </p>
             </div>
         </div>
         <div class="flex min-w-0 flex-col items-end justify-center text-right leading-none">
-            <span class="inline-flex max-w-full truncate rounded-full px-3 py-1 text-xs font-bold {% if estado_actual.estado.genera_alerta %}bg-rojo-fondo text-rojo-oscuro{% else %}bg-verde-fondo text-verde-oscuro{% endif %}">{{ estado_actual.estado.nombre|default:'Sin estado' }}</span>
-            <p class="mt-2 text-2xl font-extrabold text-negro-texto">{% if porcentaje_asistencia is not None %}{{ porcentaje_asistencia }}%{% else %}-{% endif %}</p>
+            <span
+                class="inline-flex max-w-full truncate rounded-full px-3 py-1 text-xs font-bold {% if estado_actual.estado.genera_alerta %}bg-rojo-fondo text-rojo-oscuro{% else %}bg-verde-fondo text-verde-oscuro{% endif %}">
+                {{ estado_actual.estado.nombre|default:'Sin estado' }}
+            </span>
+            <p class="mt-2 text-2xl font-extrabold text-negro-texto">
+                {% if porcentaje_asistencia is not None %}{{ porcentaje_asistencia }}%{% else %}-{% endif %}
+            </p>
             <p class="mt-1 text-xs text-gris-texto">Asistencia</p>
         </div>
     </div>

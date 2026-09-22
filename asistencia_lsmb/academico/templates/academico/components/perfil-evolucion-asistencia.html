@@ -1,10 +1,16 @@
 <section class="mb-8 rounded-lg border border-gris-claro bg-blanco-tarjeta p-4 sm:p-6">
     <div class="mb-5 flex items-center justify-between gap-3">
         <div>
-            <h2 class="text-base font-bold text-azul-profundo sm:text-lg">Evolución de la asistencia</h2>
-            <p class="mt-1 text-xs text-gris-texto">Porcentaje mensual del período {{ fecha_hoy.year }}</p>
+            <h2 class="text-base font-bold text-azul-profundo sm:text-lg">
+                Evolución de la asistencia
+            </h2>
+            <p class="mt-1 text-xs text-gris-texto">
+                Porcentaje mensual del período {{ fecha_hoy.year }}
+            </p>
         </div>
-        <span class="rounded-full bg-azul-fondo px-3 py-1 text-xs font-semibold text-azul-profundo">{{ fecha_hoy.year }}</span>
+        <span class="rounded-full bg-azul-fondo px-3 py-1 text-xs font-semibold text-azul-profundo">
+            {{ fecha_hoy.year }}
+        </span>
     </div>
 
     <div class="relative h-64 w-full">
@@ -26,13 +32,22 @@
                     <line x1="0" y1="50" x2="100" y2="50" stroke="#E5E7EB" stroke-dasharray="1 2" />
                     <line x1="0" y1="70" x2="100" y2="70" stroke="#E5E7EB" stroke-dasharray="1 2" />
                     <line x1="0" y1="90" x2="100" y2="90" stroke="#E5E7EB" stroke-dasharray="1 2" />
-                    {% if puntos_grafico %}<polyline points="{{ puntos_grafico }}" fill="none" stroke="#1B5FA8" stroke-width="1.2" vector-effect="non-scaling-stroke" />{% endif %}
+                    {% if puntos_grafico %}
+                    <polyline points="{{ puntos_grafico }}" fill="none" stroke="#1B5FA8" stroke-width="1.2" vector-effect="non-scaling-stroke" />
+                    {% endif %}
                     {% for mes in evolucion_mensual %}
-                        {% if mes.porcentaje is not None %}<line x1="{{ mes.x }}" y1="{{ mes.y }}" x2="{{ mes.x }}" y2="{{ mes.y }}" stroke="#1B5FA8" stroke-width="4" stroke-linecap="round" vector-effect="non-scaling-stroke"><title>{{ mes.nombre }}: {{ mes.porcentaje }}%</title></line>{% endif %}
+                        {% if mes.porcentaje is not None %}
+                        <line x1="{{ mes.x }}" y1="{{ mes.y }}" x2="{{ mes.x }}" y2="{{ mes.y }}" stroke="#1B5FA8" stroke-width="4" stroke-linecap="round" vector-effect="non-scaling-stroke">
+                            <title>{{ mes.nombre }}: {{ mes.porcentaje }}%</title>
+                        </line>{% endif %}
                     {% endfor %}
                 </svg>
                 <div class="absolute left-8 right-0 bottom-0 flex h-10 items-start justify-between text-[9px] text-gris-texto sm:h-6 sm:text-xs">
-                    {% for mes in evolucion_mensual %}<span class="flex-1 origin-top -rotate-45 text-center sm:rotate-0">{{ mes.nombre }}</span>{% endfor %}
+                    {% for mes in evolucion_mensual %}
+                    <span class="flex-1 origin-top -rotate-45 text-center sm:rotate-0">
+                        {{ mes.nombre }}
+                    </span>
+                    {% endfor %}
                 </div>
             </div>
         </div>

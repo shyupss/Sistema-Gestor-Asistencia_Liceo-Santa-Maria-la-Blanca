@@ -1,1 +1,15 @@
-<h2 class="mb-4 text-lg font-bold text-azul-profundo">Alertas</h2><div class="space-y-3">{% for alerta in alertas %}<article class="rounded-lg border border-gris-claro p-4"><div class="flex items-center justify-between gap-2"><p class="font-semibold text-negro-texto">{{ alerta.estado.nombre }}</p><span class="text-xs text-gris-texto">{{ alerta.fecha|date:'d/m/Y H:i' }}</span></div><p class="mt-1 text-sm text-gris-texto">{% if alerta.revisada %}Revisada{% else %}Pendiente de revisión{% endif %} · {{ alerta.funcionario.nombre }}</p></article>{% empty %}<p class="text-sm text-gris-texto">No hay alertas registradas.</p>{% endfor %}</div>
+<h2 class="mb-4 text-lg font-bold text-azul-profundo">Alertas</h2>
+<div class="space-y-3">
+    {% for alerta in alertas %}
+    <article class="rounded-lg border border-gris-claro p-4">
+        <div class="flex items-center justify-between gap-2">
+            <p class="font-semibold text-negro-texto">{{ alerta.estado.nombre }}</p>
+            <span class="text-xs text-gris-texto">{{ alerta.fecha|date:'d/m/Y H:i' }}</span>
+        </div>
+        <p class="mt-1 text-sm text-gris-texto">
+            {% if alerta.revisada %}Revisada{% else %}Pendiente de revisión{% endif %} · {{ alerta.funcionario.nombre }}</p>
+    </article>
+    {% empty %}
+    <p class="text-sm text-gris-texto">No hay alertas registradas.</p>
+    {% endfor %}
+</div>

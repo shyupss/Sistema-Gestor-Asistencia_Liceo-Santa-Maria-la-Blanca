@@ -1,1 +1,9 @@
-<nav class="overflow-x-auto border-b border-gris-claro px-3 sm:px-6" aria-label="Secciones del perfil"><div class="flex min-w-max gap-4 sm:gap-5">{% for nombre, etiqueta in tab_items %}<a href="?tab={{ nombre }}" class="border-b-2 px-1 py-4 text-xs font-semibold sm:text-sm {% if tab == nombre %}border-azul-profundo text-azul-profundo{% else %}border-transparent text-gris-texto hover:text-azul-profundo{% endif %}">{{ etiqueta }}</a>{% endfor %}</div></nav>
+<nav class="overflow-x-auto border-b border-gris-claro px-3 sm:px-6" aria-label="Secciones del perfil">
+    <div class="flex min-w-max gap-4 sm:gap-5">
+        {% for nombre, etiqueta in tab_items %}
+        <a href="?tab={{ nombre }}"
+            class="border-b-2 px-1 py-4 text-xs font-semibold sm:text-sm {% if tab == nombre %}border-azul-profundo text-azul-profundo{% else %}border-transparent text-gris-texto hover:text-azul-profundo{% endif %}">
+            {{ etiqueta }}</a>
+        {% endfor %}
+    </div>
+</nav>

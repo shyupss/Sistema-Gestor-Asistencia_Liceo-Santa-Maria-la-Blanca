@@ -42,8 +42,12 @@
             </div>
             <div class="flex justify-between gap-4 py-3">
                 <dt class="text-gris-texto">Teléfono</dt>
-                <dd class="mt-1 font-semibold text-negro-texto">{{ apoderado.telefono | default:'Sin teléfono' }}</dd>
+                <dd class="mt-1 font-semibold text-negro-texto">
+                    {{ apoderado.telefono | default:'Sin teléfono' }}
+                </dd>
             </div>
-    </div>{% empty %}<div class="py-3 text-gris-texto">No hay apoderados registrados.</div>{% endfor %}
+    </div>{% empty %}
+    <div class="py-3 text-gris-texto">No hay apoderados registrados.</div>
+    {% endfor %}
     </dl>
 </div>
