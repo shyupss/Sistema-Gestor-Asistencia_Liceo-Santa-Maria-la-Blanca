@@ -1,0 +1,315 @@
+{% extends 'base.html' %}
+
+{% block title %}{{page_title}}{% endblock %}
+
+{% block content %}
+
+{% comment %}
+!!!!!!  ELIMINAR COMENTARIO HABIENDO PROGRAMADO BACKEND :)  !!!!!!
+
+No he conectado backend para este formulario, lo único que he hecho es añadir dos argumentos al
+enlace para que el formulario sepa:
+    - Si se entró para crear una justificación o un retiro
+    - Que sepa la URL de la página padre (desde donde se viene), teniendo en consideración
+    que se llamará al formulario desde el perfil de estudiante. En este caso, se le debe pasar
+    el volver_url y volver_label en el caso de incluir child_page_title.html (ver asistencia/views/justificaciones_formulario.py)
+
+Por ahora, llamo esta página únicamente en asistencia\templates\justificaciones\components\boton-agregar-nuevo.html,
+de la siguiente manera:
+    href="{% url 'justificaciones_formulario' %}?tipo=justificacion&next={{ request.path|urlencode }}"
+
+Posiblemente se quiera llamar esta página en un futuro con el id del alumno ya pasado, en el caso 
+de llamar desde el perfil de estudiante. Desde mi vago conocimiento, para lograr eso, se debería añadir
+el siguiente substring (o algo del estilo) al final de la url:
+    "...&id={{ alumno.id }}"
+
+y en el view reclamarlo con "request.GET.get('id')"
+
+Dejé otro comentario con un TODO para el autocompletado del input de estudiante.
+
+Además, dejé variables no usadas como rut, apoderado, curso, que son variables que pertenecen al estudiante :)
+{% endcomment %}
+
+<!-- Contenedor principal del contenido -->
+<section class="mx-auto md:max-w-[90%] px-4 py-5 sm:px-6 sm:py-8">
+
+    <!-- Encabezado -->
+    {% include 'components/global/child_page_title.html' with parent_page_title=volver_label url=volver_url %}
+
+    <!-- Contenido -->
+    <div class="rounded-lg bg-blanco-tarjeta p-4 border border-gris-claro shadow-sm md:p-8"
+        x-data="{
+            tipo: '{{ tipo }}',
+            archivos: [],
+            actualizarArchivos(event) {
+                this.archivos = Array.from(event.target.files);
+                this.$nextTick(() => lucide.createIcons());
+            },
+            quitarArchivo(index) {
+                this.archivos.splice(index, 1);
+                const dt = new DataTransfer();
+                this.archivos.forEach(f => dt.items.add(f));
+                this.$refs.inputArchivos.files = dt.files;
+                this.$nextTick(() => lucide.createIcons());
+            },
+            tipoArchivo(nombre) {
+                const ext = nombre.split('.').pop().toLowerCase();
+                const mapa = {
+                    jpg: { icono: 'file-image', bg: 'bg-celeste-claro', color: 'text-azul-medio' },
+                    jpeg: { icono: 'file-image', bg: 'bg-celeste-claro', color: 'text-azul-medio' },
+                    jpe: { icono: 'file-image', bg: 'bg-celeste-claro', color: 'text-azul-medio' },
+                    png: { icono: 'file-image', bg: 'bg-celeste-claro', color: 'text-azul-medio' },
+                    gif: { icono: 'file-image', bg: 'bg-celeste-claro', color: 'text-azul-medio' },
+                    webp: { icono: 'file-image', bg: 'bg-celeste-claro', color: 'text-azul-medio' },
+                    svg: { icono: 'file-image', bg: 'bg-celeste-claro', color: 'text-azul-medio' },
+                    pdf: { icono: 'file-text', bg: 'bg-rojo-fondo', color: 'text-rojo-oscuro' },
+                    doc: { icono: 'file-text', bg: 'bg-azul-fondo', color: 'text-azul-primario' },
+                    docx: { icono: 'file-text', bg: 'bg-azul-fondo', color: 'text-azul-primario' },
+                    xls: { icono: 'file-spreadsheet', bg: 'bg-verde-fondo',color: 'text-verde-oscuro' },
+                    xlsx: { icono: 'file-spreadsheet', bg: 'bg-verde-fondo',color: 'text-verde-oscuro' },
+                    csv: { icono: 'file-spreadsheet', bg: 'bg-verde-fondo',color: 'text-verde-oscuro' },
+                    ppt: { icono: 'presentation', bg: 'bg-amarillo-fondo', color: 'text-amarillo-oscuro' },
+                    pptx: { icono: 'presentation', bg: 'bg-amarillo-fondo', color: 'text-amarillo-oscuro' },
+                };
+                return mapa[ext] || { icono: 'file', bg: 'bg-gris-ultraclaro', color: 'text-gris-texto' };
+            },
+            formatearTamano(bytes) {
+                if (bytes < 1024) return bytes + ' B';
+                if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(0) + ' KB';
+                return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+            },
+            arrastrando: false,
+            contadorArrastre: 0,
+            soltarArchivos(event) {
+                this.arrastrando = false;
+                this.contadorArrastre = 0;
+                const nuevos = Array.from(event.dataTransfer.files);
+                if (nuevos.length === 0) return;
+                this.archivos = [...this.archivos, ...nuevos];
+                const dt = new DataTransfer();
+                this.archivos.forEach(f => dt.items.add(f));
+                this.$refs.inputArchivos.files = dt.files;
+                this.$nextTick(() => lucide.createIcons());
+            },
+        }"
+        @dragenter.window="contadorArrastre++; arrastrando = true"
+        @dragleave.window="contadorArrastre--; if (contadorArrastre === 0) arrastrando = false"
+        @dragover.window.prevent
+        @drop.window.prevent="soltarArchivos($event)"
+    >
+        <!-- Overlay subir archivos -->
+        <div x-show="arrastrando" x-cloak
+            class="pointer-events-none fixed inset-0 z-50 flex flex-col items-center justify-center gap-3
+            bg-azul/10 backdrop-blur-sm border-4 border-dashed border-azul rounded-xl"
+        >
+            <i data-lucide="upload-cloud" class="h-12 w-12 text-azul"></i>
+            <p class="text-lg font-semibold text-azul">Suelta los archivos aquí</p>
+        </div>
+
+        <h1 class="mb-5 text-lg font-bold text-azul md:text-xl">{{ page_title }}</h1>
+
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %} 
+
+            <input type="hidden" name="tipo" x-model="tipo">
+            <input type="hidden" name="next" value="{{ volver_url }}">
+            
+            <div class="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:divide-x lg:divide-gris-claro">
+                <!-- Columna izquierda desktop -->
+                <div class="space-y-5 lg:pr-8">
+                    <!-- Estudiante -->
+                    <div>
+                        <label for="id_estudiante" class="mb-1.5 block text-sm font-medium text-negro-texto">Estudiante</label>
+                        <div class="relative">
+                            <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-gris-texto">
+                                <i data-lucide="user" class="h-4 w-4"></i>
+                            </span>
+                            {% comment %}
+                                !!! BORRAR CUANDO ESTÉ LISTO :)
+                                TODO: Falta el autocompletado para el input de estudiantes, lo dejo pendiente por ahora,
+                                pero tengo ideas de cómo hacerlo amigable para mobile :)
+                            {% endcomment %}
+                            <input type="text" name="busqueda_estudiante" id="id_estudiante" autocomplete="false"
+                                placeholder="Buscar estudiante por nombre, RUT o curso"
+                                class="w-full rounded-lg border border-gris-iconos py-2.5 pl-9 pr-3 text-sm text-negro-texto
+                                placeholder:text-gris-iconos focus:border-azul focus:outline-none focus:ring-1 focus:ring-azul"
+                            >
+                        </div>
+                    </div>
+
+                    <!-- Información del estudiante -->
+                    <div class="mt-2 flex flex-wrap items-center justify-evenly divide-x divide-azul-contraste rounded-xl bg-azul-fondo py-3 text-sm">
+                        {% if estudiante %}
+                            <div class="flex flex-col items-center justify-center px-8">
+                                <span class="flex items-center gap-1.5 text-azul">
+                                    <i data-lucide="book-open" class="h-4 w-4"></i>
+                                    <h2 class="font-bold">Curso</h2>
+                                </span>
+                                <p class="text-negro-texto font-medium">{{ curso|default:'IV° Medio B' }}</p>
+                            </div>
+                            <div class="flex flex-col items-center justify-center px-8">
+                                <span class="flex items-center gap-1.5 text-azul">
+                                    <i data-lucide="file-text" class="h-4 w-4"></i>
+                                    <h2 class="font-bold">RUT</h2>
+                                </span>
+                                <p class="text-negro-texto font-medium">{{ rut|default:'12.345.678-9' }}</p>
+                            </div>
+                            <div class="flex flex-col items-center justify-center px-8">
+                                <span class="flex items-center gap-1.5 text-azul">
+                                    <i data-lucide="user-shield" class="h-4 w-4"></i>
+                                    <h2 class="font-bold">Apoderado</h2>
+                                </span>
+                                <p class="text-negro-texto font-medium">{{ apoderado|default:'Pepito Montecinos' }}</p>
+                            </div>
+                        {% else %}
+                            <div class="flex flex-row gap-2 items-center justify-center text-azul font-semibold">
+                                <i data-lucide="user-search" class="h-5 w-5"></i>
+                                <h2 class="text-azul font-semibold">Primero, selecciona un estudiante</h2>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Botón justificación/retiro -->
+                    <div>
+                        <label class="mb-1.5 block text-sm font-medium text-negro-texto">Tipo de registro</label>
+
+                        <div class="inline-flex w-full rounded-full border border-gris-iconos">
+                            <button type="button" @click="tipo = 'justificacion'"
+                                class="flex flex-1 items-center justify-center gap-1.5 rounded-tl-full rounded-bl-full py-3 text-sm font-semibold transition-colors"
+                                :class="tipo === 'justificacion' ? 'bg-azul text-blanco' : 'bg-blanco-tarjeta text-gris-texto'"
+                            >
+                                <i data-lucide="square-pen" class="h-4 w-4"></i>
+                                Justificación
+                            </button>
+                            <button type="button" @click="tipo = 'retiro'"
+                                class="flex flex-1 items-center justify-center gap-1.5 rounded-tr-full rounded-br-full py-3 text-sm font-semibold transition-colors"
+                                :class="tipo === 'retiro' ? 'bg-azul text-blanco' : 'bg-blanco-tarjeta text-gris-texto'"
+                            >
+                                <i data-lucide="user-round-check" class="h-4 w-4"></i>
+                                Retiro
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Periodo a justificar -->
+                    <div>
+                        <label class="mb-1.5 block text-sm font-medium text-negro-texto">Periodo a justificar</label>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <!-- Desde -->
+                            <div class="relative">
+                                <label for="fecha_inicio" class="mb-1 flex flex-row items-center gap-1 text-xs font-medium text-gris-texto">
+                                    <i data-lucide="calendar-days" class="pointer-events-none h-3 w-3 text-gris-texto"></i>
+                                    Desde
+                                </label>
+                                <input type="date" name="fecha_inicio" required
+                                    class="w-full rounded-lg border border-gris-texto py-2.5 px-3 text-sm text-negro-texto
+                                    focus:border-azul-primario focus:outline-none focus:ring-1 focus:ring-azul"
+                                >
+                            </div>
+
+                            <!-- Hasta -->
+                            <div class="relative">
+                                <label for="fecha_fin" class="mb-1 flex flex-row items-center gap-1 text-xs font-medium text-gris-texto">
+                                    <i data-lucide="calendar-days" class="pointer-events-none h-3 w-3 text-gris-texto"></i>
+                                    Hasta
+                                </label>
+                                <input type="date" name="fecha_fin" required
+                                    class="w-full rounded-lg border border-gris-texto py-2.5 px-3 text-sm text-negro-texto
+                                    focus:border-azul-primario focus:outline-none focus:ring-1 focus:ring-azul"
+                                >
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Columna derecha desktop -->
+                <div class="space-y-5 lg:pl-8">
+                    <!-- Resumen breve -->
+                    <div>
+                        <label for="id_resumen" class="mb-1.5 block text-sm font-medium text-negro-texto">Resumen breve</label>
+                        <input type="text" id="id_resumen" name="resumen" maxlength="120" required
+                            placeholder="Ej. Cita al médico"
+                            class="w-full rounded-lg border border-gris-iconos py-2.5 px-3 text-sm text-negro-texto
+                            placeholder:text-gris-iconos focus:border-azul focus:outline-none focus:ring-1 focus:ring-azul"
+                        >
+                    </div>
+
+                    <!-- Detalle -->
+                    <div>
+                        <label for="id_detalle" class="mb-1.5 block text-sm font-medium text-negro-texto">Detalle</label>
+                        <textarea name="detalle" id="id_detalle" rows="10"
+                            placeholder="Ej. El estudiante justificó una ausencia de tres días por citas consecutivas al doctor en el horario matutino..."
+                            class="w-full resize-none rounded-lg border border-gris-iconos py-2.5 px-3 text-sm text-negro-texto
+                            placeholder:text-gris-iconos focus:border-azul focus:outline-none focus:ring-1 focus:ring-azul"
+                        ></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <hr class="my-5 border-gris-claro hidden lg:block">
+
+            <!-- Área de documentos -->
+            <div class="my-6">
+                <label for="id_adjuntos"
+                    class="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg
+                    border-2 border-dashed border-gris-iconos py-8 text-center hover:border-azul-medio"
+                >
+                    <i data-lucide="upload" class="h-6 w-6 text-gris-texto"></i>
+                    <span class="text-sm text-gris-texto">Subir documentos adjuntos al caso</span>
+                </label>
+                <input type="file" id="id_adjuntos" name="adjuntos" multiple 
+                    class="hidden"
+                    x-ref="inputArchivos"
+                    @change="actualizarArchivos($event)"
+                >
+
+                <!-- Vista previa archivos -->
+                <ul class="mt-3 space-y-2" x-show="archivos.length > 0" x-cloak>
+                    <template x-for="(archivo, index) in archivos" :key="archivo.name + '-' + index">
+                        <li class="flex items-center gap-3 rounded-lg border border-gris-claro px-3 py-2"
+                            x-effect="$nextTick(() => lucide.createIcons())"
+                        >
+                            <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-md"
+                                :class="tipoArchivo(archivo.name).bg"
+                            >
+                                <i :data-lucide="tipoArchivo(archivo.name).icono"
+                                    class="h-4 w-4"
+                                    :class="tipoArchivo(archivo.name).color"
+                                ></i>
+                            </span>
+                            <div class="min-w-0 flex-1">
+                                <p class="truncate text-sm font-medium text-negro-texto"
+                                    x-text="archivo.name"
+                                ></p>
+                                <p class="text-xs text-gris-texto"
+                                    x-text="formatearTamano(archivo.size)"
+                                ></p>
+                            </div>
+                            <button type="button" @click="quitarArchivo(index)"
+                                class="shrink-0 rounded-full p-1 text-gris-iconos transition-colors
+                                hover:bg-rojo-fondo hover:text-rojo-oscuro"
+                            >
+                                <i data-lucide="x" class="h-4 w-4"></i>
+                            </button>
+                        </li>
+                    </template>
+                </ul>
+            </div>
+
+            <hr class="my-6 border-gris-claro">
+
+            <div class="flex justify-end">
+                <button type="submit"
+                    class="flex items-center gap-1.5 rounded-lg bg-azul px-5 py-2.5 text-sm font-semibold
+                    text-blanco transition-colors hover:bg-azul-profundo"
+                >
+                    <i data-lucide="save" class="h-4 w-4"></i>
+                    Guardar
+                </button>
+            </div>
+        </form>
+    </div> 
+</section>
+
+{% endblock %}

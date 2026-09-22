@@ -42,13 +42,13 @@
         bg-blanco-tarjeta shadow-lg lg:block"
         x-cloak
     >
-        <a href="#" class="flex items-center gap-3 px-4 py-3 text-sm text-negro-texto transition-colors hover:bg-celeste-claro">
+        <a href="{% url 'justificaciones_formulario' %}?tipo=justificacion&next={{ request.path|urlencode }}" class="flex items-center gap-3 px-4 py-3 text-sm text-negro-texto transition-colors hover:bg-celeste-claro">
             <span class="flex items-center justify-center bg-azul-fondo p-3 rounded-full">
                 <i data-lucide="square-pen" class="h-4 w-4 text-azul-profundo"></i>
             </span>
             Nueva justificación
         </a>
-        <a href="#" class="flex items-center gap-3 px-4 py-3 text-sm text-negro-texto transition-colors hover:bg-celeste-claro">
+        <a href="{% url 'justificaciones_formulario' %}?tipo=retiro&next={{ request.path|urlencode }}" class="flex items-center gap-3 px-4 py-3 text-sm text-negro-texto transition-colors hover:bg-celeste-claro">
             <span class="flex items-center justify-center bg-azul-fondo p-3 rounded-full">
                 <i data-lucide="file-text" class="h-4 w-4 text-azul-profundo"></i>
             </span>
@@ -68,7 +68,7 @@
             @click="open = false"
             x-cloak
         >
-            <a href="#" class="flex w-full items-center gap-3 rounded-lg border border-gris-claro bg-blanco px-4 py-3 text-sm font-medium text-negro-texto shadow-md">
+            <a href="{% url 'justificaciones_formulario' %}?tipo=justificacion&next={{ request.path|urlencode }}" class="flex w-full items-center gap-3 rounded-lg border border-gris-claro bg-blanco px-4 py-3 text-sm font-medium text-negro-texto shadow-md">
                 <span class="flex items-center justify-center bg-azul-fondo p-3 rounded-full">
                     <i data-lucide="square-pen" class="h-4 w-4 text-azul-profundo"></i>
                 </span>
@@ -85,7 +85,7 @@
             @click="open = false"
             x-cloak
         >
-            <a href="#" class="flex w-full items-center gap-3 rounded-lg border border-gris-claro bg-blanco px-4 py-3 text-sm font-medium text-negro-texto shadow-md">
+            <a href="{% url 'justificaciones_formulario' %}?tipo=retiro&next={{ request.path|urlencode }}" class="flex w-full items-center gap-3 rounded-lg border border-gris-claro bg-blanco px-4 py-3 text-sm font-medium text-negro-texto shadow-md">
                 <span class="flex items-center justify-center bg-azul-fondo p-3 rounded-full">
                     <i data-lucide="file-text" class="h-4 w-4 text-azul-profundo"></i>
                 </span>

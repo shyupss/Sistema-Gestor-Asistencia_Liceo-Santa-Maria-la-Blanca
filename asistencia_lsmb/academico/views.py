@@ -5,6 +5,7 @@ from django.core.paginator import Paginator
 from django.db.models import F, Q
 from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
+from django.urls import reverse
 
 from academico.models import Alumno, Matricula
 from academico.queries.academico_queries import (
@@ -251,6 +252,9 @@ def perfil_alumno(request, alumno_id):
         "estado_anterior", "estado_nuevo", "periodo"
     ).order_by("-fecha_cambio")
 
+    volver_url = request.GET.get('next') or reverse('alumnos')
+    volver_label = volver_url.strip("/").split("/")[-1].lower() or "inicio"
+
     contexto = {
         "page_title": f"Perfil de {alumno.nombre}",
         "alumno": alumno,
@@ -286,5 +290,7 @@ def perfil_alumno(request, alumno_id):
             else None
         ),
         "fecha_hoy": fecha_hoy,
+        "volver_url": volver_url,
+        "volver_label": volver_label,
     }
     return render(request, "academico/perfil_alumno.html", contexto)
