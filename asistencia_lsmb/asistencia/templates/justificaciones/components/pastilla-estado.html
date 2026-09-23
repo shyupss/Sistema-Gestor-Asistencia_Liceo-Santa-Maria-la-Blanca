@@ -7,7 +7,7 @@ Requiere:
     {% if estado == 'pendiente' %}bg-azul-fondo text-azul-profundo
     {% elif estado == 'aceptada' %}bg-verde-fondo text-verde-oscuro
     {% elif estado == 'rechazada' %}bg-rojo-fondo text-rojo-oscuro
-    {% else %}bg-gris-iconos text-gris-texto
+    {% else %}bg-gris-claro text-gris-texto
     {% endif %}"
 >
     <i data-lucide="{% if estado == 'pendiente' %}clock
@@ -17,5 +17,5 @@ Requiere:
         {% endif %}"
         class="h-3 w-3"
     ></i>
-    {{ estado|capfirst }}
+    {{ estado|capfirst|default:"Sin estado" }}
 </span>

@@ -52,8 +52,8 @@ Requiere:
         </p>
     </div>
 
-    <!-- Botón  -->
-    <a href="{% if id %}{% url 'justificaciones:detalle' id %}{% else %}#{% endif %}"
+    <!-- Botón ver detalle -->
+    <a href="{% url 'justificaciones_ficha' %}?id={{ id }}"
         class="py-4 flex items-center justify-center gap-1 text-sm font-medium text-azul transition-colors hover:bg-celeste-claro"
     >
         Ver detalle

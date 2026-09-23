@@ -40,44 +40,6 @@ Además, dejé variables no usadas como rut, apoderado, curso, que son variables
     <div class="rounded-lg bg-blanco-tarjeta p-4 border border-gris-claro shadow-sm md:p-8"
         x-data="{
             tipo: '{{ tipo }}',
-            archivos: [],
-            actualizarArchivos(event) {
-                this.archivos = Array.from(event.target.files);
-                this.$nextTick(() => lucide.createIcons());
-            },
-            quitarArchivo(index) {
-                this.archivos.splice(index, 1);
-                const dt = new DataTransfer();
-                this.archivos.forEach(f => dt.items.add(f));
-                this.$refs.inputArchivos.files = dt.files;
-                this.$nextTick(() => lucide.createIcons());
-            },
-            tipoArchivo(nombre) {
-                const ext = nombre.split('.').pop().toLowerCase();
-                const mapa = {
-                    jpg: { icono: 'file-image', bg: 'bg-celeste-claro', color: 'text-azul-medio' },
-                    jpeg: { icono: 'file-image', bg: 'bg-celeste-claro', color: 'text-azul-medio' },
-                    jpe: { icono: 'file-image', bg: 'bg-celeste-claro', color: 'text-azul-medio' },
-                    png: { icono: 'file-image', bg: 'bg-celeste-claro', color: 'text-azul-medio' },
-                    gif: { icono: 'file-image', bg: 'bg-celeste-claro', color: 'text-azul-medio' },
-                    webp: { icono: 'file-image', bg: 'bg-celeste-claro', color: 'text-azul-medio' },
-                    svg: { icono: 'file-image', bg: 'bg-celeste-claro', color: 'text-azul-medio' },
-                    pdf: { icono: 'file-text', bg: 'bg-rojo-fondo', color: 'text-rojo-oscuro' },
-                    doc: { icono: 'file-text', bg: 'bg-azul-fondo', color: 'text-azul-primario' },
-                    docx: { icono: 'file-text', bg: 'bg-azul-fondo', color: 'text-azul-primario' },
-                    xls: { icono: 'file-spreadsheet', bg: 'bg-verde-fondo',color: 'text-verde-oscuro' },
-                    xlsx: { icono: 'file-spreadsheet', bg: 'bg-verde-fondo',color: 'text-verde-oscuro' },
-                    csv: { icono: 'file-spreadsheet', bg: 'bg-verde-fondo',color: 'text-verde-oscuro' },
-                    ppt: { icono: 'presentation', bg: 'bg-amarillo-fondo', color: 'text-amarillo-oscuro' },
-                    pptx: { icono: 'presentation', bg: 'bg-amarillo-fondo', color: 'text-amarillo-oscuro' },
-                };
-                return mapa[ext] || { icono: 'file', bg: 'bg-gris-ultraclaro', color: 'text-gris-texto' };
-            },
-            formatearTamano(bytes) {
-                if (bytes < 1024) return bytes + ' B';
-                if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(0) + ' KB';
-                return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
-            },
             arrastrando: false,
             contadorArrastre: 0,
             soltarArchivos(event) {
@@ -106,8 +68,19 @@ Además, dejé variables no usadas como rut, apoderado, curso, que son variables
             <p class="text-lg font-semibold text-azul">Suelta los archivos aquí</p>
         </div>
 
-        <h1 class="mb-5 text-lg font-bold text-azul md:text-xl">{{ page_title }}</h1>
-
+        <div class="flex justify-between">
+            <h1 class="mb-5 text-lg font-bold text-azul md:text-xl">{{ page_title }}</h1>
+            <p class="text-xs text-gris-texto md:hidden">
+                <span class="text-rojo ml-0.5" aria-hidden="true" title="Campo obligatorio">*</span>
+                Campo obligatorio
+            </p>
+            <p class="text-xs text-gris-texto hidden md:block">
+                Los campos marcados con 
+                <span class="text-rojo font-semibold" aria-hidden="true" title="Campo obligatorio">*</span>
+                son obligatorios
+            </p>
+        </div>
+        
         <form method="post" enctype="multipart/form-data">
             {% csrf_token %} 
 
@@ -119,7 +92,10 @@ Además, dejé variables no usadas como rut, apoderado, curso, que son variables
                 <div class="space-y-5 lg:pr-8">
                     <!-- Estudiante -->
                     <div>
-                        <label for="id_estudiante" class="mb-1.5 block text-sm font-medium text-negro-texto">Estudiante</label>
+                        <label for="id_estudiante" class="mb-1.5 block text-sm font-medium text-negro-texto">
+                            Estudiante
+                            <span class="text-rojo ml-0.5" aria-hidden="true" title="Campo obligatorio">*</span>
+                        </label>
                         <div class="relative">
                             <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-gris-texto">
                                 <i data-lucide="user" class="h-4 w-4"></i>
@@ -129,7 +105,7 @@ Además, dejé variables no usadas como rut, apoderado, curso, que son variables
                                 TODO: Falta el autocompletado para el input de estudiantes, lo dejo pendiente por ahora,
                                 pero tengo ideas de cómo hacerlo amigable para mobile :)
                             {% endcomment %}
-                            <input type="text" name="busqueda_estudiante" id="id_estudiante" autocomplete="false"
+                            <input type="text" name="busqueda_estudiante" id="id_estudiante" autocomplete="false" required
                                 placeholder="Buscar estudiante por nombre, RUT o curso"
                                 class="w-full rounded-lg border border-gris-iconos py-2.5 pl-9 pr-3 text-sm text-negro-texto
                                 placeholder:text-gris-iconos focus:border-azul focus:outline-none focus:ring-1 focus:ring-azul"
@@ -201,6 +177,7 @@ Además, dejé variables no usadas como rut, apoderado, curso, que son variables
                                 <label for="fecha_inicio" class="mb-1 flex flex-row items-center gap-1 text-xs font-medium text-gris-texto">
                                     <i data-lucide="calendar-days" class="pointer-events-none h-3 w-3 text-gris-texto"></i>
                                     Desde
+                                    <span class="text-rojo ml-0.5" aria-hidden="true" title="Campo obligatorio">*</span>
                                 </label>
                                 <input type="date" name="fecha_inicio" required
                                     class="w-full rounded-lg border border-gris-texto py-2.5 px-3 text-sm text-negro-texto
@@ -213,6 +190,7 @@ Además, dejé variables no usadas como rut, apoderado, curso, que son variables
                                 <label for="fecha_fin" class="mb-1 flex flex-row items-center gap-1 text-xs font-medium text-gris-texto">
                                     <i data-lucide="calendar-days" class="pointer-events-none h-3 w-3 text-gris-texto"></i>
                                     Hasta
+                                    <span class="text-rojo ml-0.5" aria-hidden="true" title="Campo obligatorio">*</span>
                                 </label>
                                 <input type="date" name="fecha_fin" required
                                     class="w-full rounded-lg border border-gris-texto py-2.5 px-3 text-sm text-negro-texto
@@ -227,7 +205,10 @@ Además, dejé variables no usadas como rut, apoderado, curso, que son variables
                 <div class="space-y-5 lg:pl-8">
                     <!-- Resumen breve -->
                     <div>
-                        <label for="id_resumen" class="mb-1.5 block text-sm font-medium text-negro-texto">Resumen breve</label>
+                        <label for="id_resumen" class="mb-1.5 block text-sm font-medium text-negro-texto">
+                            Resumen breve
+                            <span class="text-rojo ml-0.5" aria-hidden="true" title="Campo obligatorio">*</span>
+                        </label>
                         <input type="text" id="id_resumen" name="resumen" maxlength="120" required
                             placeholder="Ej. Cita al médico"
                             class="w-full rounded-lg border border-gris-iconos py-2.5 px-3 text-sm text-negro-texto
@@ -237,7 +218,10 @@ Además, dejé variables no usadas como rut, apoderado, curso, que son variables
 
                     <!-- Detalle -->
                     <div>
-                        <label for="id_detalle" class="mb-1.5 block text-sm font-medium text-negro-texto">Detalle</label>
+                        <label for="id_detalle" class="mb-1.5 block text-sm font-medium text-negro-texto">
+                            Detalle
+                            <span class="text-xs font-normal text-gris-texto">(opcional)</span>
+                        </label>
                         <textarea name="detalle" id="id_detalle" rows="10"
                             placeholder="Ej. El estudiante justificó una ausencia de tres días por citas consecutivas al doctor en el horario matutino..."
                             class="w-full resize-none rounded-lg border border-gris-iconos py-2.5 px-3 text-sm text-negro-texto
@@ -250,7 +234,9 @@ Además, dejé variables no usadas como rut, apoderado, curso, que son variables
             <hr class="my-5 border-gris-claro hidden lg:block">
 
             <!-- Área de documentos -->
-            <div class="my-6">
+            <div class="my-6"
+                x-data="gestorArchivos()"
+            >
                 <label for="id_adjuntos"
                     class="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg
                     border-2 border-dashed border-gris-iconos py-8 text-center hover:border-azul-medio"
@@ -299,6 +285,7 @@ Además, dejé variables no usadas como rut, apoderado, curso, que son variables
 
             <hr class="my-6 border-gris-claro">
 
+            <!-- Botón guardar -->
             <div class="flex justify-end">
                 <button type="submit"
                     class="flex items-center gap-1.5 rounded-lg bg-azul px-5 py-2.5 text-sm font-semibold

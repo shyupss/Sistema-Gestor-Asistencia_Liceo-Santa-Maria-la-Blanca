@@ -11,15 +11,15 @@
                     {% include 'justificaciones/components/tarjeta.html' %}
                 {% endfor %}
                 {% endcomment %}
-
+                
                 {% include 'justificaciones/components/tarjeta.html' with estado='pendiente' nombre='Eduardo Montecinos Gática' curso='IV' nivel='B' rut='12.345.678-9' resumen_breve='Cita al médico' archivo_nombre='certificado_medico.pdf' duracion='1 día (18 de sept 2026)' %}
                 {% include 'justificaciones/components/tarjeta.html' with estado='aceptada' nombre='Eduardo Montecinos Gática' curso='IV' nivel='B' rut='12.345.678-9' resumen_breve='Cita al médico' duracion='5 días (14 a 18 de sept 2026)' %}
                 {% include 'justificaciones/components/tarjeta.html' with estado='rechazada' nombre='Eduardo Montecinos Gática' curso='IV' nivel='B' rut='12.345.678-9' archivo_nombre='certificado_medico.pdf' duracion='2 días (17 a 18 de sept 2026)' %}
             </div>
         {% else %}
-            <div class="flex flex-col items-center gap-2 py-16 text-center">
-                <i data-lucide="pencil-line" class="h-8 w-8 text-gris-texto"></i>
-                <p class="font-medium text-gris-texto">No hay justificaciones que mostrar</p>
+            <div class="flex flex-col items-center gap-2 py-16 text-center text-gris-iconos">
+                <i data-lucide="pencil-line" class="h-8 w-8"></i>
+                <p class="font-medium">No hay justificaciones que mostrar</p>
             </div>
         {% endif %}
     </div>

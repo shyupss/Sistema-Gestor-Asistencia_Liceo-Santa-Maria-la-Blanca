@@ -1,0 +1,250 @@
+{% extends 'base.html' %}
+
+{% block title %}{{page_title}}{% endblock %}
+
+{% block content %}
+
+{% comment %}
+!!!!!!  ELIMINAR COMENTARIO HABIENDO PROGRAMADO BACKEND :)  !!!!!!
+COMENTARIOS DEL HUMILDE UI/UX:
+
+Por supuesto, toda la info está hardcodeada en la vista:
+
+    'nombre': 'Eduardo Montecinos Gática',
+    'rut': '12.345.678-9',
+    'curso': 'IV° Medio B',
+    'estado': 'pendiente',
+    'tipo': 'justificacion',
+    'pendiente': True,
+    'periodo': '12 al 14 de sept 2026 · 3 días',
+    'registro': '11 de sept 2026 · 12:31 hrs',
+    'resumen': 'Cita al médico',
+    'detalle': 'El estudiante justificó una ausencia de tres días por citas consecutivas al doctor en el horario matutino. Apoderado enfatiza la urgencia de las consultas e indica que requiere ser en la fecha dada a causa de un viaje de trabajo que tiene programado.',
+    'documentos': [
+        { 'nombre': 'certificado_medico.gif', 'url': 'https://static.wikia.nocookie.net/silly-cat/images/2/26/Tole_tole.gif/revision/latest?cb=20240521052830' },
+    ],
+    'bitacora': [
+        { 'tipo': 'creacion', 'autor': 'Ana Torres Rivera', 'fecha': datetime(2026, 9, 11, 12, 31, 0) },
+        { 'tipo': 'revision', 'autor': 'José Cristobal Silva', 'fecha': datetime(2026, 9, 11, 16, 24, 0) },
+        { 'tipo': 'actual', 'estado': 'Esperando resolución' },
+    ],
+
+Importante comentar sobre la bitácora, puesto que es algo que hemos mencionado pero no hemos definido.
+Probablemente sea algo que se valide su necesidad en la reunión, pero por ahora lo definí rápidamente como
+una lista de eventos con tipo, autor y fecha + el estado actual. Esta forma es provisional hasta que se implemente
+de manera más robusta en el backend.
+
+{% endcomment %}
+
+<!-- Contenedor principal del contenido -->
+<section class="mx-auto md:max-w-[90%] px-4 py-5 sm:px-6 sm:py-8">
+
+    <!-- Encabezado -->
+    {% include 'components/global/child_page_title.html' with parent_page_title=volver_label url=volver_url %}
+
+    <!-- Contenido -->
+    <div class="rounded-tl-lg rounded-tr-lg bg-blanco-tarjeta p-2 border border-gris-claro shadow-sm md:p-3">
+        
+        <!-- Tarjeta perfil -->
+        <div class="flex justify-between items-center py-2 md:py-3 px-2 md:px-3">
+            <div class="flex flex-row items-center justify-start gap-5">
+                <span class="p-3 bg-azul-fondo text-azul-profundo flex justify-center items-center rounded-full">
+                    <i data-lucide="user" class="h-7 w-7"></i>
+                </span>
+                <div class="flex flex-col justify-center items-start text-sm text-gris-texto">
+                    <h1 class="text-lg text-negro-texto font-bold">
+                        {{ nombre|default:"Nombre de alumno" }}
+                    </h1>
+                    {{ curso|default:"Sin curso asignado" }} · {{ rut|default:"RUT no existente" }}
+                </div>
+            </div>
+
+            <div class="flex flex-col md:flex-row justify-end items-center gap-3">
+                {% include 'justificaciones/components/pastilla-estado.html' with estado=estado %}
+
+                {% if tipo == 'justificacion' %}
+                    {% include 'justificaciones/components/pastilla-informacion.html' with label='Justificación' background_color='bg-azul-fondo' font_color='text-azul-profundo' %}
+                {% elif tipo == 'retiro' %}
+                    {% include 'justificaciones/components/pastilla-informacion.html' with label='Retiro' background_color='bg-amarillo-claro' font_color='text-amarillo-oscuro' %}
+                {% else %}
+                    {% include 'justificaciones/components/pastilla-informacion.html' %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="rounded-bl-lg rounded-br-lg bg-blanco-tarjeta border border-t-0 border-gris-claro shadow-sm px-2 md:px-3">
+        <div class="grid grid-cols-1 gap-8 p-6 lg:grid-cols-2 lg:divide-x lg:divide-gris-claro">
+
+            <!-- Columna izquierda -->
+            <div class="space-y-5 lg:pr-8">
+                <div class="flex items-center justify-between">
+
+                    <!-- Periodo a justificar -->
+                    <div>
+                        <p class="flex items-center gap-1.5 text-sm lg:text-base font-semibold text-azul">
+                            <i data-lucide="calendar" class="h-4 w-4"></i>
+                            Periodo a justificar
+                        </p>
+                        <p class="text-xs lg:text-sm text-negro-texto">
+                            {{ periodo|default:'-' }}
+                        </p>
+                    </div>
+
+                    <!-- Fecha de registro -->
+                    <div>
+                        <p class="flex items-center justify-end gap-1.5 text-sm lg:text-base font-semibold text-azul">
+                            <i data-lucide="calendar" class="h-4 w-4"></i>
+                            Fecha de registro
+                        </p>
+                        <p class="text-xs lg:text-sm text-negro-texto">
+                            {{ registro|default:'-' }}
+                        </p>
+                    </div>
+                </div>
+
+                <hr class="my-6 border-gris-claro">
+
+                <!-- Breve resumen -->
+                <div>
+                    <p class="flex items-center gap-1.5 text-sm lg:text-base font-semibold text-azul">
+                        <i data-lucide="file-text" class="h-4 w-4"></i>
+                        Breve resumen
+                    </p>
+                    <p class="text-xs lg:text-sm text-negro-texto">
+                        {{ resumen|default:'-' }}
+                    </p>
+                </div>
+
+                <!-- Detalle -->
+                <div>
+                    <p class="text-sm lg:text-base font-semibold text-azul mb-1">Detalle</p>
+                    <div class="rounded-lg border border-gris-iconos bg-blanco p-3 text-xs lg:text-sm
+                        min-h-[4.5rem] lg:min-h-[5.25rem]
+                        {% if detalle %}text-negro-texto{% else %}text-gris-texto{% endif %}"
+                    >
+                        {{ detalle|default:'Sin detalle adjunto'|linebreaksbr }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Columna derecha -->
+            <div class="space-y-5 lg:pl-8">
+                <!-- Documentos -->
+                <div>
+                    <p class="flex items-center gap-1.5 text-sm lg:text-base font-semibold text-azul mb-1">
+                        <i data-lucide="paperclip" class="h-4 w-4"></i>
+                        Documentos adjuntos
+                    </p>
+
+                    <ul class="space-y-2">
+                        {% for documento in documentos %}
+                            <li class="flex items-center gap-3 rounded-lg border border-gris-claro px-3 py-2"
+                                x-data="{ info: tipoArchivo('{{ documento.nombre|escapejs }}') }"
+                                x-effect="$nextTick(() => lucide.createIcons())"
+                            >
+                                <!-- Icono archivo -->
+                                <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md"
+                                    :class="info.bg"
+                                >
+                                    <i :data-lucide="info.icono" class="h-4 w-4" :class="info.color"></i>
+                                </span>
+
+                                <!-- Nombre archivo -->
+                                <span class="min-w-0 flex-1 truncate text-sm text-negro-texto">
+                                    {{ documento.nombre }}
+                                </span>
+
+                                <!-- Descarga -->
+                                <a href="{{ documento.url }}"
+                                    download="{{ documento.nombre }}"
+                                    @click.prevent="descargarArchivo('{{ documento.url|escapejs }}', '{{ documento.nombre|escapejs }}')"
+                                    class="shrink-0 rounded-full p-1.5 text-gris-texto transition-colors hover:bg-celeste-claro hover:text-azul"
+                                    title="Descargar {{ documento.nombre }}"
+                                >
+                                    <i data-lucide="download" class="h-4 w-4"></i>
+                                </a>
+                            </li>
+                        {% empty %}
+                            <li class="w-full border border-gris-claro rounded-lg py-4 gap-1.5 flex items-center justify-center text-sm text-gris-texto">
+                                <i data-lucide="link" class="h-4 w-4"></i>
+                                Sin documentos adjuntos
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                <hr class="my-6 border-gris-claro">
+
+                <!-- Bitácora -->
+                <div>
+                    <p class="flex items-center gap-1.5 text-sm lg:text-base font-semibold text-azul">
+                        <i data-lucide="notebook-pen" class="h-4 w-4"></i>
+                        Bitácora
+                    </p>
+
+                    <div class="flex flex-col gap-1 mt-1">
+                        {% for evento in bitacora %}
+                            {% if evento.tipo == 'creacion' %}
+                                <div class="flex justify-start items-center gap-1.5 text-xs lg:text-sm text-negro-texto">
+                                    <span class="h-2 w-2 shrink-0 rounded-full bg-azul"></span>
+                                    <p>
+                                        {% if tipo == 'justificacion' %}Justificación{% else %}Retiro{% endif %} creado por 
+                                        <span class="text-azul">{{ evento.autor }}</span>
+                                        · {{ evento.fecha|date:"d/m/Y, H:i" }}
+                                    </p>
+                                </div>
+                            {% elif evento.tipo == 'revision' %}
+                                <div class="flex justify-start items-center gap-1.5 text-xs lg:text-sm text-negro-texto">
+                                    <span class="h-2 w-2 shrink-0 rounded-full bg-azul"></span>
+                                    <p>
+                                        {% if tipo == 'justificacion' %}Justificación revisada{% else %}Retiro revisado{% endif %} por 
+                                        <span class="text-azul">{{ evento.autor }}</span>
+                                        · {{ evento.fecha|date:"d/m/Y, H:i" }}
+                                    </p>
+                                </div>
+                            {% elif evento.tipo == 'actual' %}
+                                <div class="flex justify-start items-center gap-1.5 text-xs lg:text-sm text-gris-texto">
+                                    <span class="h-2 w-2 shrink-0 rounded-full bg-gris-texto"></span>
+                                    {{ evento.estado }}
+                                </div>
+                            {% endif %}
+                        {% empty %}
+                            <div class="flex justify-start items-center gap-1.5 text-xs lg:text-sm text-gris-texto">
+                                <span class="h-2 w-2 shrink-0 rounded-full bg-gris-texto"></span>
+                                No hay eventos registrados
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Botones resolución -->
+                {% if pendiente %}
+                    <hr class="my-6 border-gris-claro">
+
+                    <div class="flex w-full gap-3">
+                        <button type="button"
+                            class="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-rojo px-5 py-2.5 text-sm font-medium
+                            text-blanco transition-colors hover:bg-rojo-oscuro"
+                        >
+                            <i data-lucide="x-circle" class="h-4 w-4"></i>
+                            Rechazar
+                        </button>
+
+                        <button type="button"
+                            class="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-verde px-5 py-2.5 text-sm font-medium
+                            text-blanco transition-colors hover:bg-verde-oscuro"
+                        >
+                            <i data-lucide="circle-check" class="h-4 w-4"></i>
+                            Aceptar
+                        </button>
+                    </div>
+                {% endif %}
+                
+            </div>
+        </div>
+    </div>
+    
+</section>
+
+{% endblock %}
