@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Pagina Primera{% endblock %}
+{% block title %}Inicio{% endblock %}
 
 {% block content %}
     <div class="bg-white p-8 rounded-lg shadow-md text-center">
@@ -11,9 +11,11 @@
 
     <div class="flex flex-col items-center justify-center gap-1 mt-5">
         <h1>Work in progress...</h1>
-        <div class="flex flex-row items-center justify-center gap-5 mt-1">
+        <div class="flex flex-col items-center justify-center gap-5 mt-1">
             <a href="{% url 'alumnos' %}" class="bg-azul-fondo text-negro-texto border rounded-full p-4 pt-2 pb-2 hover:border-azul-primario hover:text-gris-texto transition-colors">Ir a estudiantes</a>
             <a href="{% url 'cursos' %}" class="bg-azul-fondo text-negro-texto border rounded-full p-4 pt-2 pb-2 hover:border-azul-primario hover:text-gris-texto transition-colors">Ir a cursos</a>
+            <a href="{% url 'asistencia' %}" class="bg-azul-fondo text-negro-texto border rounded-full p-4 pt-2 pb-2 hover:border-azul-primario hover:text-gris-texto transition-colors">Ir a asistencia</a>
+            <a href="{% url 'justificaciones' %}" class="bg-azul-fondo text-negro-texto border rounded-full p-4 pt-2 pb-2 hover:border-azul-primario hover:text-gris-texto transition-colors">Ir a justificaciones</a>
         </div>
     </div>
 {% endblock %}
