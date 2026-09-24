@@ -1,20 +1,9 @@
-{% comment %}
-Requiere:
-    - estudiante.id (para el detalle)
-    - estudiante.nombre
-    - estudiante.curso (y el nivel)
-    - estudiante.rut
-    - estado
-    - resumen_breve
-    - archivo_nombre (únicamente del primero)
-    - archivo_url
-    - duracion (manejar desde python con fecha inicio/fecha final, formatear con babel para '13 de sept 2026') 
-{% endcomment %}
+{% comment %}Recibe una tarjeta con justificacion, curso y archivo.{% endcomment %}
 
 <article class="flex flex-col rounded-lg bg-blanco-tarjeta shadow-md border border-gris-claro border-l-[6px]
-    {% if estado == 'pendiente' %}border-l-azul-claro
-    {% elif estado == 'aceptada' %}border-l-verde
-    {% elif estado == 'rechazada' %}border-l-rojo
+    {% if tarjeta.justificacion.estado_solicitud.nombre == 'pendiente' %}border-l-azul-claro
+    {% elif tarjeta.justificacion.estado_solicitud.nombre == 'aceptada' %}border-l-verde
+    {% elif tarjeta.justificacion.estado_solicitud.nombre == 'rechazada' %}border-l-rojo
     {% else %}border-l-gris-iconos
     {% endif %}"
 >
@@ -25,11 +14,14 @@ Requiere:
                 <i data-lucide="file-text" class="h-5 w-5 text-azul"></i>
             </span>
             <div>
-                <p class="font-semibold leading-tight text-negro-texto">{{ nombre }}</p>
-                <p class="text-sm text-gris-texto">{{ curso }}° Medio {{ nivel }} · {{ rut }}</p>
+                <p class="font-semibold leading-tight text-negro-texto">{{ tarjeta.justificacion.alumno.nombre }}</p>
+                    <p class="text-sm text-gris-texto">
+                        {% if tarjeta.curso %}{{ tarjeta.curso.nivel_romano }}° Medio {{ tarjeta.curso.grupo }}{% else %}Sin curso asignado{% endif %}
+                        · {{ tarjeta.justificacion.alumno.rut }}
+                    </p>
             </div>
         </div>
-        {% include 'justificaciones/components/pastilla-estado.html' with estado=estado %}
+        {% include 'justificaciones/components/pastilla-estado.html' with estado=tarjeta.justificacion.estado_solicitud.nombre %}
     </div>
 
     <!-- Información extra -->
@@ -37,23 +29,23 @@ Requiere:
         <div class="flex items-center justify-between gap-2">
             <span class="flex items-center gap-1.5">
                 <i data-lucide="file-text" class="h-4 w-4"></i>
-                {{ resumen_breve|default:'-' }}
+                {{ tarjeta.justificacion.resumen|default:'-' }}
             </span>
-            {% if archivo_nombre %}
-                <a href="{{ archivo_url|default:'#' }}" class="group flex items-center gap-1.5 hover:text-azul">
+            {% if tarjeta.archivo %}
+                <a href="{{ tarjeta.archivo.archivo.url }}" class="group flex items-center gap-1.5 hover:text-azul">
                     <i data-lucide="link" class="h-4 w-4 group-hover:text-azul"></i>
-                    {{ archivo_nombre }}
+                    {{ tarjeta.archivo.nombre_original }}
                 </a>
             {% endif %}
         </div>
         <p class="flex items-center gap-1.5 text-negro-texto">
             <i data-lucide="calendar" class="h-4 w-4"></i>
-            {{ duracion|default:'-' }}
+            {{ tarjeta.justificacion.duracion|default:'-' }}
         </p>
     </div>
 
     <!-- Botón ver detalle -->
-    <a href="{% url 'justificaciones_ficha' %}?id={{ id }}"
+    <a href="{% url 'justificaciones_ficha' %}?id={{ tarjeta.justificacion.id }}"
         class="py-4 flex items-center justify-center gap-1 text-sm font-medium text-azul transition-colors hover:bg-celeste-claro"
     >
         Ver detalle

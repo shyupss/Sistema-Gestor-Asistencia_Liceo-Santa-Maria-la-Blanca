@@ -2,7 +2,7 @@ from datetime import timedelta
 
 from babel.dates import format_date
 from django.core.paginator import Paginator
-from django.db.models import F, Q
+from django.db.models import Exists, F, OuterRef, Q
 from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
 from django.urls import reverse
@@ -203,10 +203,15 @@ def perfil_alumno(request, alumno_id):
     total_ausencias = registros_asistencia.filter(
         tipo_asistencia__cuenta_como_ausencia=True
     ).count()
+    solicitudes_aceptadas = Justificaciones.objects.filter(
+        alumno_id=OuterRef("alumno_id"),
+        estado_solicitud__nombre__iexact="aceptada",
+        fecha_inicio__lte=OuterRef("paso_lista__fecha"),
+        fecha_fin__gte=OuterRef("paso_lista__fecha"),
+    )
     total_justificadas = registros_asistencia.filter(
         tipo_asistencia__cuenta_como_ausencia=True,
-        justificacion__isnull=False,
-    ).count()
+    ).filter(Exists(solicitudes_aceptadas)).count()
     nombres_meses = ("Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic")
     mes_inicial = 3
     intervalos_grafico = len(nombres_meses) - 1
@@ -239,7 +244,11 @@ def perfil_alumno(request, alumno_id):
         })
     justificaciones = Justificaciones.objects.filter(alumno=alumno).select_related(
         "estado_solicitud", "funcionario_resuelve"
-    ).order_by("-fecha_inicio")
+    ).order_by("-fecha_registro", "-id")
+    total_solicitudes = justificaciones.count()
+    solicitudes_pendientes = justificaciones.filter(
+        estado_solicitud__nombre__iexact="pendiente"
+    ).count()
     alertas = Alerta.objects.filter(alumno=alumno).select_related(
         "estado", "funcionario", "periodo"
     ).order_by("-fecha")
@@ -262,6 +271,8 @@ def perfil_alumno(request, alumno_id):
         "estado_actual": estado_actual,
         "registros_asistencia": registros_asistencia,
         "justificaciones": justificaciones,
+        "total_solicitudes": total_solicitudes,
+        "solicitudes_pendientes": solicitudes_pendientes,
         "alertas": alertas,
         "historial_estados": historial_estados,
         "tab": tab,

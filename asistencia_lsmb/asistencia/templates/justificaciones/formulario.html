@@ -4,32 +4,6 @@
 
 {% block content %}
 
-{% comment %}
-!!!!!!  ELIMINAR COMENTARIO HABIENDO PROGRAMADO BACKEND :)  !!!!!!
-
-No he conectado backend para este formulario, lo único que he hecho es añadir dos argumentos al
-enlace para que el formulario sepa:
-    - Si se entró para crear una justificación o un retiro
-    - Que sepa la URL de la página padre (desde donde se viene), teniendo en consideración
-    que se llamará al formulario desde el perfil de estudiante. En este caso, se le debe pasar
-    el volver_url y volver_label en el caso de incluir child_page_title.html (ver asistencia/views/justificaciones_formulario.py)
-
-Por ahora, llamo esta página únicamente en asistencia\templates\justificaciones\components\boton-agregar-nuevo.html,
-de la siguiente manera:
-    href="{% url 'justificaciones_formulario' %}?tipo=justificacion&next={{ request.path|urlencode }}"
-
-Posiblemente se quiera llamar esta página en un futuro con el id del alumno ya pasado, en el caso 
-de llamar desde el perfil de estudiante. Desde mi vago conocimiento, para lograr eso, se debería añadir
-el siguiente substring (o algo del estilo) al final de la url:
-    "...&id={{ alumno.id }}"
-
-y en el view reclamarlo con "request.GET.get('id')"
-
-Dejé otro comentario con un TODO para el autocompletado del input de estudiante.
-
-Además, dejé variables no usadas como rut, apoderado, curso, que son variables que pertenecen al estudiante :)
-{% endcomment %}
-
 <!-- Contenedor principal del contenido -->
 <section class="mx-auto md:max-w-[90%] px-4 py-5 sm:px-6 sm:py-8">
 
@@ -105,7 +79,7 @@ Además, dejé variables no usadas como rut, apoderado, curso, que son variables
                                 TODO: Falta el autocompletado para el input de estudiantes, lo dejo pendiente por ahora,
                                 pero tengo ideas de cómo hacerlo amigable para mobile :)
                             {% endcomment %}
-                            <input type="text" name="busqueda_estudiante" id="id_estudiante" autocomplete="false" required
+                            <input type="text" name="busqueda_estudiante" id="id_estudiante" value="{{ busqueda_estudiante }}" autocomplete="off" required
                                 placeholder="Buscar estudiante por nombre, RUT o curso"
                                 class="w-full rounded-lg border border-gris-iconos py-2.5 pl-9 pr-3 text-sm text-negro-texto
                                 placeholder:text-gris-iconos focus:border-azul focus:outline-none focus:ring-1 focus:ring-azul"
@@ -115,27 +89,33 @@ Además, dejé variables no usadas como rut, apoderado, curso, que son variables
 
                     <!-- Información del estudiante -->
                     <div class="mt-2 flex flex-wrap items-center justify-evenly divide-x divide-azul-contraste rounded-xl bg-azul-fondo py-3 text-sm">
-                        {% if estudiante %}
+                        {% if estudiante_contexto %}
                             <div class="flex flex-col items-center justify-center px-8">
                                 <span class="flex items-center gap-1.5 text-azul">
                                     <i data-lucide="book-open" class="h-4 w-4"></i>
                                     <h2 class="font-bold">Curso</h2>
                                 </span>
-                                <p class="text-negro-texto font-medium">{{ curso|default:'IV° Medio B' }}</p>
+                                <p class="text-negro-texto font-medium">
+                                    {% if estudiante_contexto.curso %}
+                                        {{ estudiante_contexto.curso.nivel_romano }}° Medio {{ estudiante_contexto.curso.grupo }}
+                                    {% else %}
+                                        Sin curso asignado
+                                    {% endif %}
+                                </p>
                             </div>
                             <div class="flex flex-col items-center justify-center px-8">
                                 <span class="flex items-center gap-1.5 text-azul">
                                     <i data-lucide="file-text" class="h-4 w-4"></i>
                                     <h2 class="font-bold">RUT</h2>
                                 </span>
-                                <p class="text-negro-texto font-medium">{{ rut|default:'12.345.678-9' }}</p>
+                                <p class="text-negro-texto font-medium">{{ estudiante_contexto.alumno.rut }}</p>
                             </div>
                             <div class="flex flex-col items-center justify-center px-8">
                                 <span class="flex items-center gap-1.5 text-azul">
                                     <i data-lucide="user-shield" class="h-4 w-4"></i>
                                     <h2 class="font-bold">Apoderado</h2>
                                 </span>
-                                <p class="text-negro-texto font-medium">{{ apoderado|default:'Pepito Montecinos' }}</p>
+                                <p class="text-negro-texto font-medium">{{ estudiante_contexto.apoderado.nombre|default:'Sin apoderado' }}</p>
                             </div>
                         {% else %}
                             <div class="flex flex-row gap-2 items-center justify-center text-azul font-semibold">

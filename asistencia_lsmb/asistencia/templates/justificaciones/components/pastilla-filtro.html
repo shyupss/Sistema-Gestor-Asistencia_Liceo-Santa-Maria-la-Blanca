@@ -5,7 +5,7 @@ Requiere:
     - cuenta:           cantidad de justificaciones de x estado
 {% endcomment %}
 
-<a href="{% if filtro_actual == estado %}{% url 'justificaciones' %}{% else %}?estado={{ estado }}{% endif %}"
+<a href="{% if filtro_actual == estado %}{% querystring estado=None %}{% else %}{% querystring estado=estado %}{% endif %}"
     class="group inline-flex items-center gap-1.5 rounded-full px-2 py-1 text-xs md:text-sm font-medium shadow-sm
     {% if estado == 'pendiente' and filtro_actual == 'pendiente' %}bg-azul-fondo text-azul-profundo border border-azul
     {% elif estado == 'aceptada' and filtro_actual == 'aceptada' %}bg-verde-fondo text-verde-oscuro border border-verde

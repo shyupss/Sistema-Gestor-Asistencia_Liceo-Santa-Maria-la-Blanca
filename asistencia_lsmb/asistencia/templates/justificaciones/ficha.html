@@ -4,38 +4,6 @@
 
 {% block content %}
 
-{% comment %}
-!!!!!!  ELIMINAR COMENTARIO HABIENDO PROGRAMADO BACKEND :)  !!!!!!
-COMENTARIOS DEL HUMILDE UI/UX:
-
-Por supuesto, toda la info está hardcodeada en la vista:
-
-    'nombre': 'Eduardo Montecinos Gática',
-    'rut': '12.345.678-9',
-    'curso': 'IV° Medio B',
-    'estado': 'pendiente',
-    'tipo': 'justificacion',
-    'pendiente': True,
-    'periodo': '12 al 14 de sept 2026 · 3 días',
-    'registro': '11 de sept 2026 · 12:31 hrs',
-    'resumen': 'Cita al médico',
-    'detalle': 'El estudiante justificó una ausencia de tres días por citas consecutivas al doctor en el horario matutino. Apoderado enfatiza la urgencia de las consultas e indica que requiere ser en la fecha dada a causa de un viaje de trabajo que tiene programado.',
-    'documentos': [
-        { 'nombre': 'certificado_medico.gif', 'url': 'https://static.wikia.nocookie.net/silly-cat/images/2/26/Tole_tole.gif/revision/latest?cb=20240521052830' },
-    ],
-    'bitacora': [
-        { 'tipo': 'creacion', 'autor': 'Ana Torres Rivera', 'fecha': datetime(2026, 9, 11, 12, 31, 0) },
-        { 'tipo': 'revision', 'autor': 'José Cristobal Silva', 'fecha': datetime(2026, 9, 11, 16, 24, 0) },
-        { 'tipo': 'actual', 'estado': 'Esperando resolución' },
-    ],
-
-Importante comentar sobre la bitácora, puesto que es algo que hemos mencionado pero no hemos definido.
-Probablemente sea algo que se valide su necesidad en la reunión, pero por ahora lo definí rápidamente como
-una lista de eventos con tipo, autor y fecha + el estado actual. Esta forma es provisional hasta que se implemente
-de manera más robusta en el backend.
-
-{% endcomment %}
-
 <!-- Contenedor principal del contenido -->
 <section class="mx-auto md:max-w-[90%] px-4 py-5 sm:px-6 sm:py-8">
 
@@ -55,7 +23,8 @@ de manera más robusta en el backend.
                     <h1 class="text-lg text-negro-texto font-bold">
                         {{ nombre|default:"Nombre de alumno" }}
                     </h1>
-                    {{ curso|default:"Sin curso asignado" }} · {{ rut|default:"RUT no existente" }}
+                    {% if curso %}{{ curso.nivel_romano }}° Medio {{ curso.grupo }}{% else %}Sin curso asignado{% endif %}
+                    · {{ rut|default:"RUT no existente" }}
                 </div>
             </div>
 
@@ -189,8 +158,7 @@ de manera más robusta en el backend.
                                 <div class="flex justify-start items-center gap-1.5 text-xs lg:text-sm text-negro-texto">
                                     <span class="h-2 w-2 shrink-0 rounded-full bg-azul"></span>
                                     <p>
-                                        {% if tipo == 'justificacion' %}Justificación{% else %}Retiro{% endif %} creado por 
-                                        <span class="text-azul">{{ evento.autor }}</span>
+                                        {% if tipo == 'justificacion' %}Justificación{% else %}Retiro{% endif %} creado
                                         · {{ evento.fecha|date:"d/m/Y, H:i" }}
                                     </p>
                                 </div>
@@ -198,15 +166,15 @@ de manera más robusta en el backend.
                                 <div class="flex justify-start items-center gap-1.5 text-xs lg:text-sm text-negro-texto">
                                     <span class="h-2 w-2 shrink-0 rounded-full bg-azul"></span>
                                     <p>
-                                        {% if tipo == 'justificacion' %}Justificación revisada{% else %}Retiro revisado{% endif %} por 
-                                        <span class="text-azul">{{ evento.autor }}</span>
+                                        {% if tipo == 'justificacion' %}Justificación resuelta{% else %}Retiro resuelto{% endif %}
+                                        {% if evento.autor %}por <span class="text-azul">{{ evento.autor }}</span>{% endif %}
                                         · {{ evento.fecha|date:"d/m/Y, H:i" }}
                                     </p>
                                 </div>
                             {% elif evento.tipo == 'actual' %}
                                 <div class="flex justify-start items-center gap-1.5 text-xs lg:text-sm text-gris-texto">
                                     <span class="h-2 w-2 shrink-0 rounded-full bg-gris-texto"></span>
-                                    {{ evento.estado }}
+                                    Estado actual: {{ evento.estado|capfirst }}
                                 </div>
                             {% endif %}
                         {% empty %}
@@ -223,21 +191,31 @@ de manera más robusta en el backend.
                     <hr class="my-6 border-gris-claro">
 
                     <div class="flex w-full gap-3">
-                        <button type="button"
-                            class="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-rojo px-5 py-2.5 text-sm font-medium
-                            text-blanco transition-colors hover:bg-rojo-oscuro"
-                        >
-                            <i data-lucide="x-circle" class="h-4 w-4"></i>
-                            Rechazar
-                        </button>
+                        <form method="post" class="flex flex-1">
+                            {% csrf_token %}
+                            <input type="hidden" name="accion" value="rechazar">
+                            <input type="hidden" name="next" value="{{ volver_url }}">
+                            <button type="submit"
+                                class="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-rojo px-5 py-2.5 text-sm font-medium
+                                text-blanco transition-colors hover:bg-rojo-oscuro"
+                            >
+                                <i data-lucide="x-circle" class="h-4 w-4"></i>
+                                Rechazar
+                            </button>
+                        </form>
 
-                        <button type="button"
-                            class="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-verde px-5 py-2.5 text-sm font-medium
-                            text-blanco transition-colors hover:bg-verde-oscuro"
-                        >
-                            <i data-lucide="circle-check" class="h-4 w-4"></i>
-                            Aceptar
-                        </button>
+                        <form method="post" class="flex flex-1">
+                            {% csrf_token %}
+                            <input type="hidden" name="accion" value="aceptar">
+                            <input type="hidden" name="next" value="{{ volver_url }}">
+                            <button type="submit"
+                                class="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-verde px-5 py-2.5 text-sm font-medium
+                                text-blanco transition-colors hover:bg-verde-oscuro"
+                            >
+                                <i data-lucide="circle-check" class="h-4 w-4"></i>
+                                Aceptar
+                            </button>
+                        </form>
                     </div>
                 {% endif %}
                 

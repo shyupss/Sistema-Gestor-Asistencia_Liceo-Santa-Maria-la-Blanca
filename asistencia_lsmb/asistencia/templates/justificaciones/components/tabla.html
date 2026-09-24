@@ -2,19 +2,12 @@
     {% include 'justificaciones/components/header-tabla.html' %}
 
     <!-- Contenedor de tarjetas -->
-    <!-- TODO: Conectar justificaciones con el backend (ELIMINAR ESTE COMENTARIO UNA VEZ HECHO) -->
     <div class="border-t border-b border-gris-claro bg-blanco-tarjeta">
-        {% if not justificaciones %}
+        {% if tarjetas %}
             <div class="px-2 py-3 grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-3">
-                {% comment %}
-                {% for justificacion in justificaciones %}
-                    {% include 'justificaciones/components/tarjeta.html' %}
+                {% for tarjeta in tarjetas %}
+                    {% include 'justificaciones/components/tarjeta.html' with tarjeta=tarjeta %}
                 {% endfor %}
-                {% endcomment %}
-                
-                {% include 'justificaciones/components/tarjeta.html' with estado='pendiente' nombre='Eduardo Montecinos Gática' curso='IV' nivel='B' rut='12.345.678-9' resumen_breve='Cita al médico' archivo_nombre='certificado_medico.pdf' duracion='1 día (18 de sept 2026)' %}
-                {% include 'justificaciones/components/tarjeta.html' with estado='aceptada' nombre='Eduardo Montecinos Gática' curso='IV' nivel='B' rut='12.345.678-9' resumen_breve='Cita al médico' duracion='5 días (14 a 18 de sept 2026)' %}
-                {% include 'justificaciones/components/tarjeta.html' with estado='rechazada' nombre='Eduardo Montecinos Gática' curso='IV' nivel='B' rut='12.345.678-9' archivo_nombre='certificado_medico.pdf' duracion='2 días (17 a 18 de sept 2026)' %}
             </div>
         {% else %}
             <div class="flex flex-col items-center gap-2 py-16 text-center text-gris-iconos">

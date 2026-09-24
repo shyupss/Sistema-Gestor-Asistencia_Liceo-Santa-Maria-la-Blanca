@@ -38,7 +38,15 @@ class Paso_Lista(models.Model):
 
 
 class Justificaciones(models.Model):
+    TIPO_JUSTIFICACION = 'justificacion'
+    TIPO_RETIRO = 'retiro'
+    TIPOS = (
+        (TIPO_JUSTIFICACION, 'Justificación'),
+        (TIPO_RETIRO, 'Retiro'),
+    )
+
     alumno = models.ForeignKey(Alumno, on_delete=models.CASCADE)
+    tipo = models.CharField(max_length=20, choices=TIPOS, default=TIPO_JUSTIFICACION)
     funcionario_resuelve = models.ForeignKey(
         'alertas.Funcionario',
         on_delete=models.PROTECT,
@@ -49,8 +57,29 @@ class Justificaciones(models.Model):
     estado_solicitud = models.ForeignKey(Estados_Solicitud, on_delete=models.PROTECT)
     fecha_inicio = models.DateField()
     fecha_fin = models.DateField()
+    fecha_registro = models.DateTimeField(auto_now_add=True)
+    resumen = models.CharField(max_length=120)
     motivo = models.TextField(blank=True)
     fecha_resolucion = models.DateTimeField(null=True, blank=True)
+
+    @property
+    def duracion(self):
+        dias = (self.fecha_fin - self.fecha_inicio).days + 1
+        return f'{dias} día' if dias == 1 else f'{dias} días'
+
+
+class Adjunto_Justificacion(models.Model):
+    justificacion = models.ForeignKey(
+        Justificaciones,
+        on_delete=models.CASCADE,
+        related_name='adjuntos',
+    )
+    archivo = models.FileField(upload_to='justificaciones/%Y/%m/%d/')
+    nombre_original = models.CharField(max_length=255)
+    fecha_subida = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.nombre_original
 
 
 class Asistencia_Alumnos(models.Model):

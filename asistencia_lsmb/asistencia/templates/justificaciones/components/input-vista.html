@@ -52,7 +52,7 @@ Requiere:
     >
         <template x-for="opcion in opciones" :key="opcion">
             <button type="button"
-                @click="selected = opcion; open = false;"
+                @click="selected = opcion; open = false; $nextTick(() => $root.closest('form').submit())"
                 class="flex w-full items-center px-4 py-2 text-left text-xs md:text-sm transition-colors hover:bg-gris-ultraclaro"
                 :class="selected === opcion ? 'font-medium text-azul-profundo bg-azul-fondo/30' : 'text-negro-texto'"
                 x-text="opcion"

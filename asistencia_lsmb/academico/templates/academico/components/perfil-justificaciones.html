@@ -3,13 +3,39 @@
     {% for item in justificaciones %}
     <article class="rounded-lg border border-gris-claro p-4">
         <div class="flex flex-wrap items-center justify-between gap-2">
-            <p class="font-semibold text-negro-texto">{{ item.fecha_inicio|date:'d/m/Y' }} al {{
-                item.fecha_fin|date:'d/m/Y' }}</p>
-                <span class="rounded-full bg-azul-fondo px-2 py-1 text-xs font-semibold text-azul-profundo">
-                    {{ item.estado_solicitud.nombre }}
-                </span>
+            <div>
+                <p class="font-semibold text-negro-texto">
+                    {% if item.tipo == 'justificacion' %}Justificación{% else %}Retiro{% endif %}
+                </p>
+                <p class="text-xs text-gris-texto">
+                    {{ item.fecha_inicio|date:'d/m/Y' }} al {{ item.fecha_fin|date:'d/m/Y' }}
+                </p>
+            </div>
+            <span class="rounded-full px-2 py-1 text-xs font-semibold
+                {% if item.estado_solicitud.nombre == 'pendiente' %}bg-azul-fondo text-azul-profundo
+                {% elif item.estado_solicitud.nombre == 'aceptada' %}bg-verde-fondo text-verde-oscuro
+                {% elif item.estado_solicitud.nombre == 'rechazada' %}bg-rojo-fondo text-rojo-oscuro
+                {% else %}bg-gris-ultraclaro text-gris-texto{% endif %}">
+                {{ item.estado_solicitud.nombre|capfirst }}
+            </span>
         </div>
-        <p class="mt-2 text-sm text-gris-texto">{{ item.motivo|default:'Sin motivo indicado' }}</p>
+        <p class="mt-3 text-sm font-medium text-negro-texto">
+            {{ item.resumen|default:'Sin resumen indicado' }}
+        </p>
+        <p class="mt-1 text-sm text-gris-texto">
+            {{ item.motivo|default:'Sin detalle indicado'|truncatewords:24 }}
+        </p>
+        <div class="mt-3 flex flex-wrap items-center justify-between gap-2 text-xs text-gris-texto">
+            <span>Registrada {{ item.fecha_registro|date:'d/m/Y, H:i' }}</span>
+            {% if item.fecha_resolucion %}
+                <span>Resuelta {{ item.fecha_resolucion|date:'d/m/Y, H:i' }}</span>
+            {% endif %}
+            <a href="{% url 'justificaciones_ficha' %}?id={{ item.id }}&next={{ request.get_full_path|urlencode }}"
+                class="font-medium text-azul hover:underline"
+            >
+                Ver detalle
+            </a>
+        </div>
     </article>{% empty %}<p class="text-sm text-gris-texto">No hay justificaciones registradas.</p>
     {% endfor %}
 </div>
