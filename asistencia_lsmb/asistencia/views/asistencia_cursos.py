@@ -37,6 +37,7 @@ def pagina_asistencia(request):
     page_obj = paginator.get_page(request.GET.get("page"))
 
     contexto = {
+        "page_title": "Asistencia",
         "page_obj": page_obj,
         "alertas": resumen["alertas"],
         "search_query": search_query,

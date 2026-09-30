@@ -12,35 +12,8 @@
 
     <!-- Contenido -->
     <div class="rounded-lg bg-blanco-tarjeta p-4 border border-gris-claro shadow-sm md:p-8"
-        x-data="{
-            tipo: '{{ tipo }}',
-            arrastrando: false,
-            contadorArrastre: 0,
-            soltarArchivos(event) {
-                this.arrastrando = false;
-                this.contadorArrastre = 0;
-                const nuevos = Array.from(event.dataTransfer.files);
-                if (nuevos.length === 0) return;
-                this.archivos = [...this.archivos, ...nuevos];
-                const dt = new DataTransfer();
-                this.archivos.forEach(f => dt.items.add(f));
-                this.$refs.inputArchivos.files = dt.files;
-                this.$nextTick(() => lucide.createIcons());
-            },
-        }"
-        @dragenter.window="contadorArrastre++; arrastrando = true"
-        @dragleave.window="contadorArrastre--; if (contadorArrastre === 0) arrastrando = false"
-        @dragover.window.prevent
-        @drop.window.prevent="soltarArchivos($event)"
+        x-data="{ tipo: '{{ tipo }}' }"
     >
-        <!-- Overlay subir archivos -->
-        <div x-show="arrastrando" x-cloak
-            class="pointer-events-none fixed inset-0 z-50 flex flex-col items-center justify-center gap-3
-            bg-azul/10 backdrop-blur-sm border-4 border-dashed border-azul rounded-xl"
-        >
-            <i data-lucide="upload-cloud" class="h-12 w-12 text-azul"></i>
-            <p class="text-lg font-semibold text-azul">Suelta los archivos aquí</p>
-        </div>
 
         <div class="flex justify-between">
             <h1 class="mb-5 text-lg font-bold text-azul md:text-xl">{{ page_title }}</h1>
@@ -74,11 +47,6 @@
                             <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-gris-texto">
                                 <i data-lucide="user" class="h-4 w-4"></i>
                             </span>
-                            {% comment %}
-                                !!! BORRAR CUANDO ESTÉ LISTO :)
-                                TODO: Falta el autocompletado para el input de estudiantes, lo dejo pendiente por ahora,
-                                pero tengo ideas de cómo hacerlo amigable para mobile :)
-                            {% endcomment %}
                             <input type="text" name="busqueda_estudiante" id="id_estudiante" value="{{ busqueda_estudiante }}" autocomplete="off" required
                                 placeholder="Buscar estudiante por nombre, RUT o curso"
                                 class="w-full rounded-lg border border-gris-iconos py-2.5 pl-9 pr-3 text-sm text-negro-texto
@@ -170,9 +138,8 @@
                                 <label for="fecha_fin" class="mb-1 flex flex-row items-center gap-1 text-xs font-medium text-gris-texto">
                                     <i data-lucide="calendar-days" class="pointer-events-none h-3 w-3 text-gris-texto"></i>
                                     Hasta
-                                    <span class="text-rojo ml-0.5" aria-hidden="true" title="Campo obligatorio">*</span>
                                 </label>
-                                <input type="date" name="fecha_fin" required
+                                <input type="date" name="fecha_fin"
                                     class="w-full rounded-lg border border-gris-texto py-2.5 px-3 text-sm text-negro-texto
                                     focus:border-azul-primario focus:outline-none focus:ring-1 focus:ring-azul"
                                 >
@@ -214,9 +181,22 @@
             <hr class="my-5 border-gris-claro hidden lg:block">
 
             <!-- Área de documentos -->
-            <div class="my-6"
+            <div class="relative my-6"
                 x-data="gestorArchivos()"
+                @dragenter.window="contadorArrastre++; arrastrando = true"
+                @dragleave.window="contadorArrastre--; if (contadorArrastre === 0) arrastrando = false"
+                @dragover.window.prevent
+                @drop.window.prevent="soltarArchivos($event)"
             >
+                <!-- Overlay drag & drop -->
+                <div x-show="arrastrando" x-cloak
+                    class="pointer-events-none fixed inset-0 z-50 flex flex-col items-center justify-center gap-3
+                    bg-azul/10 backdrop-blur-sm border-4 border-dashed border-azul rounded-xl"
+                >
+                    <i data-lucide="upload-cloud" class="h-12 w-12 text-azul"></i>
+                    <p class="text-lg font-semibold text-azul">Suelta los archivos aquí</p>
+                </div>
+
                 <label for="id_adjuntos"
                     class="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg
                     border-2 border-dashed border-gris-iconos py-8 text-center hover:border-azul-medio"
@@ -225,17 +205,27 @@
                     <span class="text-sm text-gris-texto">Subir documentos adjuntos al caso</span>
                 </label>
                 <input type="file" id="id_adjuntos" name="adjuntos" multiple 
+                    accept=".jpg,.jpeg,.jpe,.png,.gif,.webp,.svg,.pdf,.doc,.docx,.xls,.xlsx,.csv,.ppt,.pptx"
                     class="hidden"
                     x-ref="inputArchivos"
                     @change="actualizarArchivos($event)"
                 >
 
+                <!-- Tarjeta de error para archivos no admitidos -->
+                <div x-show="archivosInvalidos.length > 0" x-cloak
+                    class="mt-3 flex items-start gap-3 rounded-lg bg-rojo-fondo p-3 border border-rojo-oscuro/20 text-rojo-oscuro"
+                >
+                    <i data-lucide="alert-circle" class="h-5 w-5 shrink-0 mt-0.5"></i>
+                    <div class="text-sm">
+                        <p class="font-medium">Los archivos de tipos no admitidos no se subieron:</p>
+                        <p class="text-xs mt-1 font-normal opacity-90" x-text="archivosInvalidos.join(', ')"></p>
+                    </div>
+                </div>
+
                 <!-- Vista previa archivos -->
                 <ul class="mt-3 space-y-2" x-show="archivos.length > 0" x-cloak>
-                    <template x-for="(archivo, index) in archivos" :key="archivo.name + '-' + index">
-                        <li class="flex items-center gap-3 rounded-lg border border-gris-claro px-3 py-2"
-                            x-effect="$nextTick(() => lucide.createIcons())"
-                        >
+                    <template x-for="(archivo, index) in archivos" :key="archivo.name + '-' + archivo.size">
+                        <li class="flex items-center gap-3 rounded-lg border border-gris-claro px-3 py-2">
                             <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-md"
                                 :class="tipoArchivo(archivo.name).bg"
                             >
@@ -278,5 +268,4 @@
         </form>
     </div> 
 </section>
-
 {% endblock %}
