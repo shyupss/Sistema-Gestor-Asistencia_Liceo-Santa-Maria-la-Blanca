@@ -11,9 +11,9 @@ function tipoArchivo(nombre) {
         pdf: { icono: 'file-text', bg: 'bg-rojo-fondo', color: 'text-rojo-oscuro' },
         doc: { icono: 'file-text', bg: 'bg-azul-fondo', color: 'text-azul-primario' },
         docx: { icono: 'file-text', bg: 'bg-azul-fondo', color: 'text-azul-primario' },
-        xls: { icono: 'file-spreadsheet', bg: 'bg-verde-fondo',color: 'text-verde-oscuro' },
-        xlsx: { icono: 'file-spreadsheet', bg: 'bg-verde-fondo',color: 'text-verde-oscuro' },
-        csv: { icono: 'file-spreadsheet', bg: 'bg-verde-fondo',color: 'text-verde-oscuro' },
+        xls: { icono: 'file-spreadsheet', bg: 'bg-verde-fondo', color: 'text-verde-oscuro' },
+        xlsx: { icono: 'file-spreadsheet', bg: 'bg-verde-fondo', color: 'text-verde-oscuro' },
+        csv: { icono: 'file-spreadsheet', bg: 'bg-verde-fondo', color: 'text-verde-oscuro' },
         ppt: { icono: 'presentation', bg: 'bg-amarillo-fondo', color: 'text-amarillo-oscuro' },
         pptx: { icono: 'presentation', bg: 'bg-amarillo-fondo', color: 'text-amarillo-oscuro' },
     };
@@ -56,20 +56,67 @@ async function descargarArchivo(url, nombre) {
 document.addEventListener('alpine:init', () => {
     Alpine.data('gestorArchivos', () => ({
         archivos: [],
+        archivosInvalidos: [],
+        arrastrando: false,
+        contadorArrastre: 0,
+        extensionesPermitidas: ['jpg', 'jpeg', 'jpe', 'png', 'gif', 'webp', 'svg', 'pdf', 'doc', 'docx', 'xls', 'xlsx', 'csv', 'ppt', 'pptx'],
         tipoArchivo,
         formatearTamano,
-        
-        actualizarArchivos(event) {
-            this.archivos = Array.from(event.target.files);
+
+        // Validar, desduplicar y acumular archivos (input o drag & drop)
+        agregarArchivos(listaArchivos) {
+            this.archivosInvalidos = [];
+            const nuevosValidos = [];
+
+            Array.from(listaArchivos).forEach(f => {
+                const ext = f.name.split('.').pop().toLowerCase();
+                if (!this.extensionesPermitidas.includes(ext)) {
+                    this.archivosInvalidos.push(f.name);
+                    return;
+                }
+                // Evitar duplicados por nombre + tamaño
+                if (!this.archivos.some(a => a.name === f.name && a.size === f.size)) {
+                    nuevosValidos.push(f);
+                }
+            });
+
+            if (nuevosValidos.length > 0) {
+                this.archivos = [...this.archivos, ...nuevosValidos];
+                this.sincronizarInput();
+            }
+
+            // Invocar Lucide una sola vez tras el ciclo de Alpine, no en cada <li>
             this.$nextTick(() => lucide.createIcons());
         },
-        
+
+        actualizarArchivos(event) {
+            if (event.target.files && event.target.files.length > 0) {
+                this.agregarArchivos(event.target.files);
+            }
+            // Limpiar el input para que volver a abrir el mismo archivo no quede en conflicto
+            event.target.value = '';
+        },
+
+        soltarArchivos(event) {
+            this.arrastrando = false;
+            this.contadorArrastre = 0;
+            if (event.dataTransfer && event.dataTransfer.files) {
+                this.agregarArchivos(event.dataTransfer.files);
+            }
+        },
+
         quitarArchivo(index) {
             this.archivos.splice(index, 1);
+            this.sincronizarInput();
+            this.$nextTick(() => lucide.createIcons());
+        },
+
+        sincronizarInput() {
             const dt = new DataTransfer();
             this.archivos.forEach(f => dt.items.add(f));
-            this.$refs.inputArchivos.files = dt.files;
-            this.$nextTick(() => lucide.createIcons());
+            if (this.$refs.inputArchivos) {
+                this.$refs.inputArchivos.files = dt.files;
+            }
         }
     }));
 });
