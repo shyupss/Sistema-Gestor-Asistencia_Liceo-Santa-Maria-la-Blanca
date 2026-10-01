@@ -4,6 +4,7 @@ from django.db.models import (
     ExpressionWrapper,
     F,
     FloatField,
+    Exists,
     OuterRef,
     Prefetch,
     Q,
@@ -13,7 +14,7 @@ from django.db.models import (
 )
 
 from academico.models import Alumno, Curso, Matricula
-from asistencia.models import Asistencia_Alumnos
+from asistencia.models import Asistencia_Alumnos, Paso_Lista
 from alertas.models import EstadoAlumno
 
 
@@ -82,6 +83,10 @@ def obtener_alumnos(fecha):
 
 
 def obtener_cursos(fecha):
+    paso_lista_hoy = Paso_Lista.objects.filter(
+        curso=OuterRef("pk"),
+        fecha=fecha,
+    )
     matriculas_activas = Prefetch(
         "matriculas",
         queryset=Matricula.objects.filter(
@@ -102,7 +107,8 @@ def obtener_cursos(fecha):
                 | Q(matriculas__fecha_termino__gt=fecha)
             ),
             distinct=True,
-        )
+        ),
+        registrada_hoy=Exists(paso_lista_hoy),
     )
 
 
