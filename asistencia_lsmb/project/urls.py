@@ -20,14 +20,16 @@ from django.conf import settings
 from django.conf.urls.static import static
 from inicio import views as inicio_views
 from academico import views as academico_views
+from academico import perfiles_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', inicio_views.pagina_principal, name='home'), # <-- El '' (string vacío) es lo que oculta el cohete
     # path('segunda/', inicio_views.pagina_segunda, name='nothome'),
     path('alumnos/', academico_views.pagina_alumnos, name = 'alumnos'),
-    path('alumnos/<int:alumno_id>/', academico_views.perfil_alumno, name='perfil_alumno'),
+    path('alumnos/<int:alumno_id>/', perfiles_views.perfil_alumno, name='perfil_alumno'),
     path('cursos/', academico_views.pagina_cursos, name= 'cursos'),
+    path('cursos/<int:curso_id>/', perfiles_views.perfil_curso, name='perfil_curso'),
     path("asistencia/", include("asistencia.urls")),
     path('reportes/', include("reportes.urls")),
     path('monitoreo/', include("monitoreo.urls")),

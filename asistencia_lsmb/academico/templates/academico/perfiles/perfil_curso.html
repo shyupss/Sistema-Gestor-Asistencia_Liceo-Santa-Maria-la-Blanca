@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block title %}Perfil de {{ curso.nivel_romano }}° Medio {{ curso.grupo }}{% endblock %}
+
+{% block content %}
+<section class="mx-auto max-w-6xl px-4 py-5 sm:px-6 sm:py-8">
+    {% include 'components/global/child_page_title.html' with url=volver_url parent_page_title='Cursos' %}
+
+    <div class="overflow-hidden rounded-xl border border-gris-claro bg-blanco-tarjeta shadow-sm">
+        <header class="border-b border-gris-claro bg-azul-fondo px-5 py-6 sm:px-8">
+            <div class="flex items-center justify-between gap-4">
+                <div class="flex min-w-0 items-center gap-3 sm:gap-4">
+                    <div class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-white text-azul-profundo">
+                        <i data-lucide="book-open" class="h-8 w-8"></i>
+                    </div>
+                    <div class="min-w-0">
+                        <p class="text-xs font-semibold uppercase tracking-wide text-azul-profundo">Perfil de curso</p>
+                        <h1 class="mt-1 truncate text-base font-bold text-negro-texto sm:text-xl">{{ curso.nivel_romano }}° Medio {{ curso.grupo }}</h1>
+                        <p class="mt-1 text-xs text-gris-texto">Profesor/a jefe: {{ curso.profesor_jefe.nombre|default:'Sin asignar' }}</p>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <span class="inline-flex max-w-full rounded-full px-3 py-1 text-xs font-bold {% if estado_genera_alerta %}bg-rojo-fondo text-rojo-oscuro{% elif estado_asistencia == 'Sin datos' %}bg-gris-ultraclaro text-gris-texto{% else %}bg-verde-fondo text-verde-oscuro{% endif %}">{{ estado_asistencia }}</span>
+                    <p class="text-2xl font-extrabold text-negro-texto">{% if porcentaje_asistencia is not None %}{{ porcentaje_asistencia }}%{% else %}-{% endif %}</p>
+                    <p class="mt-1 text-xs text-gris-texto">Asistencia</p>
+                </div>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-2 divide-x divide-y divide-gris-claro border-b border-gris-claro sm:grid-cols-4 sm:divide-y-0">
+            <div class="p-4 text-center sm:p-5"><p class="text-2xl font-bold text-azul-profundo sm:text-3xl">{{ total_estudiantes }}</p><p class="mt-1 text-xs text-gris-texto">Estudiantes</p></div>
+            <div class="p-4 text-center sm:p-5"><p class="text-2xl font-bold text-azul-profundo sm:text-3xl">{% if porcentaje_asistencia is not None %}{{ porcentaje_asistencia }}%{% else %}-{% endif %}</p><p class="mt-1 text-xs text-gris-texto">Asistencia general</p></div>
+            <div class="p-4 text-center sm:p-5"><p class="text-2xl font-bold text-verde-oscuro sm:text-3xl">{{ estudiantes_meta }}</p><p class="mt-1 text-xs text-gris-texto">Estudiantes ≥ {{ porcentaje_meta }}%</p></div>
+            <div class="p-4 text-center sm:p-5"><p class="text-2xl font-bold text-rojo-oscuro sm:text-3xl">{{ estudiantes_bajo_meta }}</p><p class="mt-1 text-xs text-gris-texto">Bajo la meta</p></div>
+        </div>
+
+        <section class="border-b border-gris-claro px-5 py-5 sm:px-8">
+            <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
+                <h2 class="font-bold text-azul-profundo">Estudiantes por nivel de asistencia</h2>
+            </div>
+            <div class="mx-auto grid max-w-4xl grid-cols-2 gap-2 sm:grid-cols-4">
+                {% for nivel, cuenta in niveles_asistencia.items %}
+                {% if nivel != 'Sin datos' and nivel != 'Sin configurar' %}
+                <div class="flex items-center justify-center rounded-lg border p-2.5
+                    {% if nivel == 'Óptimo' or nivel == 'Optimo' %}border-verde-fondo bg-verde-fondo text-verde-oscuro
+                    {% elif nivel == 'Adecuado' %}border-azul-fondo bg-azul-fondo text-azul-profundo
+                    {% elif nivel == 'Atención' or nivel == 'Alerta' %}border-amarillo-fondo bg-amarillo-fondo text-amarillo-oscuro
+                    {% elif nivel == 'Crítico' or nivel == 'Critico' %}border-rojo-fondo bg-rojo-fondo text-rojo-oscuro
+                    {% endif %}">
+                    <div class="text-center leading-none">
+                        <span class="text-xl font-bold md:text-2xl">{{ cuenta }}</span>
+                        <p class="mt-1 text-xs font-medium md:text-sm">{{ nivel }}</p>
+                    </div>
+                </div>
+                {% endif %}
+                {% endfor %}
+            </div>
+        </section>
+
+        {% include 'academico/perfiles/components/compartidos/justificaciones_resumen.html' %}
+        {% include 'academico/perfiles/components/compartidos/pestanas.html' %}
+
+        <div class="p-5 sm:p-8">
+            {% if tab == 'informacion' %}
+            {% include 'academico/perfiles/components/curso/informacion.html' %}
+            {% elif tab == 'asistencia' %}
+            {% include 'academico/perfiles/components/curso/asistencia.html' %}
+            {% elif tab == 'justificaciones' %}
+            {% include 'academico/perfiles/components/curso/justificaciones.html' %}
+            {% elif tab == 'alertas' %}
+            {% include 'academico/perfiles/components/compartidos/alertas.html' %}
+            {% elif tab == 'historial' %}
+            {% include 'academico/perfiles/components/compartidos/historial.html' %}
+            {% else %}
+            {% include 'academico/perfiles/components/curso/estudiantes.html' %}
+            {% endif %}
+        </div>
+    </div>
+</section>
+<script>
+    document.querySelectorAll('[data-progress]').forEach(function (bar) {
+        bar.style.width = `${bar.dataset.progress}%`;
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,18 @@
+<div class="grid gap-8 md:grid-cols-2">
+    <div>
+        <h2 class="mb-4 text-lg font-bold text-azul-profundo">Datos del curso</h2>
+        <dl class="divide-y divide-gris-claro border-y border-gris-claro text-sm">
+            <div class="flex justify-between gap-4 py-3"><dt class="text-gris-texto">Curso</dt><dd class="font-semibold text-negro-texto">{{ curso.nivel_romano }}° Medio {{ curso.grupo }}</dd></div>
+            <div class="flex justify-between gap-4 py-3"><dt class="text-gris-texto">Periodo</dt><dd class="font-semibold text-negro-texto">{{ curso.periodo.anio }}</dd></div>
+            <div class="flex justify-between gap-4 py-3"><dt class="text-gris-texto">Profesor/a jefe</dt><dd class="text-right font-semibold text-negro-texto">{{ curso.profesor_jefe.nombre|default:'Sin asignar' }}</dd></div>
+        </dl>
+    </div>
+    <div>
+        <h2 class="mb-4 text-lg font-bold text-azul-profundo">Resumen de asistencia</h2>
+        <dl class="divide-y divide-gris-claro border-y border-gris-claro text-sm">
+            <div class="flex justify-between gap-4 py-3"><dt class="text-gris-texto">Estudiantes</dt><dd class="font-semibold text-negro-texto">{{ total_estudiantes }}</dd></div>
+            <div class="flex justify-between gap-4 py-3"><dt class="text-gris-texto">Días registrados</dt><dd class="font-semibold text-negro-texto">{{ total_dias_clase }}</dd></div>
+            <div class="flex justify-between gap-4 py-3"><dt class="text-gris-texto">Registros de asistencia</dt><dd class="font-semibold text-negro-texto">{{ total_registros }}</dd></div>
+        </dl>
+    </div>
+</div>

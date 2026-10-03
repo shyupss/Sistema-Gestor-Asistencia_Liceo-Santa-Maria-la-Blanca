@@ -1,0 +1,9 @@
+<h2 class="mb-4 text-lg font-bold text-azul-profundo">Alumnos del curso</h2>
+<div class="divide-y divide-gris-claro border-y border-gris-claro">
+    {% for matricula in matriculas %}
+    <a href="{% url 'perfil_alumno' matricula.alumno_id %}?next=/cursos/{{ curso.id }}/" class="flex items-center justify-between gap-4 py-3 text-sm hover:text-azul-primario">
+        <span class="min-w-0"><span class="block truncate font-semibold text-negro-texto">{{ matricula.alumno.nombre }}</span><span class="text-xs text-gris-texto">{{ matricula.alumno.rut }}</span></span>
+        <span class="flex-shrink-0 text-right text-xs font-semibold {% if matricula.estado_asistencia == 'Óptimo' or matricula.estado_asistencia == 'Optimo' %}text-verde-oscuro{% elif matricula.estado_asistencia == 'Crítico' or matricula.estado_asistencia == 'Critico' %}text-rojo-oscuro{% else %}text-azul-profundo{% endif %}">{% if matricula.porcentaje_asistencia is not None %}{{ matricula.porcentaje_asistencia }}%{% else %}-{% endif %}<span class="block font-normal text-gris-texto">{{ matricula.estado_asistencia }}</span></span>
+    </a>
+    {% empty %}<p class="py-6 text-sm text-gris-texto">No hay alumnos matriculados.</p>{% endfor %}
+</div>

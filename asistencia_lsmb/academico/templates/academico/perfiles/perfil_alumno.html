@@ -5,23 +5,23 @@
 {% block content %}
 <section class="mx-auto max-w-6xl px-4 py-5 sm:px-6 sm:py-8">
     {% include 'components/global/child_page_title.html' with url=volver_url parent_page_title=volver_label %}
-    
+
     <div class="overflow-hidden rounded-xl border border-gris-claro bg-blanco-tarjeta shadow-sm">
-        {% include 'academico/components/perfil-encabezado.html' %}
-        {% include 'academico/components/perfil-metricas.html' %}
-        {% include 'academico/components/perfil-justificaciones-resumen.html' %}
-        {% include 'academico/components/perfil-pestanas.html' %}
+        {% include 'academico/perfiles/components/alumno/encabezado.html' %}
+        {% include 'academico/perfiles/components/alumno/metricas.html' %}
+        {% include 'academico/perfiles/components/compartidos/justificaciones_resumen.html' %}
+        {% include 'academico/perfiles/components/compartidos/pestanas.html' %}
         <div class="p-5 sm:p-8">
             {% if tab == 'informacion' %}
-            {% include 'academico/components/perfil-informacion.html' %}
+            {% include 'academico/perfiles/components/alumno/informacion.html' %}
             {% elif tab == 'asistencia' %}
-            {% include 'academico/components/perfil-asistencia.html' %}
+            {% include 'academico/perfiles/components/alumno/asistencia.html' %}
             {% elif tab == 'justificaciones' %}
-            {% include 'academico/components/perfil-justificaciones.html' %}
+            {% include 'academico/perfiles/components/alumno/justificaciones.html' %}
             {% elif tab == 'alertas' %}
-            {% include 'academico/components/perfil-alertas.html' %}
+            {% include 'academico/perfiles/components/compartidos/alertas.html' %}
             {% else %}
-            {% include 'academico/components/perfil-historial.html' %}
+            {% include 'academico/perfiles/components/compartidos/historial.html' %}
             {% endif %}
         </div>
     </div>

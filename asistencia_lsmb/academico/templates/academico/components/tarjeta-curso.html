@@ -124,7 +124,7 @@
         {% endif %}
 
         <!-- Botón ver ficha -->
-        <a href="#" 
+        <a href="{% url 'perfil_curso' curso.id %}?next=/cursos/"
            class="group flex items-center justify-center space-x-1 py-3 text-xs font-semibold text-azul-primario hover:text-azul-profundo hover:bg-gris-ultraclaro/50 transition-colors">
             <span>Ver ficha</span>
             <i data-lucide="arrow-right" class="w-4 h-4 transition-transform duration-200 ease-out group-hover:scale-110 origin-center active:scale-95"></i>

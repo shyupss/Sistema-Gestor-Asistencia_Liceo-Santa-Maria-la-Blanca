@@ -1,0 +1,25 @@
+{% include 'academico/perfiles/components/compartidos/evolucion_asistencia.html' %}
+<div class="mb-4 flex flex-wrap items-end justify-between gap-2">
+    <div>
+        <h2 class="text-lg font-bold text-azul-profundo">Resumen diario</h2>
+        <p class="mt-1 text-sm text-gris-texto">Asistencia registrada por día durante el periodo {{ curso.periodo.anio }}.</p>
+    </div>
+    <span class="text-xs text-gris-texto">{{ total_registros }} registros · {{ total_dias_clase }} días</span>
+</div>
+<div class="divide-y divide-gris-claro border-y border-gris-claro">
+    {% for dia in resumen_diario %}
+    <div class="flex flex-wrap items-center justify-between gap-3 py-4">
+        <p class="min-w-[7rem] font-semibold text-negro-texto">{{ dia.fecha|date:'l d/m/Y'|capfirst }}</p>
+        <div class="flex flex-wrap gap-2 text-xs font-semibold">
+            <span class="inline-flex items-center gap-1 rounded-full bg-verde-fondo px-3 py-1 text-verde-oscuro">
+                <i data-lucide="user-check" class="h-3.5 w-3.5"></i>{{ dia.presentes }} presentes
+            </span>
+            <span class="inline-flex items-center gap-1 rounded-full bg-rojo-fondo px-3 py-1 text-rojo-oscuro">
+                <i data-lucide="user-round-x" class="h-3.5 w-3.5"></i>{{ dia.ausentes }} ausentes
+            </span>
+        </div>
+    </div>
+    {% empty %}
+    <p class="py-8 text-center text-sm text-gris-texto">No hay registros de asistencia este año.</p>
+    {% endfor %}
+</div>
