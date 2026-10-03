@@ -211,6 +211,7 @@ def perfil_curso(request, curso_id):
         "porcentaje_asistencia": porcentaje_asistencia,
         "tab": tab,
         "fecha_hoy": fecha_hoy,
+        "registrada_hoy": pasos_lista.filter(fecha=fecha_hoy).exists(),
         "volver_url": request.GET.get("next") or "/cursos/",
     }
     return render(request, "academico/perfiles/perfil_curso.html", contexto)
