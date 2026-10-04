@@ -5,12 +5,30 @@
 {% block content %}
 
 <!-- Contenedor principal del contenido -->
-<div class="mx-auto max-w-[90%] px-4 py-5 sm:px-6 sm:py-8">
+<section 
+    class="mx-auto max-w-[90%] px-4 py-5 sm:px-6 sm:py-8"
+    x-data="{ seccionActiva: 'asistencia' }"
+>
     <!-- Encabezado -->
     {% include 'components/global/page_title.html' with page_title=page_title today=fecha_hoy %}
     
-    <!-- Contenido -->
+    <!-- Navbar Mobile -->
+    {% include 'monitoreo/components/mobile-navbar.html' %}
 
-</div>
+    <!-- Contenido -->
+    <div class="mt-6 flex flex-col gap-6 lg:flex-row lg:items-start">
+        <!-- Navbar lateral Desktop -->
+        {% include 'monitoreo/components/desktop-navbar.html' %}
+
+        <!-- Secciones -->
+        <div class="min-w-0 flex-1 space-y-6">
+            {% include 'monitoreo/pages/asistencia.html' %}
+            {% include 'monitoreo/pages/alertas.html' %}
+            {% include 'monitoreo/pages/justificaciones.html' %}
+            {% include 'monitoreo/pages/actividad-reciente.html' %}
+        </div>
+    </div>
+
+</section>
 
 {% endblock %}

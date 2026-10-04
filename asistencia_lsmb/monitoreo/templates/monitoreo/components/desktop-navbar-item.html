@@ -1,0 +1,19 @@
+<li>
+    <button type="button"
+        @click="seccionActiva = '{{ seccion }}'"
+        class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors"
+        :class="seccionActiva === '{{ seccion }}' ? 'bg-azul-fondo text-azul-profundo' : 'text-gris-texto hover:bg-blanco-fondo'"
+    >
+        <i 
+            data-lucide="
+                {% if seccion == 'asistencia' %}calendar-check
+                {% elif seccion == 'alertas' %}alert-triangle
+                {% elif seccion == 'justificaciones' %}square-pen
+                {% elif seccion == 'actividad_reciente' %}activity
+                {% else %}package
+                {% endif %}" 
+            class="h-4 w-4"
+        ></i>
+        {{ label }}
+    </button>
+</li>
