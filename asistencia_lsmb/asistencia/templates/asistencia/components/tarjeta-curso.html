@@ -56,10 +56,11 @@
         
         <!-- Botón registrar asistencia -->
         {% if curso.registrada_hoy %}
-            <div class="flex items-center justify-center space-x-1.5 py-2.5 bg-gris-ultraclaro text-gris-texto font-medium text-xs cursor-not-allowed">
+            <a href="{% url 'registrar_asistencia' %}?curso={{ curso.id }}&fecha={{ fecha_hoy|date:'Y-m-d' }}"
+                class="group flex items-center justify-center space-x-1.5 py-2.5 bg-gris-ultraclaro hover:bg-gris-claro text-azul-profundo font-semibold text-sm transition-colors">
                 <i data-lucide="check-square" class="w-4 h-4"></i>
-                <span>Asistencia registrada</span>
-            </div>
+                <span>Modificar asistencia de hoy</span>
+            </a>
         {% else %}
             <a href="{% url 'registrar_asistencia' %}?curso={{ curso.id }}&fecha={{ fecha_hoy|date:'Y-m-d' }}"
                 class="group flex items-center justify-center space-x-1.5 py-2.5 bg-blanco-tarjeta hover:bg-gris-ultraclaro text-azul-profundo font-semibold text-sm transition-colors">
