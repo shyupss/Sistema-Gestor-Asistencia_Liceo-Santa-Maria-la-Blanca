@@ -49,6 +49,10 @@ class MonitoreoOperativoTests(TestCase):
 			es_estado_final=True,
 			cubre_ausencia=True,
 		)
+		self.estado_rechazada = Estados_Solicitud.objects.create(
+			nombre="rechazada",
+			es_estado_final=True,
+		)
 
 	def test_muestra_pendientes_y_promedio_de_resolucion(self):
 		ahora = timezone.now()
@@ -101,5 +105,34 @@ class MonitoreoOperativoTests(TestCase):
 		tipos = {evento["tipo"] for evento in eventos}
 
 		self.assertIn("asistencia.registrada", tipos)
-		self.assertIn("justificacion.nueva", tipos)
+		self.assertIn("justificacion.nuevo", tipos)
 		self.assertIn("alerta.emitida", tipos)
+
+	def test_registra_aceptacion_y_rechazo_de_justificaciones_y_retiros(self):
+		ahora = timezone.now()
+		aceptada = Justificaciones.objects.create(
+			alumno=self.alumno,
+			tipo=Justificaciones.TIPO_JUSTIFICACION,
+			estado_solicitud=self.estado_aceptada,
+			fecha_inicio=self.fecha,
+			fecha_fin=self.fecha,
+			resumen="Certificado médico",
+			funcionario_resuelve=self.funcionario,
+			fecha_resolucion=ahora,
+		)
+		rechazado = Justificaciones.objects.create(
+			alumno=self.alumno,
+			tipo=Justificaciones.TIPO_RETIRO,
+			estado_solicitud=self.estado_rechazada,
+			fecha_inicio=self.fecha,
+			fecha_fin=self.fecha,
+			resumen="Retiro de prueba",
+			funcionario_resuelve=self.funcionario,
+			fecha_resolucion=ahora,
+		)
+
+		eventos = preparar_actividad_reciente(self.fecha)
+		tipos = {evento["tipo"] for evento in eventos}
+
+		self.assertIn("justificacion.aceptada", tipos)
+		self.assertIn("retiro.rechazada", tipos)

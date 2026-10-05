@@ -72,6 +72,10 @@ def _curso_alumno(alumno, periodo_id=None):
     return matriculas.filter(fecha_termino__isnull=True).first() or matriculas.first()
 
 
+def _tipo_justificacion(valor):
+    return "retiro" if valor == "retiro" else "justificacion"
+
+
 def preparar_justificaciones(fecha):
     pendientes = list(obtener_justificaciones_pendientes(fecha)[:10])
     resueltas = list(obtener_justificaciones_resueltas(fecha))
@@ -121,15 +125,31 @@ def preparar_actividad_reciente(fecha):
         matricula = _curso_alumno(justificacion.alumno)
         curso = matricula.curso if matricula else None
         funcionario = justificacion.funcionario_resuelve
+        tipo_registro = _tipo_justificacion(justificacion.tipo)
+        nombre_registro = "retiro" if tipo_registro == "retiro" else "justificación"
         eventos.append({
             "fecha": justificacion.fecha_registro,
-            "tipo": "justificacion.nueva",
+            "tipo": f"{tipo_registro}.nuevo",
             "alumno": justificacion.alumno.nombre,
             "curso": f"{curso.nivel_romano}° Medio {curso.grupo}" if curso else "Sin curso",
-            "autor": funcionario.nombre if funcionario else "Sistema",
-            "rol_autor": funcionario.cargo.nombre if funcionario else None,
+            "autor": "Sistema",
+            "rol_autor": "Registro recibido",
+            "nombre_registro": nombre_registro,
             "tiempo": _tiempo_transcurrido(justificacion.fecha_registro, ahora),
         })
+
+        estado = _nombre_normalizado(justificacion.estado_solicitud.nombre)
+        if justificacion.fecha_resolucion and estado in {"aceptada", "rechazada"}:
+            eventos.append({
+                "fecha": justificacion.fecha_resolucion,
+                "tipo": f"{tipo_registro}.{estado}",
+                "alumno": justificacion.alumno.nombre,
+                "curso": f"{curso.nivel_romano}° Medio {curso.grupo}" if curso else "Sin curso",
+                "autor": funcionario.nombre if funcionario else "Sistema",
+                "rol_autor": funcionario.cargo.nombre if funcionario else "Resolución registrada",
+                "nombre_registro": nombre_registro,
+                "tiempo": _tiempo_transcurrido(justificacion.fecha_resolucion, ahora),
+            })
 
     for paso in obtener_pasos_recientes(fecha):
         eventos.append({
