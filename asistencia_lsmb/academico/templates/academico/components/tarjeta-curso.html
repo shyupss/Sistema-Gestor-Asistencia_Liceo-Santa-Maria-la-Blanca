@@ -111,12 +111,13 @@
         
         <!-- Botón registrar asistencia -->
         {% if curso.registrada_hoy %}
-            <div class="flex items-center justify-center space-x-1.5 py-3 bg-gris-ultraclaro text-gris-texto font-medium text-xs cursor-not-allowed border-r border-gris-claro">
+            <a href="{% url 'registrar_asistencia' %}?curso={{ curso.id }}&fecha={{ fecha_hoy|date:'Y-m-d' }}" 
+            class="flex items-center justify-center space-x-1.5 py-3 bg-gris-ultraclaro text-gris-texto font-medium text-xs hover:bg-gris-claro border-r border-gris-claro">
                 <i data-lucide="check-square" class="w-4 h-4"></i>
-                <span>Asistencia registrada</span>
-            </div>
+                <span>Modificar asistencia</span>
+            </a>
         {% else %}
-                <a href="{% url 'registrar_asistencia' %}?curso={{ curso.id }}&fecha={{ fecha_hoy|date:'Y-m-d' }}"
+            <a href="{% url 'registrar_asistencia' %}?curso={{ curso.id }}&fecha={{ fecha_hoy|date:'Y-m-d' }}"
                class="group flex items-center justify-center space-x-1.5 py-3 bg-azul-primario hover:bg-azul-profundo text-blanco-tarjeta font-semibold text-xs transition-colors border-r border-azul-primario">
                 <i data-lucide="check-square" class="w-4 h-4 transition-transform duration-200 ease-out group-hover:scale-110 origin-center active:scale-95"></i>
                 <span>Registrar asistencia</span>
