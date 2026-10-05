@@ -70,8 +70,14 @@
         {% endif %}
     </div>
 
-    <a href="{% url 'asistencia' %}"
-        class="mt-7 block rounded-full bg-azul-primario px-5 py-3 text-sm font-semibold text-white hover:bg-azul-profundo">
-        Volver a asistencia
-    </a>
+    <div class="mt-7 grid gap-3 sm:grid-cols-2">
+        <a href="{% url 'registrar_asistencia' %}?curso={{ curso.id }}&fecha={{ fecha|date:'Y-m-d' }}&jornada={{ jornada }}"
+            class="block rounded-full border border-azul-medio px-5 py-3 text-center text-sm font-semibold text-azul-profundo hover:bg-azul-fondo">
+            Modificar asistencia
+        </a>
+        <a href="{% url 'asistencia' %}"
+            class="block rounded-full bg-azul-primario px-5 py-3 text-center text-sm font-semibold text-white hover:bg-azul-profundo">
+            Volver a asistencia
+        </a>
+    </div>
 </div>

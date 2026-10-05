@@ -31,8 +31,7 @@ def pagina_asistencia(request):
             if curso.estado_asistencia == estado_filtro
         ]
 
-    cursos = [curso for curso in cursos if curso.pendiente]
-    cursos_pendientes = cursos
+    cursos_pendientes = [curso for curso in cursos if curso.pendiente]
     paginator = Paginator(cursos, 12)
     page_obj = paginator.get_page(request.GET.get("page"))
 

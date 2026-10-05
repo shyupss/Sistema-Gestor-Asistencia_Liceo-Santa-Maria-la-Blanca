@@ -1,0 +1,12 @@
+<button type="button"
+    @click="seccionActiva = '{{ seccion }}'"
+    class="w-full"
+>
+    <span
+        class="inline-block py-1 font-semibold text-gris-texto border-b-2 transition-colors text-sm md:text-base"
+        :class="seccionActiva === '{{ seccion }}' ? 'border-b-azul-primario text-negro-texto' : 'border-b-transparent hover:border-b-azul-primario hover:text-negro-texto'"
+    >
+        <span class="hidden md:inline">{{ label }}</span>
+        <span class="inline md:hidden">{% if seccion == 'actividad_reciente' %}{{ label|truncatewords:1|slice:":-2" }}{% else %}{{ label }}{% endif %}</span>
+    </span>
+</button>

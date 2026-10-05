@@ -1,0 +1,111 @@
+{% include 'monitoreo/components/section-title.html' with icon='calendar-check' title='Asistencia' %}
+
+
+<div class="mt-4 flex flex-col gap-4 lg:grid lg:grid-cols-12 lg:grid-flow-dense lg:gap-4">
+
+    <!-- % Asistencia general -->
+    <div class="flex flex-col justify-center rounded-lg bg-blanco-tarjeta px-6 py-4 shadow-sm lg:col-span-4 lg:h-[180px]">
+        <div class="flex items-center justify-between gap-2">
+            <div>
+                <p class="text-base font-semibold text-azul">Asistencia general</p>
+                <p class="text-5xl font-semibold text-azul-profundo">{{ asistencia_general.porcentaje }}%</p>
+                <p class="text-xs text-gris-texto">{{ asistencia_general.periodo }}</p>
+            </div>
+            <!-- Gráfico de dona -->
+            <div class="relative h-20 w-20 shrink-0">
+                <canvas id="grafico-asistencia-general"></canvas>
+            </div>
+        </div>
+        <p class="mt-2 text-xs text-gris-texto">Meta: {{ asistencia_general.meta }}%</p>
+    </div>
+    {{ asistencia_general|json_script:"datos-asistencia-general" }}
+ 
+    <!-- Evolución de asistencia -->
+    <div class="rounded-lg bg-blanco-tarjeta p-4 shadow-sm lg:col-span-8 lg:h-[180px]">
+        <p class="text-base font-semibold text-azul">Evolución de asistencia</p>
+
+        <!-- Gráfico de barras -->
+        <div class="relative mt-2 h-32 lg:h-[calc(100%-2rem)]">
+            <canvas id="grafico-evolucion-asistencia"></canvas>
+        </div>
+    </div>
+    {{ evolucion_asistencia|json_script:"datos-evolucion-asistencia" }}
+ 
+    <!-- Nivel de asistencia por curso -->
+    <div class="rounded-lg bg-blanco-tarjeta p-4 shadow-sm lg:col-span-12">
+        <p class="text-base font-semibold text-azul">Nivel de asistencia por curso</p>
+
+        <!-- Grilla de tarjetas de curso -->
+        <div class="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-8">
+            {% for curso in asistencia_por_curso %}
+                <div class="rounded-lg p-3 text-center
+                    {% if curso.porcentaje == None %}bg-gris-ultraclaro
+                    {% elif curso.porcentaje >= 85 %}bg-verde-fondo
+                    {% elif curso.porcentaje >= 70 %}bg-amarillo-fondo
+                    {% else %}bg-rojo-fondo{% endif %}">
+                    <p class="text-xs font-medium
+                        {% if curso.porcentaje == None %}text-gris-texto
+                        {% elif curso.porcentaje >= 85 %}text-verde-oscuro
+                        {% elif curso.porcentaje >= 70 %}text-amarillo-oscuro
+                        {% else %}text-rojo-oscuro{% endif %}">{{ curso.curso }}</p>
+                    <p class="text-lg font-semibold
+                        {% if curso.porcentaje == None %}text-gris-texto
+                        {% elif curso.porcentaje >= 85 %}text-verde-oscuro
+                        {% elif curso.porcentaje >= 70 %}text-amarillo-oscuro
+                        {% else %}text-rojo-oscuro{% endif %}">
+                        {% if curso.porcentaje == None %}—{% else %}{{ curso.porcentaje }}%{% endif %}
+                    </p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+ 
+    <!-- Calendario de asistencia -->
+    <div class="rounded-lg bg-blanco-tarjeta p-4 shadow-sm lg:col-span-6 lg:row-span-2">
+        <p class="text-base font-semibold text-azul">Calendario de asistencia</p>
+        <div class="mt-2 flex h-24 items-center justify-center rounded-lg border border-dashed border-gris-claro text-xs text-gris-texto lg:h-[calc(100%-2rem)]">
+            Contenido pendiente
+        </div>
+    </div>
+ 
+    <!-- Cursos pendientes -->
+    <div class="rounded-lg bg-blanco-tarjeta p-4 shadow-sm lg:col-span-6 lg:row-span-2">
+        <div class="flex items-center justify-between">
+            <p class="text-base font-semibold text-azul">Cursos pendientes ({{ cursos_pendientes|length }})</p>
+            <a href="{% url 'asistencia' %}">   
+                <span class="flex flex-row items-center gap-1 text-xs text-azul hover:text-azul-claro transition-colors">
+                    Ver todo
+                    <i data-lucide="arrow-right" class="w-3 h-3"></i>
+                </span>
+            </a>
+        </div>
+        <ul class="space-y-1.5 mt-3">
+            {% for curso in cursos_pendientes %}
+            <li>
+                <a href="{{ curso.url }}" class="group flex items-center justify-between rounded-lg border border-gris-claro px-3 py-2 text-sm text-negro-texto transition-colors hover:bg-blanco-fondo hover:border-azul">
+                    <span class="flex items-center gap-3">
+                        <div class="p-1.5 rounded-lg bg-azul-fondo ">
+                            <i data-lucide="graduation-cap" class="h-4 w-4 text-azul-profundo group-hover:text-azul"></i>
+                        </div>
+                        {{ curso.nombre }}
+                    </span>
+                    <i data-lucide="chevron-right" class="h-4 w-4 text-gris-iconos"></i>
+                </a>
+            </li>
+            {% empty %}
+            <li class="text-sm text-gris-texto">Todos los cursos tienen pase de lista registrado.</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const datosAsistenciaGeneral = JSON.parse(document.getElementById('datos-asistencia-general').textContent);
+        crearDonut('grafico-asistencia-general', datosAsistenciaGeneral.porcentaje);
+ 
+        const datosEvolucion = JSON.parse(document.getElementById('datos-evolucion-asistencia').textContent);
+        crearBarras('grafico-evolucion-asistencia', datosEvolucion.labels, datosEvolucion.valores);
+    });
+</script>

@@ -28,9 +28,9 @@
 
 		<section class="overflow-hidden rounded-xl border border-gris-claro bg-blanco-tarjeta shadow-sm">
 			<div class="flex items-center justify-between border-b border-gris-claro px-5 py-4">
-				<h2 class="flex items-center gap-2 text-base font-bold text-negro-texto">
+					<h2 class="flex items-center gap-2 text-base font-bold text-negro-texto">
 					<i data-lucide="clipboard-list" class="h-4 w-4 text-azul-profundo"></i>
-					Cursos pendientes
+						Cursos del período
 				</h2>
 				<span class="text-[10px] text-gris-texto">{{ total_cursos_registrados }} de {{ total_cursos_periodo }} cursos registrados</span>
 			</div>
@@ -38,7 +38,7 @@
 				{% for curso in page_obj %}
 					{% include "asistencia/components/tarjeta-curso.html" with curso=curso %}
 				{% empty %}
-					<p class="col-span-full py-8 text-center text-sm text-gris-texto">No hay cursos pendientes para hoy.</p>
+					<p class="col-span-full py-8 text-center text-sm text-gris-texto">No hay cursos disponibles para hoy.</p>
 				{% endfor %}
 			</div>
 			<div class="border-t border-gris-claro px-5 py-3 text-right">
