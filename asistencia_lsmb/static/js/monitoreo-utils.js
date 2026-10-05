@@ -72,3 +72,68 @@ function crearBarras(canvasId, labels, valores, color = PALETA.azulPrimario) {
         },
     });
 }
+
+
+function crearDonutSegmentos(canvasId, valores, colores) {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) return null;
+ 
+    return new Chart(canvas, {
+        type: 'doughnut',
+        data: {
+            datasets: [{
+                data: valores,
+                backgroundColor: colores,
+                borderWidth: 0,
+            }],
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '65%',
+            plugins: {
+                legend: { display: false },
+                tooltip: { enabled: false },
+            },
+        },
+    });
+}
+
+function crearLinea(canvasId, labels, valores, opciones = {}) {
+    const { color = PALETA.rojo, sufijo = '' } = opciones;
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) return null;
+ 
+    return new Chart(canvas, {
+        type: 'line',
+        data: {
+            labels,
+            datasets: [{
+                data: valores,
+                borderColor: color,
+                backgroundColor: color + '22', // relleno semi-transparente bajo la línea
+                fill: true,
+                tension: 0.3,
+                pointRadius: 3,
+                pointBackgroundColor: color,
+            }],
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { callback: (valor) => valor + sufijo },
+                    grid: { color: PALETA.grisClaro },
+                },
+                x: {
+                    grid: { display: false },
+                },
+            },
+        },
+    });
+}
