@@ -19,8 +19,9 @@
                 {% endcomment %}
                 <div class="flex items-center gap-3 rounded-lg border border-gris-claro px-3 py-2.5">
                     <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full 
-                        {% if evento.tipo == 'alerta.emitida' %}bg-rojo-fondo text-rojo-oscuro
-                        {% elif evento.tipo == 'justificacion.nueva' %}bg-verde-fondo text-verde-oscuro
+                        {% if evento.tipo == 'alerta.emitida' or evento.tipo == 'justificacion.rechazada' or evento.tipo == 'retiro.rechazada' %}bg-rojo-fondo text-rojo-oscuro
+                        {% elif evento.tipo == 'justificacion.aceptada' or evento.tipo == 'retiro.aceptado' %}bg-verde-fondo text-verde-oscuro
+                        {% elif evento.tipo == 'justificacion.nuevo' or evento.tipo == 'retiro.nuevo' %}bg-azul-fondo text-azul-profundo
                         {% elif evento.tipo == 'asistencia.registrada' %}bg-azul-fondo text-azul-profundo
                         {% else %}bg-azul-fondo text-azul-profundo
                         {% endif %}
@@ -29,7 +30,10 @@
                         <i 
                             data-lucide="
                             {% if evento.tipo == 'alerta.emitida' %}alert-triangle
-                            {% elif evento.tipo == 'justificacion.nueva' %}file-check
+                            {% elif evento.tipo == 'justificacion.aceptada' or evento.tipo == 'retiro.aceptado' %}file-check-2
+                            {% elif evento.tipo == 'justificacion.rechazada' or evento.tipo == 'retiro.rechazada' %}file-x-2
+                            {% elif evento.tipo == 'justificacion.nuevo' %}file-plus-2
+                            {% elif evento.tipo == 'retiro.nuevo' %}log-out
                             {% elif evento.tipo == 'asistencia.registrada' %}calendar-check
                             {% else %}file-text
                             {% endif %}" 
@@ -42,9 +46,15 @@
                                 Se emitió una alerta <span class="text-rojo">{{ evento.nivel }}</span> 
                                 para <span class="text-azul">{{ evento.alumno }} - {{ evento.curso }}</span> 
                                 por <span class="text-azul">{{ evento.motivo }}</span>
-                            {% elif evento.tipo == 'justificacion.nueva' %}
-                                <span class="text-azul">{{ evento.autor }}</span> ingresó una nueva justificación
+                            {% elif evento.tipo == 'justificacion.nuevo' or evento.tipo == 'retiro.nuevo' %}
+                                <span class="text-azul">{{ evento.autor }}</span> registró un nuevo {{ evento.nombre_registro }}
                                 para <span class="text-azul">{{ evento.alumno }} - {{ evento.curso }}</span>
+                            {% elif evento.tipo == 'justificacion.aceptada' or evento.tipo == 'retiro.aceptado' %}
+                                <span class="text-verde-oscuro">{{ evento.autor }}</span> aceptó el {{ evento.nombre_registro }}
+                                de <span class="text-azul">{{ evento.alumno }} - {{ evento.curso }}</span>
+                            {% elif evento.tipo == 'justificacion.rechazada' or evento.tipo == 'retiro.rechazada' %}
+                                <span class="text-rojo-oscuro">{{ evento.autor }}</span> rechazó el {{ evento.nombre_registro }}
+                                de <span class="text-azul">{{ evento.alumno }} - {{ evento.curso }}</span>
                             {% elif evento.tipo == 'asistencia.registrada' %}
                                 <span class="text-azul">{{ evento.autor }}</span> registró la asistencia
                                 para el curso <span class="text-azul">{{ evento.curso }}</span>
