@@ -39,12 +39,19 @@ def perfil_curso(request, curso_id):
         alumno__matriculas__curso=curso,
         alumno__matriculas__periodo=curso.periodo,
     ).distinct()
+    ausencia_no_cubierta = (
+        Q(tipo_asistencia__cuenta_como_ausencia=True)
+        & (
+            Q(justificacion__isnull=True)
+            | Q(justificacion__estado_solicitud__cubre_ausencia=False)
+        )
+    )
     total_dias_clase = pasos_lista.values("fecha").distinct().count()
     total_ausencias = asistencias.filter(
         tipo_asistencia__cuenta_como_ausencia=True,
     ).count()
     total_registros = asistencias.count()
-    total_presentes = total_registros - total_ausencias
+    total_presentes = total_registros - asistencias.filter(ausencia_no_cubierta).count()
     estados_asistencia = obtener_estados_asistencia()
     registros_por_alumno = {
         registro["alumno_id"]: registro
@@ -52,7 +59,7 @@ def perfil_curso(request, curso_id):
             total=Count("id", distinct=True),
             ausencias=Count(
                 "id",
-                filter=Q(tipo_asistencia__cuenta_como_ausencia=True),
+                filter=ausencia_no_cubierta,
                 distinct=True,
             ),
         )
@@ -140,7 +147,7 @@ def perfil_curso(request, curso_id):
         )
         registros_mes_total = registros_mes.count()
         ausencias_mes = registros_mes.filter(
-            tipo_asistencia__cuenta_como_ausencia=True,
+            ausencia_no_cubierta,
         ).count()
         porcentaje_mes = (
             round((registros_mes_total - ausencias_mes) * 100 / registros_mes_total)
@@ -239,6 +246,13 @@ def perfil_alumno(request, alumno_id):
         .select_related("tipo_asistencia", "paso_lista", "justificacion")
         .order_by("-paso_lista__fecha")
     )
+    ausencia_no_cubierta = (
+        Q(tipo_asistencia__cuenta_como_ausencia=True)
+        & (
+            Q(justificacion__isnull=True)
+            | Q(justificacion__estado_solicitud__cubre_ausencia=False)
+        )
+    )
     total_dias_clase = registros_asistencia.values("paso_lista_id").distinct().count()
     total_ausencias = registros_asistencia.filter(
         tipo_asistencia__cuenta_como_ausencia=True
@@ -263,7 +277,7 @@ def perfil_alumno(request, alumno_id):
         )
         dias_mes = registros_mes.values("paso_lista_id").distinct().count()
         ausencias_mes = registros_mes.filter(
-            tipo_asistencia__cuenta_como_ausencia=True
+            ausencia_no_cubierta
         ).count()
         porcentaje_mes = (
             round((dias_mes - ausencias_mes) * 100 / dias_mes)
@@ -336,7 +350,10 @@ def perfil_alumno(request, alumno_id):
             else 0
         ),
         "porcentaje_asistencia": (
-            round((total_dias_clase - total_ausencias) * 100 / total_dias_clase)
+            round((
+                total_dias_clase
+                - registros_asistencia.filter(ausencia_no_cubierta).count()
+            ) * 100 / total_dias_clase)
             if total_dias_clase
             else None
         ),

@@ -1,4 +1,5 @@
 from django.contrib import messages
+from django.db import transaction
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
@@ -6,6 +7,9 @@ from django.utils import timezone
 from babel.dates import format_datetime, format_date
 
 from asistencia.models import Estados_Solicitud, Justificaciones
+from asistencia.models import Asistencia_Alumnos
+from asistencia.services.asistencia_service import recalcular_estado_alumno
+from academico.models import PeriodoAcademico
 
 def pagina_justificaciones_ficha(request):
     id_justificacion = request.GET.get('id')
@@ -25,9 +29,24 @@ def pagina_justificaciones_ficha(request):
 
         if nombre_estado and not justificacion.estado_solicitud.es_estado_final:
             estado = get_object_or_404(Estados_Solicitud, nombre__iexact=nombre_estado)
-            justificacion.estado_solicitud = estado
-            justificacion.fecha_resolucion = timezone.now()
-            justificacion.save(update_fields=['estado_solicitud', 'fecha_resolucion'])
+            with transaction.atomic():
+                justificacion.estado_solicitud = estado
+                justificacion.fecha_resolucion = timezone.now()
+                justificacion.save(update_fields=['estado_solicitud', 'fecha_resolucion'])
+
+                if estado.cubre_ausencia:
+                    asistencias = Asistencia_Alumnos.objects.filter(
+                        alumno=justificacion.alumno,
+                        paso_lista__fecha__gte=justificacion.fecha_inicio,
+                        paso_lista__fecha__lte=justificacion.fecha_fin,
+                        tipo_asistencia__cuenta_como_ausencia=True,
+                    )
+                    asistencias.update(justificacion=justificacion)
+                    periodos = PeriodoAcademico.objects.filter(
+                        id__in=asistencias.values("paso_lista__curso__periodo_id")
+                    )
+                    for periodo in periodos:
+                        recalcular_estado_alumno(justificacion.alumno, periodo)
             messages.success(request, f'La justificación fue {nombre_estado}.')
         else:
             messages.error(request, 'La acción solicitada no es válida.')

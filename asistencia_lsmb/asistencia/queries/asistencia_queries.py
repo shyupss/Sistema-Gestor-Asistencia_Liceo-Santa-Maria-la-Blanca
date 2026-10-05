@@ -42,6 +42,10 @@ def obtener_cursos(fecha=None):
             "paso_lista__asistencia_alumnos",
             filter=Q(paso_lista__fecha__year=fecha.year)
             & Q(paso_lista__asistencia_alumnos__tipo_asistencia__cuenta_como_ausencia=True)
+            & (
+                Q(paso_lista__asistencia_alumnos__justificacion__isnull=True)
+                | Q(paso_lista__asistencia_alumnos__justificacion__estado_solicitud__cubre_ausencia=False)
+            )
             & Q(paso_lista__asistencia_alumnos__alumno__matriculas__periodo__anio=fecha.year)
             & (Q(paso_lista__asistencia_alumnos__alumno__matriculas__fecha_termino__isnull=True)
                | Q(paso_lista__asistencia_alumnos__alumno__matriculas__fecha_termino__gt=fecha)),

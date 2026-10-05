@@ -66,7 +66,13 @@ def recalcular_estado_alumno(alumno, periodo):
         total=Count("id"),
         ausencias=Count(
             "id",
-            filter=Q(tipo_asistencia__cuenta_como_ausencia=True),
+            filter=(
+                Q(tipo_asistencia__cuenta_como_ausencia=True)
+                & (
+                    Q(justificacion__isnull=True)
+                    | Q(justificacion__estado_solicitud__cubre_ausencia=False)
+                )
+            ),
         ),
     )
 

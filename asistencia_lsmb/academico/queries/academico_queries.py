@@ -63,6 +63,9 @@ def obtener_alumnos(fecha):
             "asistencia_alumnos",
             filter=asistencia_del_anio & Q(
                 asistencia_alumnos__tipo_asistencia__cuenta_como_ausencia=True,
+            ) & (
+                Q(asistencia_alumnos__justificacion__isnull=True)
+                | Q(asistencia_alumnos__justificacion__estado_solicitud__cubre_ausencia=False)
             ),
             distinct=True,
         ),
@@ -129,7 +132,13 @@ def obtener_asistencia_curso(curso, fecha):
         total=Count("pk", distinct=True),
         ausencias=Count(
             "pk",
-            filter=Q(tipo_asistencia__cuenta_como_ausencia=True),
+            filter=(
+                Q(tipo_asistencia__cuenta_como_ausencia=True)
+                & (
+                    Q(justificacion__isnull=True)
+                    | Q(justificacion__estado_solicitud__cubre_ausencia=False)
+                )
+            ),
             distinct=True,
         ),
     )
