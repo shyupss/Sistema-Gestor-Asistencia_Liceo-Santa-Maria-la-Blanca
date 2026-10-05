@@ -1,6 +1,6 @@
 {# Llamada: {% include 'academico/components/pastilla.html' with texto=texto color=color %} #}
 
-<a href="?estado={{ nivel|urlencode }}"
+<a href="{% if estado_filtro == nivel %}{% querystring estado=None page=None %}{% else %}{% querystring estado=nivel page=None %}{% endif %}"
     class="relative p-2.5 rounded-lg flex items-center justify-center gap-3 cursor-pointer group border
     {% if nivel == 'Óptimo' or nivel == 'Optimo' %}
         border-verde-fondo bg-verde-fondo text-verde-oscuro hover:border-verde-oscuro
