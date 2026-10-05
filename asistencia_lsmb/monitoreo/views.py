@@ -1,112 +1,19 @@
 from django.shortcuts import render
 from django.utils import timezone
-from monitoreo.services.monitoreo_service import preparar_dashboard
+from monitoreo.services.monitoreo_service import (
+    preparar_actividad_reciente,
+    preparar_dashboard,
+    preparar_justificaciones,
+)
 
 def pagina_monitoreo(request):
     fecha_hoy = timezone.localdate()
-
-    # TODO: Borrar info hardcodeada
-    justificaciones_pendientes = [
-        {
-            "alumno": "Nombre Alumno",
-            "motivo": "Cita al médico",
-            "tiempo": "1h",
-            "url": "#",
-        },
-        {
-            "alumno": "Nombre Alumno",
-            "motivo": "Cita al médico",
-            "tiempo": "2h",
-            "url": "#",
-        },
-        {
-            "alumno": "Nombre Alumno",
-            "motivo": "Cita al médico",
-            "tiempo": "2h 30m",
-            "url": "#",
-        },
-        {
-            "alumno": "Nombre Alumno",
-            "motivo": "Cita al médico",
-            "tiempo": "5h",
-            "url": "#",
-        },
-        {
-            "alumno": "Nombre Alumno",
-            "motivo": "Cita al médico",
-            "tiempo": "9h 12m",
-            "url": "#",
-        },
-        {
-            "alumno": "Nombre Alumno",
-            "motivo": "Cita al médico",
-            "tiempo": "1d",
-            "url": "#",
-        },
-        {
-            "alumno": "Nombre Alumno",
-            "motivo": "Cita al médico",
-            "tiempo": "2d",
-            "url": "#",
-        },
-        {
-            "alumno": "Nombre Alumno",
-            "motivo": "Cita al médico",
-            "tiempo": "2d",
-            "url": "#",
-        },
-        {
-            "alumno": "Nombre Alumno",
-            "motivo": "Cita al médico",
-            "tiempo": "3d",
-            "url": "#",
-        },
-        {
-            "alumno": "Nombre Alumno",
-            "motivo": "Cita al médico",
-            "tiempo": "5d",
-            "url": "#",
-        },
-    ]
 
     contexto = {
         "page_title": "Monitoreo",
         "fecha_hoy": fecha_hoy,
         **preparar_dashboard(fecha_hoy),
-
-        # TODO: Cambiar info por real
-        # JUSTIFICACIONES
-        "justificaciones_pendientes": justificaciones_pendientes,
-        "pendientes_count": len(justificaciones_pendientes),
-        "prom_resolucion": "1.8 días",
-
-        # ACTIVIDAD RECIENTE
-        "actividad_reciente": [
-            {
-                "tipo": "alerta.emitida",
-                "nivel": "crítica",
-                "alumno": "Alumno",
-                "curso": "Curso",
-                "motivo": "motivo",
-                "autor": "Sistema",
-                "rol_autor": None,
-                "tiempo": "1h",
-            },
-            {
-                "tipo": "justificacion.nueva",
-                "alumno": "Alumno",
-                "curso": "Curso",
-                "autor": "Funcionario",
-                "rol_autor": "Inspectoría",
-                "tiempo": "1d 4h",
-            },
-            {
-                "tipo": "asistencia.registrada",
-                "curso": "Curso",
-                "autor": "Funcionario",
-                "rol_autor": "Inspectoría",
-                "tiempo": "1d 6h",
-            },
-        ],
+        **preparar_justificaciones(fecha_hoy),
+        "actividad_reciente": preparar_actividad_reciente(fecha_hoy),
     }
     return render(request, "monitoreo/base.html", contexto)

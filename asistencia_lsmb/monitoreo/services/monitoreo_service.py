@@ -1,18 +1,23 @@
 import unicodedata
-from calendar import month_abbr
 from datetime import date
 
+from django.utils import timezone
 from django.urls import reverse
 
 from monitoreo.queries.monitoreo_queries import (
     contar_asistencias,
     contar_matriculas_activas,
     obtener_alertas,
+    obtener_alertas_recientes,
     obtener_asistencias_periodo,
     obtener_cursos_periodo,
     obtener_estados_alumnos,
     obtener_historial_alertas,
+    obtener_justificaciones_pendientes,
+    obtener_justificaciones_recientes,
+    obtener_justificaciones_resueltas,
     obtener_periodo_actual,
+    obtener_pasos_recientes,
     obtener_pasos_periodo,
 )
 
@@ -45,6 +50,98 @@ def _rango_periodo(periodo, fecha):
     inicio = max(periodo.fecha_inicio, date(fecha.year, periodo.fecha_inicio.month, 1))
     fin = min(periodo.fecha_fin, fecha)
     return inicio, fin
+
+
+def _tiempo_transcurrido(fecha, ahora=None):
+    ahora = ahora or timezone.now()
+    diferencia = max(ahora - fecha, timezone.timedelta())
+    dias = diferencia.days
+    horas = diferencia.seconds // 3600
+    minutos = (diferencia.seconds % 3600) // 60
+    if dias:
+        return f"{dias}d" if not horas else f"{dias}d {horas}h"
+    if horas:
+        return f"{horas}h" if not minutos else f"{horas}h {minutos}m"
+    return f"{minutos}m"
+
+
+def _curso_alumno(alumno, periodo_id=None):
+    matriculas = alumno.matriculas.select_related("curso")
+    if periodo_id:
+        matriculas = matriculas.filter(periodo_id=periodo_id)
+    return matriculas.filter(fecha_termino__isnull=True).first() or matriculas.first()
+
+
+def preparar_justificaciones(fecha):
+    pendientes = list(obtener_justificaciones_pendientes(fecha)[:10])
+    resueltas = list(obtener_justificaciones_resueltas(fecha))
+    ahora = timezone.now()
+    tiempos = [
+        (item.fecha_resolucion - item.fecha_registro).total_seconds() / 86400
+        for item in resueltas
+        if item.fecha_resolucion and item.fecha_registro
+    ]
+    promedio = f"{sum(tiempos) / len(tiempos):.1f} días" if tiempos else "—"
+
+    return {
+        "justificaciones_pendientes": [
+            {
+                "alumno": item.alumno.nombre,
+                "motivo": item.resumen or item.motivo or "Sin motivo indicado",
+                "tiempo": _tiempo_transcurrido(item.fecha_registro, ahora),
+                "url": reverse("perfil_alumno", args=[item.alumno_id]),
+            }
+            for item in pendientes
+        ],
+        "pendientes_count": len(pendientes),
+        "prom_resolucion": promedio,
+    }
+
+
+def preparar_actividad_reciente(fecha):
+    eventos = []
+    ahora = timezone.now()
+
+    for alerta in obtener_alertas_recientes(fecha):
+        matricula = _curso_alumno(alerta.alumno, alerta.periodo_id)
+        curso = matricula.curso if matricula else None
+        eventos.append({
+            "fecha": alerta.fecha,
+            "tipo": "alerta.emitida",
+            "nivel": alerta.estado.nombre.lower(),
+            "alumno": alerta.alumno.nombre,
+            "curso": f"{curso.nivel_romano}° Medio {curso.grupo}" if curso else "Sin curso",
+            "motivo": "bajo porcentaje de asistencia",
+            "autor": alerta.funcionario.nombre,
+            "rol_autor": alerta.funcionario.cargo.nombre,
+            "tiempo": _tiempo_transcurrido(alerta.fecha, ahora),
+        })
+
+    for justificacion in obtener_justificaciones_recientes(fecha):
+        matricula = _curso_alumno(justificacion.alumno)
+        curso = matricula.curso if matricula else None
+        funcionario = justificacion.funcionario_resuelve
+        eventos.append({
+            "fecha": justificacion.fecha_registro,
+            "tipo": "justificacion.nueva",
+            "alumno": justificacion.alumno.nombre,
+            "curso": f"{curso.nivel_romano}° Medio {curso.grupo}" if curso else "Sin curso",
+            "autor": funcionario.nombre if funcionario else "Sistema",
+            "rol_autor": funcionario.cargo.nombre if funcionario else None,
+            "tiempo": _tiempo_transcurrido(justificacion.fecha_registro, ahora),
+        })
+
+    for paso in obtener_pasos_recientes(fecha):
+        eventos.append({
+            "fecha": paso.hora_registro,
+            "tipo": "asistencia.registrada",
+            "curso": f"{paso.curso.nivel_romano}° Medio {paso.curso.grupo}",
+            "autor": paso.funcionario.nombre,
+            "rol_autor": paso.funcionario.cargo.nombre,
+            "tiempo": _tiempo_transcurrido(paso.hora_registro, ahora),
+        })
+
+    return sorted(eventos, key=lambda evento: evento["fecha"], reverse=True)[:10]
 
 
 def _datos_asistencia(periodo, cursos, fecha):

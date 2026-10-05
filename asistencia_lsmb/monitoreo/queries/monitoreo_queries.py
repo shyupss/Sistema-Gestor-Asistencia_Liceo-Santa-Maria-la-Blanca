@@ -2,7 +2,7 @@ from django.db.models import Count, Q
 
 from academico.models import Curso, Matricula
 from alertas.models import Alerta, EstadoAlumno, HistorialEstadoAlumno
-from asistencia.models import Asistencia_Alumnos, Paso_Lista
+from asistencia.models import Asistencia_Alumnos, Justificaciones, Paso_Lista
 
 
 def obtener_periodo_actual(fecha):
@@ -73,3 +73,43 @@ def contar_matriculas_activas(curso, fecha):
     ).filter(
         Q(fecha_termino__isnull=True) | Q(fecha_termino__gt=fecha),
     ).count()
+
+
+def obtener_justificaciones_pendientes(fecha):
+    return Justificaciones.objects.filter(
+        estado_solicitud__nombre__iexact="pendiente",
+        fecha_registro__date__lte=fecha,
+    ).select_related(
+        "alumno", "estado_solicitud"
+    ).order_by("fecha_registro", "id")
+
+
+def obtener_justificaciones_resueltas(fecha):
+    return Justificaciones.objects.filter(
+        fecha_registro__date__lte=fecha,
+        fecha_resolucion__isnull=False,
+    ).select_related("alumno", "funcionario_resuelve").order_by("-fecha_resolucion")
+
+
+def obtener_justificaciones_recientes(fecha):
+    return Justificaciones.objects.filter(
+        fecha_registro__date__lte=fecha,
+    ).select_related(
+        "alumno", "funcionario_resuelve"
+    ).order_by("-fecha_registro", "-id")[:10]
+
+
+def obtener_pasos_recientes(fecha):
+    return Paso_Lista.objects.filter(
+        fecha__lte=fecha,
+    ).select_related(
+        "curso", "funcionario", "funcionario__cargo"
+    ).order_by("-hora_registro", "-id")[:10]
+
+
+def obtener_alertas_recientes(fecha):
+    return Alerta.objects.filter(
+        fecha__date__lte=fecha,
+    ).select_related(
+        "alumno", "estado", "funcionario", "funcionario__cargo", "periodo"
+    ).order_by("-fecha", "-id")[:10]
