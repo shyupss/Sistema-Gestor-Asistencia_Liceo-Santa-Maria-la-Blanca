@@ -26,6 +26,35 @@ from .forms import (
 )
 
 
+def _indices_apoderados(post_data):
+    indices = []
+    for key in post_data:
+        if not key.startswith("apoderado_"):
+            continue
+        if key.endswith("-rut"):
+            suffix_length = len("-rut")
+        elif key.endswith("_rut"):
+            suffix_length = len("_rut")
+        else:
+            continue
+        try:
+            indices.append(int(key[len("apoderado_"):-suffix_length]))
+        except ValueError:
+            continue
+    return sorted(set(indices))
+
+
+def _guardar_apoderado(form):
+    apoderado, _ = Apoderado.objects.get_or_create(
+        rut=form.cleaned_data["rut"],
+    )
+    apoderado.nombre = form.cleaned_data["nombre"]
+    apoderado.telefono = form.cleaned_data.get("telefono")
+    apoderado.email = form.cleaned_data.get("email")
+    apoderado.save()
+    return apoderado
+
+
 # ─────────────────────────── Página principal ────────────────────────────────
 
 def pagina_administracion(request):
@@ -138,11 +167,9 @@ def matricular_alumno(request):
 
         apoderado_forms = []
         relacion_forms = []
-        i = 0
-        while f"apoderado_{i}_rut" in request.POST:
+        for i in _indices_apoderados(request.POST):
             apoderado_forms.append(ApoderadoForm(request.POST, prefix=f"apoderado_{i}"))
             relacion_forms.append(AlumnoApoderadoForm(request.POST, prefix=f"relacion_{i}"))
-            i += 1
 
         all_valid = alumno_form.is_valid() and matricula_form.is_valid()
         apoderados_valid = all(f.is_valid() for f in apoderado_forms + relacion_forms)
@@ -157,14 +184,7 @@ def matricular_alumno(request):
                 matricula.save()
 
                 for ap_form, rel_form in zip(apoderado_forms, relacion_forms):
-                    apoderado, _ = Apoderado.objects.get_or_create(
-                        rut=ap_form.cleaned_data["rut"],
-                        defaults={
-                            "nombre": ap_form.cleaned_data["nombre"],
-                            "telefono": ap_form.cleaned_data.get("telefono"),
-                            "email": ap_form.cleaned_data.get("email"),
-                        },
-                    )
+                    apoderado = _guardar_apoderado(ap_form)
                     AlumnoApoderado.objects.create(
                         alumno=alumno,
                         apoderado=apoderado,
@@ -213,9 +233,13 @@ def editar_matricula(request, matricula_id):
 
         apoderado_forms = []
         relacion_forms = []
-        i = 0
-        while f"apoderado_{i}_rut" in request.POST:
-            relacion_inst = list(relaciones_existentes)[i] if i < len(relaciones_existentes) else None
+        relaciones_existentes_lista = list(relaciones_existentes)
+        for posicion, i in enumerate(_indices_apoderados(request.POST)):
+            relacion_inst = (
+                relaciones_existentes_lista[posicion]
+                if posicion < len(relaciones_existentes_lista)
+                else None
+            )
             apoderado_inst = relacion_inst.apoderado if relacion_inst else None
             apoderado_forms.append(
                 ApoderadoForm(request.POST, prefix=f"apoderado_{i}", instance=apoderado_inst)
@@ -223,7 +247,6 @@ def editar_matricula(request, matricula_id):
             relacion_forms.append(
                 AlumnoApoderadoForm(request.POST, prefix=f"relacion_{i}", instance=relacion_inst)
             )
-            i += 1
 
         all_valid = alumno_form.is_valid() and matricula_form.is_valid()
         apoderados_valid = all(f.is_valid() for f in apoderado_forms + relacion_forms)
@@ -234,18 +257,7 @@ def editar_matricula(request, matricula_id):
 
             relaciones_existentes.delete()
             for ap_form, rel_form in zip(apoderado_forms, relacion_forms):
-                apoderado, _ = Apoderado.objects.get_or_create(
-                    rut=ap_form.cleaned_data["rut"],
-                    defaults={
-                        "nombre": ap_form.cleaned_data["nombre"],
-                        "telefono": ap_form.cleaned_data.get("telefono"),
-                        "email": ap_form.cleaned_data.get("email"),
-                    },
-                )
-                apoderado.nombre = ap_form.cleaned_data["nombre"]
-                apoderado.telefono = ap_form.cleaned_data.get("telefono")
-                apoderado.email = ap_form.cleaned_data.get("email")
-                apoderado.save()
+                apoderado = _guardar_apoderado(ap_form)
 
                 AlumnoApoderado.objects.create(
                     alumno=alumno,

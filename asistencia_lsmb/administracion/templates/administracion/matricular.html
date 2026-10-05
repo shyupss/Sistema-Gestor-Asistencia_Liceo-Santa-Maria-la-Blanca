@@ -151,31 +151,31 @@
                     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <div>
                             <label class="mb-1.5 block text-sm font-medium text-negro-texto">RUT <span class="text-rojo ml-0.5">*</span></label>
-                            <input type="text" :name="`apoderado_${i}_rut`" placeholder="12.345.678-9" required
+                            <input type="text" :name="`apoderado_${i}-rut`" placeholder="12.345.678-9" required
                                 class="w-full rounded-lg border border-gris-iconos py-2.5 px-3 text-sm text-negro-texto placeholder:text-gris-iconos focus:border-azul focus:outline-none focus:ring-1 focus:ring-azul">
                         </div>
                         <div>
                             <label class="mb-1.5 block text-sm font-medium text-negro-texto">Nombre <span class="text-rojo ml-0.5">*</span></label>
-                            <input type="text" :name="`apoderado_${i}_nombre`" placeholder="Nombre completo" required
+                            <input type="text" :name="`apoderado_${i}-nombre`" placeholder="Nombre completo" required
                                 class="w-full rounded-lg border border-gris-iconos py-2.5 px-3 text-sm text-negro-texto placeholder:text-gris-iconos focus:border-azul focus:outline-none focus:ring-1 focus:ring-azul">
                         </div>
                         <div>
                             <label class="mb-1.5 block text-sm font-medium text-negro-texto">Teléfono</label>
-                            <input type="text" :name="`apoderado_${i}_telefono`" placeholder="+56 9 1234 5678"
+                            <input type="text" :name="`apoderado_${i}-telefono`" placeholder="+56 9 1234 5678"
                                 class="w-full rounded-lg border border-gris-iconos py-2.5 px-3 text-sm text-negro-texto placeholder:text-gris-iconos focus:border-azul focus:outline-none focus:ring-1 focus:ring-azul">
                         </div>
                         <div>
                             <label class="mb-1.5 block text-sm font-medium text-negro-texto">Correo electrónico</label>
-                            <input type="email" :name="`apoderado_${i}_email`" placeholder="correo@ejemplo.cl"
+                            <input type="email" :name="`apoderado_${i}-email`" placeholder="correo@ejemplo.cl"
                                 class="w-full rounded-lg border border-gris-iconos py-2.5 px-3 text-sm text-negro-texto placeholder:text-gris-iconos focus:border-azul focus:outline-none focus:ring-1 focus:ring-azul">
                         </div>
                         <div>
                             <label class="mb-1.5 block text-sm font-medium text-negro-texto">Relación <span class="text-rojo ml-0.5">*</span></label>
-                            <input type="text" :name="`relacion_${i}_tipo_relacion`" placeholder="Ej: Padre, Madre, Tutor" required
+                            <input type="text" :name="`relacion_${i}-tipo_relacion`" placeholder="Ej: Padre, Madre, Tutor" required
                                 class="w-full rounded-lg border border-gris-iconos py-2.5 px-3 text-sm text-negro-texto placeholder:text-gris-iconos focus:border-azul focus:outline-none focus:ring-1 focus:ring-azul">
                         </div>
                         <div class="flex items-center gap-3 pt-6">
-                            <input type="checkbox" :name="`relacion_${i}_recibe_notificaciones`" value="on"
+                            <input type="checkbox" :name="`relacion_${i}-recibe_notificaciones`" value="on"
                                 class="h-4 w-4 rounded border-gris-iconos text-azul focus:ring-azul">
                             <label class="text-sm font-medium text-negro-texto">Recibe notificaciones</label>
                         </div>
