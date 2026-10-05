@@ -95,7 +95,7 @@ def obtener_justificaciones_recientes(fecha):
     return Justificaciones.objects.filter(
         fecha_registro__date__lte=fecha,
     ).select_related(
-        "alumno", "funcionario_resuelve"
+        "alumno", "estado_solicitud", "funcionario_resuelve"
     ).order_by("-fecha_registro", "-id")[:10]
 
 
