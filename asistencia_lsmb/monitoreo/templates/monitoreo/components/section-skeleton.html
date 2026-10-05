@@ -1,0 +1,13 @@
+<section id="{{ id_seccion }}" class="scroll-mt-24 lg:block" :class="{ 'hidden': seccionActiva !== '{{ id_seccion }}' }">
+    <div class="rounded-xl bg-blanco-tarjeta lg:bg-transparent p-6 lg:p-0 shadow-sm lg:shadow-none">
+        {% if id_seccion == 'asistencia' %}
+            {% include 'monitoreo/pages/asistencia.html' %}
+        {% elif id_seccion == 'alertas' %}
+            {% include 'monitoreo/pages/alertas.html' %}
+        {% elif id_seccion == 'justificaciones' %}
+            {% include 'monitoreo/pages/justificaciones.html' %}
+        {% elif id_seccion == 'actividad_reciente' %}
+            {% include 'monitoreo/pages/actividad-reciente.html' %}
+        {% endif %}
+    </div>
+</section>
