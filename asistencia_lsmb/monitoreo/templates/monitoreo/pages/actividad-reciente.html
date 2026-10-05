@@ -1,8 +1,68 @@
 {% include 'monitoreo/components/section-title.html' with icon='activity' title='Actividad reciente' %}
 
 <div class="mt-4 rounded-lg bg-blanco-tarjeta p-4 shadow-sm">
-    <p class="text-base font-semibold text-azul block lg:hidden">Actividad reciente</p>
-    <div class="mt-2 flex h-24 items-center justify-center rounded-lg border border-dashed border-gris-claro text-xs text-gris-texto">
-        Contenido pendiente
+    <div class="flex items-center gap-2">
+        <p class="text-base font-semibold text-azul">Actividad reciente</p>
+        <span class="rounded-full bg-azul-fondo px-2 py-0.5 text-xs font-semibold text-azul-profundo">
+            {{ actividad_reciente|length|default:0 }}
+        </span>
     </div>
+
+    <ul class="mt-3 space-y-2 border rounded-lg border-gris-ultraclaro p-1.5 lg:flex-1 lg:overflow-y-auto lg:pr-1">
+        {% for evento in actividad_reciente %}
+            <li>
+                <div class="flex items-center gap-3 rounded-lg border border-gris-claro px-3 py-2.5">
+                    <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full 
+                        {% if evento.tipo == 'alerta.emitida' %}bg-rojo-fondo text-rojo-oscuro
+                        {% elif evento.tipo == 'justificacion.nueva' %}bg-verde-fondo text-verde-oscuro
+                        {% elif evento.tipo == 'asistencia.registrada' %}bg-azul-fondo text-azul-profundo
+                        {% else %}bg-azul-fondo text-azul-profundo
+                        {% endif %}
+                        "
+                    >
+                        <i 
+                            data-lucide="
+                            {% if evento.tipo == 'alerta.emitida' %}alert-triangle
+                            {% elif evento.tipo == 'justificacion.nueva' %}file-check
+                            {% elif evento.tipo == 'asistencia.registrada' %}calendar-check
+                            {% else %}file-text
+                            {% endif %}" 
+                            class="h-4 w-4"
+                        ></i>
+                    </span>
+                    <span class="min-w-0 flex-1">
+                        <p class="text-sm text-negro-texto break-words">
+                            {% if evento.tipo == 'alerta.emitida' %}
+                                Se emitió una alerta <span class="text-rojo">{{ evento.nivel }}</span> 
+                                para <span class="text-azul">{{ evento.alumno }} - {{ evento.curso }}</span> 
+                                por <span class="text-azul">{{ evento.motivo }}</span>
+                            {% elif evento.tipo == 'justificacion.nueva' %}
+                                <span class="text-azul">{{ evento.autor }}</span> ingresó una nueva justificación
+                                para <span class="text-azul">{{ evento.alumno }} - {{ evento.curso }}</span>
+                            {% elif evento.tipo == 'asistencia.registrada' %}
+                                <span class="text-azul">{{ evento.autor }}</span> registró la asistencia
+                                para el curso <span class="text-azul">{{ evento.curso }}</span>
+                            {% else %}Evento sin información
+                            {% endif %}
+                        </p>
+                        <p class="text-xs text-gris-texto">
+                            {% if evento.rol_autor %}{{ evento.rol_autor }}{% else %}{{ evento.autor }}{% endif %}
+                        </p>
+                    </span>
+                    <span class="flex shrink-0 items-center gap-1 rounded-full bg-azul-fondo/60 px-2 py-0.5 text-xs font-medium text-azul-profundo">
+                        <i data-lucide="clock" class="h-3 w-3 text-azul"></i>
+                        {{ evento.tiempo }}
+                    </span>
+                </div>
+            </li>
+        {% empty %}
+            <div class="flex flex-col justify-center items-center py-6 text-center">
+                <span class="flex h-10 w-10 items-center justify-center rounded-full bg-verde-claro text-verde-oscuro mb-2">
+                    <i data-lucide="check-circle-2" class="h-5 w-5"></i>
+                </span>
+                <p class="text-sm font-medium text-negro-texto">Al día</p>
+                <p class="text-xs text-gris-texto">No hay justificaciones pendientes por revisar.</p>
+            </div>
+        {% endfor %}
+    </ul>
 </div>

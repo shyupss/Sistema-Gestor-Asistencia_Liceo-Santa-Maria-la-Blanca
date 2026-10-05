@@ -83,9 +83,30 @@ def pagina_monitoreo(request):
         # ACTIVIDAD RECIENTE
         "actividad_reciente": [
             {
-                "tipo": "",
-                
-            }
+                "tipo": "alerta.emitida",
+                "nivel": "crítica",
+                "alumno": "Alumno",
+                "curso": "Curso",
+                "motivo": "motivo",
+                "autor": "Sistema",
+                "rol_autor": None,
+                "tiempo": "1h",
+            },
+            {
+                "tipo": "justificacion.nueva",
+                "alumno": "Alumno",
+                "curso": "Curso",
+                "autor": "Funcionario",
+                "rol_autor": "Inspectoría",
+                "tiempo": "1d 4h",
+            },
+            {
+                "tipo": "asistencia.registrada",
+                "curso": "Curso",
+                "autor": "Funcionario",
+                "rol_autor": "Inspectoría",
+                "tiempo": "1d 6h",
+            },
         ],
     }
     return render(request, "monitoreo/base.html", contexto)
