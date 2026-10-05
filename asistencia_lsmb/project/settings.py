@@ -28,6 +28,12 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 DEBUG = True if os.getenv('DEBUG') else False
 print(DEBUG)
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOST').split(',') if os.getenv('ALLOWED_HOST') else []
+CSRF_TRUSTED_ORIGINS = [
+    origen.strip()
+    for origen in os.getenv('CSRF_TRUSTED_ORIGINS', '').split(',')
+    if origen.strip()
+]
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # Application definition
 
