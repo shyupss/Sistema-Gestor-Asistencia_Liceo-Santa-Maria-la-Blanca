@@ -7,7 +7,21 @@
 <!-- Contenedor principal del contenido -->
 <section 
     class="mx-auto max-w-[90%] px-1 py-5 sm:px-2 sm:py-8"
-    x-data="{ seccionActiva: 'asistencia' }"
+    x-data="{
+        seccionActiva: 'asistencia',
+        init() {
+            const secciones = ['asistencia', 'alertas', 'justificaciones', 'actividad_reciente'];
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(e => {
+                    if (e.isIntersecting) this.seccionActiva = e.target.id;
+                });
+            }, { threshold: 0.4 });
+            secciones.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) observer.observe(el);
+            });
+        }
+    }"
 >
     <!-- Encabezado -->
     {% include 'components/global/page_title.html' with page_title=page_title today=fecha_hoy %}
