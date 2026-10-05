@@ -4,8 +4,15 @@ from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
 
 from academico.models import Alumno, Curso, Matricula
-from academico.queries.academico_queries import obtener_estados_asistencia
-from academico.services.academico_service import clasificar_asistencia
+from academico.queries.academico_queries import (
+    obtener_asistencia_alumnos_curso,
+    obtener_estados_asistencia,
+)
+from academico.services.academico_service import (
+    clasificar_asistencia,
+    promedio_asistencia,
+    porcentaje_asistencia,
+)
 from alertas.models import Alerta, EstadoAlumno, HistorialEstadoAlumno
 from asistencia.models import Asistencia_Alumnos, Justificaciones, Paso_Lista
 from asistencia.queries.asistencia_queries import obtener_alumnos_curso
@@ -30,6 +37,7 @@ def perfil_curso(request, curso_id):
         pk=curso_id,
     )
     matriculas = list(obtener_alumnos_curso(curso, fecha_hoy))
+    alumno_ids = [matricula.alumno_id for matricula in matriculas]
     pasos_lista = Paso_Lista.objects.filter(
         curso=curso,
         fecha__year=fecha_hoy.year,
@@ -39,6 +47,11 @@ def perfil_curso(request, curso_id):
         alumno__matriculas__curso=curso,
         alumno__matriculas__periodo=curso.periodo,
     ).distinct()
+    asistencias_alumnos = obtener_asistencia_alumnos_curso(
+        curso,
+        alumno_ids,
+        fecha_hoy,
+    )
     ausencia_no_cubierta = (
         Q(tipo_asistencia__cuenta_como_ausencia=True)
         & (
@@ -55,7 +68,7 @@ def perfil_curso(request, curso_id):
     estados_asistencia = obtener_estados_asistencia()
     registros_por_alumno = {
         registro["alumno_id"]: registro
-        for registro in asistencias.values("alumno_id").annotate(
+        for registro in asistencias_alumnos.values("alumno_id").annotate(
             total=Count("id", distinct=True),
             ausencias=Count(
                 "id",
@@ -72,10 +85,9 @@ def perfil_curso(request, curso_id):
     for matricula in matriculas:
         registro = registros_por_alumno.get(matricula.alumno_id)
         if registro and registro["total"]:
-            porcentaje = round(
-                (registro["total"] - registro["ausencias"])
-                * 100
-                / registro["total"]
+            porcentaje = porcentaje_asistencia(
+                registro["total"],
+                registro["ausencias"],
             )
             estado = clasificar_asistencia(porcentaje, estados_asistencia)
             nombre_estado = estado.nombre if estado else "Sin configurar"
@@ -154,9 +166,10 @@ def perfil_curso(request, curso_id):
             if registros_mes_total
             else None
         )
-        x = round(8 + indice * (84 / intervalos_grafico), 2)
-        y = round(90 - (porcentaje_mes or 0) * 0.8, 2)
+        x = y = None
         if porcentaje_mes is not None:
+            x = round(8 + indice * (84 / intervalos_grafico), 2)
+            y = round(90 - porcentaje_mes * 0.8, 2)
             puntos_grafico.append(f"{x},{y}")
         evolucion_mensual.append({
             "nombre": nombre_mes,
@@ -165,14 +178,12 @@ def perfil_curso(request, curso_id):
             "y": y,
         })
 
-    porcentaje_asistencia = (
-        round(total_presentes * 100 / total_registros)
-        if total_registros
-        else None
+    porcentaje_curso = promedio_asistencia(
+        registros_por_alumno.values()
     )
     estado_curso = (
-        clasificar_asistencia(porcentaje_asistencia, estados_asistencia)
-        if porcentaje_asistencia is not None
+        clasificar_asistencia(porcentaje_curso, estados_asistencia)
+        if porcentaje_curso is not None
         else None
     )
 
@@ -215,7 +226,7 @@ def perfil_curso(request, curso_id):
             ("historial", "Historial"),
             ("estudiantes", "Estudiantes"),
         ],
-        "porcentaje_asistencia": porcentaje_asistencia,
+        "porcentaje_asistencia": porcentaje_curso,
         "tab": tab,
         "fecha_hoy": fecha_hoy,
         "registrada_hoy": pasos_lista.filter(fecha=fecha_hoy).exists(),
@@ -284,17 +295,16 @@ def perfil_alumno(request, alumno_id):
             if dias_mes
             else None
         )
-        punto = None
+        x = y = None
         if porcentaje_mes is not None:
             x = round(8 + indice * (84 / intervalos_grafico), 2)
             y = round(90 - porcentaje_mes * 0.8, 2)
-            punto = f"{x},{y}"
-            puntos_grafico.append(punto)
+            puntos_grafico.append(f"{x},{y}")
         evolucion_mensual.append({
             "nombre": nombre_mes,
             "porcentaje": porcentaje_mes,
-            "x": round(8 + indice * (84 / intervalos_grafico), 2),
-            "y": round(90 - (porcentaje_mes or 0) * 0.8, 2),
+            "x": x,
+            "y": y,
         })
     justificaciones = Justificaciones.objects.filter(alumno=alumno).select_related(
         "estado_solicitud", "funcionario_resuelve"

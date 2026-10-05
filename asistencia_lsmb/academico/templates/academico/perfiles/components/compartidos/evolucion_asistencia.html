@@ -35,12 +35,6 @@
                     {% if puntos_grafico %}
                     <polyline points="{{ puntos_grafico }}" fill="none" stroke="#1B5FA8" stroke-width="1.2" vector-effect="non-scaling-stroke" />
                     {% endif %}
-                    {% for mes in evolucion_mensual %}
-                        {% if mes.porcentaje is not None %}
-                        <line x1="{{ mes.x }}" y1="{{ mes.y }}" x2="{{ mes.x }}" y2="{{ mes.y }}" stroke="#1B5FA8" stroke-width="4" stroke-linecap="round" vector-effect="non-scaling-stroke">
-                            <title>{{ mes.nombre }}: {{ mes.porcentaje }}%</title>
-                        </line>{% endif %}
-                    {% endfor %}
                 </svg>
                 <div class="absolute left-8 right-0 bottom-0 flex h-10 items-start justify-between text-[9px] text-gris-texto sm:h-6 sm:text-xs">
                     {% for mes in evolucion_mensual %}

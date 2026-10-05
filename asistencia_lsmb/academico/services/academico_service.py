@@ -8,6 +8,23 @@ def clasificar_asistencia(porcentaje, estados):
     )
 
 
+def porcentaje_asistencia(total, ausencias):
+    return (
+        round((total - ausencias) * 100 / total)
+        if total
+        else None
+    )
+
+
+def promedio_asistencia(alumnos):
+    porcentajes = [
+        porcentaje_asistencia(alumno["total"], alumno["ausencias"])
+        for alumno in alumnos
+        if alumno["total"]
+    ]
+    return round(sum(porcentajes) / len(porcentajes)) if porcentajes else None
+
+
 def preparar_alumnos(alumnos, estados):
     alumnos_con_datos = []
     for alumno in alumnos:
@@ -52,13 +69,16 @@ def preparar_alumnos(alumnos, estados):
 def preparar_cursos(cursos, fecha, estados):
     cursos = list(cursos)
     for curso in cursos:
-        datos_asistencia = obtener_asistencia_curso(curso, fecha)
+        alumno_ids = [
+            matricula.alumno_id
+            for matricula in curso.matriculas_activas
+        ]
+        datos_asistencia = obtener_asistencia_curso(curso, fecha, alumno_ids)
         curso.total_registros = datos_asistencia["total"]
         curso.total_ausencias = datos_asistencia["ausencias"]
-        curso.asistencia = round(
-            (curso.total_registros - curso.total_ausencias) * 100
-            / curso.total_registros
-        ) if curso.total_registros else 0
+        curso.asistencia = promedio_asistencia(
+            datos_asistencia["porcentajes_alumnos"]
+        ) or 0
 
         if curso.total_registros:
             estado = clasificar_asistencia(curso.asistencia, estados)

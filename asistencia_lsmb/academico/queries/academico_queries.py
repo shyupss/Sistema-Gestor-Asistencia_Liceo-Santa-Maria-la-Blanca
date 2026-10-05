@@ -115,20 +115,29 @@ def obtener_cursos(fecha):
     )
 
 
-def obtener_asistencia_curso(curso, fecha):
+def obtener_asistencia_alumnos_curso(curso, alumno_ids, fecha):
     inicio_anio = fecha.replace(month=1, day=1)
     inicio_siguiente_anio = inicio_anio.replace(year=fecha.year + 1)
-    asistencias = Asistencia_Alumnos.objects.filter(
-        paso_lista__curso=curso,
+    return Asistencia_Alumnos.objects.filter(
+        alumno_id__in=alumno_ids,
         paso_lista__fecha__gte=inicio_anio,
         paso_lista__fecha__lt=inicio_siguiente_anio,
-        alumno__matriculas__curso=curso,
-        alumno__matriculas__periodo__anio=fecha.year,
-    ).filter(
-        Q(alumno__matriculas__fecha_termino__isnull=True)
-        | Q(alumno__matriculas__fecha_termino__gt=fecha)
+        paso_lista__fecha__lte=fecha,
+        paso_lista__curso__periodo=curso.periodo,
     )
-    return asistencias.aggregate(
+
+
+def obtener_asistencia_curso(curso, fecha, alumno_ids=None):
+    if alumno_ids is None:
+        alumno_ids = Matricula.objects.filter(
+            curso=curso,
+            periodo=curso.periodo,
+        ).filter(
+            Q(fecha_termino__isnull=True) | Q(fecha_termino__gt=fecha),
+        ).values_list("alumno_id", flat=True)
+
+    asistencias = obtener_asistencia_alumnos_curso(curso, alumno_ids, fecha)
+    resumen = asistencias.aggregate(
         total=Count("pk", distinct=True),
         ausencias=Count(
             "pk",
@@ -142,6 +151,21 @@ def obtener_asistencia_curso(curso, fecha):
             distinct=True,
         ),
     )
+    resumen["porcentajes_alumnos"] = asistencias.values("alumno_id").annotate(
+        total=Count("pk", distinct=True),
+        ausencias=Count(
+            "pk",
+            filter=(
+                Q(tipo_asistencia__cuenta_como_ausencia=True)
+                & (
+                    Q(justificacion__isnull=True)
+                    | Q(justificacion__estado_solicitud__cubre_ausencia=False)
+                )
+            ),
+            distinct=True,
+        ),
+    )
+    return resumen
 
 
 def obtener_estados_asistencia():
