@@ -40,11 +40,16 @@ def pagina_justificaciones_formulario(request):
                 to_attr='matriculas_formulario',
             ),
             'apoderados',
-        ).filter(
+        )
+        estudiantes_exactos = estudiantes.filter(
             Q(rut__iexact=busqueda) | Q(nombre__iexact=busqueda)
         )
-        if not estudiantes.exists() and busqueda:
-            estudiantes = Alumno.objects.filter(nombre__icontains=busqueda)
+        if estudiantes_exactos.exists():
+            estudiantes = estudiantes_exactos
+        elif busqueda:
+            estudiantes = estudiantes.filter(nombre__icontains=busqueda)
+        else:
+            estudiantes = estudiantes_exactos
 
         if estudiantes.count() != 1:
             errores.append('Selecciona un único estudiante válido por nombre o RUT.')
@@ -63,10 +68,12 @@ def pagina_justificaciones_formulario(request):
         if tipo not in TIPOS_VALIDOS:
             errores.append('El tipo de registro no es válido.')
 
-        try:
-            estado = Estados_Solicitud.objects.get(nombre__iexact='pendiente')
-        except Estados_Solicitud.DoesNotExist:
-            estado = None
+        estado = (
+            Estados_Solicitud.objects.filter(nombre__iexact='pendiente')
+            .order_by('id')
+            .first()
+        )
+        if estado is None:
             errores.append('No existe el estado inicial "pendiente".')
 
         if not errores:

@@ -232,17 +232,23 @@ def _datos_alertas(periodo, cursos, fecha):
 
     alertas_por_curso = []
     for curso in cursos:
+        alumnos_activos = {
+            matricula.alumno_id
+            for matricula in curso.matriculas.all()
+            if matricula.fecha_termino is None or matricula.fecha_termino > fecha
+        }
         alumno_ids = {
             estado.alumno_id
             for estado in estados_alerta
-            if estado.alumno_id in {
-                matricula.alumno_id for matricula in curso.matriculas.all()
-                if matricula.fecha_termino is None or matricula.fecha_termino > fecha
-            }
+            if estado.alumno_id in alumnos_activos
         }
         alertas_por_curso.append({
             "curso": f"{curso.nivel_romano}°{curso.grupo}",
-            "valor": len(alumno_ids),
+            "valor": (
+                round(len(alumno_ids) * 100 / len(alumnos_activos))
+                if alumnos_activos
+                else 0
+            ),
         })
 
     historial = obtener_historial_alertas(periodo.pk, fecha)
