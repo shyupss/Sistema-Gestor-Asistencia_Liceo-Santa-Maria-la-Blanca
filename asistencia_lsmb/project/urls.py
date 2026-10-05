@@ -34,6 +34,7 @@ urlpatterns = [
     path('reportes/', include("reportes.urls")),
     path('monitoreo/', include("monitoreo.urls")),
     path('alertas/', include("alertas.urls")),
+    path('administracion/', include("administracion.urls")),
 ]
 
 if settings.DEBUG:

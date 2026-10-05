@@ -1,0 +1,243 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<section class="mx-auto md:max-w-[90%] px-4 py-5 sm:px-6 sm:py-8"
+    x-data="{ apoderadoCount: {{ apoderado_count }} }"
+>
+
+    {% include 'components/global/child_page_title.html' with parent_page_title='Administración' url='/administracion/' %}
+
+    <!-- Mensajes -->
+    {% if messages %}
+    <div class="mb-6 space-y-2">
+        {% for message in messages %}
+        <div class="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium
+            {% if message.tags == 'success' %}bg-verde-claro text-verde-oscuro border border-verde-contraste
+            {% else %}bg-rojo-claro text-rojo-oscuro border border-rojo-contraste{% endif %}">
+            <i data-lucide="{% if message.tags == 'success' %}check-circle{% else %}alert-circle{% endif %}" class="h-4 w-4 shrink-0"></i>
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+
+        <!-- ══════════ DATOS DEL ALUMNO ══════════ -->
+        <div class="rounded-lg bg-blanco-tarjeta p-4 border border-gris-claro shadow-sm md:p-8 mb-6">
+            <h2 class="text-lg font-bold text-azul mb-5 flex items-center gap-2">
+                <i data-lucide="user" class="h-5 w-5"></i>
+                Datos del alumno
+            </h2>
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+
+                <!-- RUT -->
+                <div>
+                    <label for="{{ alumno_form.rut.id_for_label }}" class="mb-1.5 block text-sm font-medium text-negro-texto">
+                        {{ alumno_form.rut.label }}
+                        <span class="text-rojo ml-0.5">*</span>
+                    </label>
+                    {{ alumno_form.rut }}
+                    {% if alumno_form.rut.errors %}
+                        {% for error in alumno_form.rut.errors %}
+                        <p class="mt-1 text-xs text-rojo">{{ error }}</p>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+
+                <!-- Nombre -->
+                <div>
+                    <label for="{{ alumno_form.nombre.id_for_label }}" class="mb-1.5 block text-sm font-medium text-negro-texto">
+                        {{ alumno_form.nombre.label }}
+                        <span class="text-rojo ml-0.5">*</span>
+                    </label>
+                    {{ alumno_form.nombre }}
+                    {% if alumno_form.nombre.errors %}
+                        {% for error in alumno_form.nombre.errors %}
+                        <p class="mt-1 text-xs text-rojo">{{ error }}</p>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+
+                <!-- Teléfono -->
+                <div>
+                    <label for="{{ alumno_form.telefono.id_for_label }}" class="mb-1.5 block text-sm font-medium text-negro-texto">
+                        {{ alumno_form.telefono.label }}
+                    </label>
+                    {{ alumno_form.telefono }}
+                    {% if alumno_form.telefono.errors %}
+                        {% for error in alumno_form.telefono.errors %}
+                        <p class="mt-1 text-xs text-rojo">{{ error }}</p>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+
+                <!-- Email -->
+                <div>
+                    <label for="{{ alumno_form.email.id_for_label }}" class="mb-1.5 block text-sm font-medium text-negro-texto">
+                        {{ alumno_form.email.label }}
+                    </label>
+                    {{ alumno_form.email }}
+                    {% if alumno_form.email.errors %}
+                        {% for error in alumno_form.email.errors %}
+                        <p class="mt-1 text-xs text-rojo">{{ error }}</p>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ══════════ APODERADOS ══════════ -->
+        <div class="rounded-lg bg-blanco-tarjeta p-4 border border-gris-claro shadow-sm md:p-8 mb-6">
+            <div class="flex items-center justify-between mb-5">
+                <h2 class="text-lg font-bold text-azul flex items-center gap-2">
+                    <i data-lucide="user-check" class="h-5 w-5"></i>
+                    Apoderados responsables
+                </h2>
+                <button type="button"
+                    @click="apoderadoCount++"
+                    class="flex items-center gap-1.5 rounded-lg border border-azul px-3 py-1.5 text-sm font-medium text-azul transition-colors hover:bg-azul-fondo">
+                    <i data-lucide="plus" class="h-4 w-4"></i>
+                    Agregar apoderado
+                </button>
+            </div>
+
+            <!-- Apoderados existentes (con errores si los hay) -->
+            {% for ap_form, rel_form in apoderado_forms %}
+            <div class="mb-6 pb-6 border-b border-gris-claro last:border-0 last:mb-0 last:pb-0">
+                <p class="text-sm font-semibold text-negro-texto mb-3">Apoderado {{ forloop.counter }}</p>
+                <!-- Campos ocultos con prefijo para que Django los detecte -->
+                <input type="hidden" name="{{ ap_form.prefix }}_exists" value="1">
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div>
+                        <label class="mb-1.5 block text-sm font-medium text-negro-texto">RUT <span class="text-rojo ml-0.5">*</span></label>
+                        {{ ap_form.rut }}
+                        {% for error in ap_form.rut.errors %}<p class="mt-1 text-xs text-rojo">{{ error }}</p>{% endfor %}
+                    </div>
+                    <div>
+                        <label class="mb-1.5 block text-sm font-medium text-negro-texto">Nombre <span class="text-rojo ml-0.5">*</span></label>
+                        {{ ap_form.nombre }}
+                        {% for error in ap_form.nombre.errors %}<p class="mt-1 text-xs text-rojo">{{ error }}</p>{% endfor %}
+                    </div>
+                    <div>
+                        <label class="mb-1.5 block text-sm font-medium text-negro-texto">Teléfono</label>
+                        {{ ap_form.telefono }}
+                    </div>
+                    <div>
+                        <label class="mb-1.5 block text-sm font-medium text-negro-texto">Correo electrónico</label>
+                        {{ ap_form.email }}
+                    </div>
+                    <div>
+                        <label class="mb-1.5 block text-sm font-medium text-negro-texto">Relación <span class="text-rojo ml-0.5">*</span></label>
+                        {{ rel_form.tipo_relacion }}
+                        {% for error in rel_form.tipo_relacion.errors %}<p class="mt-1 text-xs text-rojo">{{ error }}</p>{% endfor %}
+                    </div>
+                    <div class="flex items-center gap-3 pt-6">
+                        {{ rel_form.recibe_notificaciones }}
+                        <label class="text-sm font-medium text-negro-texto">{{ rel_form.recibe_notificaciones.label }}</label>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+
+            <!-- Apoderados dinámicos nuevos (AlpineJS) -->
+            <template x-for="i in Array.from({length: apoderadoCount - {{ apoderado_count }}}, (_, k) => k + {{ apoderado_count }})" :key="i">
+                <div class="mb-6 pb-6 border-b border-gris-claro">
+                    <p class="text-sm font-semibold text-negro-texto mb-3" x-text="`Apoderado ${i + 1}`"></p>
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <div>
+                            <label class="mb-1.5 block text-sm font-medium text-negro-texto">RUT <span class="text-rojo ml-0.5">*</span></label>
+                            <input type="text" :name="`apoderado_${i}_rut`" placeholder="12.345.678-9" required
+                                class="w-full rounded-lg border border-gris-iconos py-2.5 px-3 text-sm text-negro-texto placeholder:text-gris-iconos focus:border-azul focus:outline-none focus:ring-1 focus:ring-azul">
+                        </div>
+                        <div>
+                            <label class="mb-1.5 block text-sm font-medium text-negro-texto">Nombre <span class="text-rojo ml-0.5">*</span></label>
+                            <input type="text" :name="`apoderado_${i}_nombre`" placeholder="Nombre completo" required
+                                class="w-full rounded-lg border border-gris-iconos py-2.5 px-3 text-sm text-negro-texto placeholder:text-gris-iconos focus:border-azul focus:outline-none focus:ring-1 focus:ring-azul">
+                        </div>
+                        <div>
+                            <label class="mb-1.5 block text-sm font-medium text-negro-texto">Teléfono</label>
+                            <input type="text" :name="`apoderado_${i}_telefono`" placeholder="+56 9 1234 5678"
+                                class="w-full rounded-lg border border-gris-iconos py-2.5 px-3 text-sm text-negro-texto placeholder:text-gris-iconos focus:border-azul focus:outline-none focus:ring-1 focus:ring-azul">
+                        </div>
+                        <div>
+                            <label class="mb-1.5 block text-sm font-medium text-negro-texto">Correo electrónico</label>
+                            <input type="email" :name="`apoderado_${i}_email`" placeholder="correo@ejemplo.cl"
+                                class="w-full rounded-lg border border-gris-iconos py-2.5 px-3 text-sm text-negro-texto placeholder:text-gris-iconos focus:border-azul focus:outline-none focus:ring-1 focus:ring-azul">
+                        </div>
+                        <div>
+                            <label class="mb-1.5 block text-sm font-medium text-negro-texto">Relación <span class="text-rojo ml-0.5">*</span></label>
+                            <input type="text" :name="`relacion_${i}_tipo_relacion`" placeholder="Ej: Padre, Madre, Tutor" required
+                                class="w-full rounded-lg border border-gris-iconos py-2.5 px-3 text-sm text-negro-texto placeholder:text-gris-iconos focus:border-azul focus:outline-none focus:ring-1 focus:ring-azul">
+                        </div>
+                        <div class="flex items-center gap-3 pt-6">
+                            <input type="checkbox" :name="`relacion_${i}_recibe_notificaciones`" value="on"
+                                class="h-4 w-4 rounded border-gris-iconos text-azul focus:ring-azul">
+                            <label class="text-sm font-medium text-negro-texto">Recibe notificaciones</label>
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </div>
+
+        <!-- ══════════ DATOS DE MATRÍCULA ══════════ -->
+        <div class="rounded-lg bg-blanco-tarjeta p-4 border border-gris-claro shadow-sm md:p-8 mb-6">
+            <h2 class="text-lg font-bold text-azul mb-5 flex items-center gap-2">
+                <i data-lucide="file-text" class="h-5 w-5"></i>
+                Datos de matrícula
+            </h2>
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+
+                <!-- Periodo -->
+                <div>
+                    <label for="{{ matricula_form.periodo.id_for_label }}" class="mb-1.5 block text-sm font-medium text-negro-texto">
+                        {{ matricula_form.periodo.label }}
+                        <span class="text-rojo ml-0.5">*</span>
+                    </label>
+                    {{ matricula_form.periodo }}
+                    {% for error in matricula_form.periodo.errors %}<p class="mt-1 text-xs text-rojo">{{ error }}</p>{% endfor %}
+                </div>
+
+                <!-- Curso -->
+                <div>
+                    <label for="{{ matricula_form.curso.id_for_label }}" class="mb-1.5 block text-sm font-medium text-negro-texto">
+                        {{ matricula_form.curso.label }}
+                        <span class="text-rojo ml-0.5">*</span>
+                    </label>
+                    {{ matricula_form.curso }}
+                    {% for error in matricula_form.curso.errors %}<p class="mt-1 text-xs text-rojo">{{ error }}</p>{% endfor %}
+                </div>
+
+                <!-- Fecha matrícula -->
+                <div>
+                    <label for="{{ matricula_form.fecha_matricula.id_for_label }}" class="mb-1.5 block text-sm font-medium text-negro-texto">
+                        {{ matricula_form.fecha_matricula.label }}
+                        <span class="text-rojo ml-0.5">*</span>
+                    </label>
+                    {{ matricula_form.fecha_matricula }}
+                    {% for error in matricula_form.fecha_matricula.errors %}<p class="mt-1 text-xs text-rojo">{{ error }}</p>{% endfor %}
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Botones -->
+        <div class="flex items-center justify-end gap-3">
+            <a href="{% url 'administracion' %}"
+                class="flex items-center gap-1.5 rounded-lg border border-gris-iconos px-5 py-2.5 text-sm font-semibold text-gris-texto transition-colors hover:bg-gris-ultraclaro">
+                Cancelar
+            </a>
+            <button type="submit"
+                class="flex items-center gap-1.5 rounded-lg bg-azul px-5 py-2.5 text-sm font-semibold text-blanco transition-colors hover:bg-azul-profundo">
+                <i data-lucide="save" class="h-4 w-4"></i>
+                Matricular alumno
+            </button>
+        </div>
+
+    </form>
+</section>
+{% endblock %}

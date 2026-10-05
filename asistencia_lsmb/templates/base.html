@@ -25,6 +25,87 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,400..700;1,400..700&display=swap"
         rel="stylesheet">
+
+    <!-- Flatpickr (Calendario en español) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
+    <style>
+        /* Estilos personalizados para Flatpickr adaptados al sistema */
+        .flatpickr-calendar {
+            font-family: 'Inter', sans-serif !important;
+            border: 2px solid #1B5FA8 !important; /* Borde azul primario */
+            border-radius: 0.75rem !important; /* rounded-xl */
+            box-shadow: 0 10px 25px -5px rgba(27, 95, 168, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
+            overflow: hidden !important;
+            background: #FFFFFF !important;
+        }
+        .flatpickr-calendar.arrowTop:before,
+        .flatpickr-calendar.arrowTop:after {
+            border-bottom-color: #1B5FA8 !important;
+        }
+        .flatpickr-calendar.arrowBottom:before,
+        .flatpickr-calendar.arrowBottom:after {
+            border-top-color: #1B5FA8 !important;
+        }
+        .flatpickr-months {
+            background-color: #1B5FA8 !important;
+            color: #FFFFFF !important;
+            padding: 4px 0 !important;
+        }
+        .flatpickr-months .flatpickr-month {
+            color: #FFFFFF !important;
+            fill: #FFFFFF !important;
+        }
+        .flatpickr-months .flatpickr-prev-month,
+        .flatpickr-months .flatpickr-next-month {
+            color: #FFFFFF !important;
+            fill: #FFFFFF !important;
+        }
+        .flatpickr-months .flatpickr-prev-month:hover svg,
+        .flatpickr-months .flatpickr-next-month:hover svg {
+            fill: #D4EAFF !important;
+        }
+        .flatpickr-current-month .flatpickr-monthDropdown-months {
+            font-weight: 600 !important;
+            color: #FFFFFF !important;
+            background-color: #1B5FA8 !important;
+        }
+        .flatpickr-current-month input.cur-year {
+            font-weight: 600 !important;
+            color: #FFFFFF !important;
+        }
+        span.flatpickr-weekday {
+            background: #F3F4F6 !important;
+            color: #1F2937 !important;
+            font-weight: 600 !important;
+            font-size: 0.75rem !important;
+        }
+        .flatpickr-day {
+            border-radius: 0.5rem !important; /* rounded-lg */
+            color: #1F2937 !important;
+            font-weight: 500 !important;
+        }
+        .flatpickr-day:hover {
+            background-color: #D4EAFF !important;
+            color: #0F3A66 !important;
+        }
+        .flatpickr-day.selected,
+        .flatpickr-day.selected:hover {
+            background-color: #1B5FA8 !important;
+            color: #FFFFFF !important;
+            border-color: #1B5FA8 !important;
+            font-weight: 700 !important;
+        }
+        .flatpickr-day.today {
+            border-color: #1B5FA8 !important;
+            color: #1B5FA8 !important;
+            font-weight: 700 !important;
+        }
+        .flatpickr-day.today:hover {
+            background-color: #D4EAFF !important;
+        }
+    </style>
 </head>
 
 <body class="bg-blanco-fondo">
@@ -43,6 +124,17 @@
 
     <script>
         lucide.createIcons();
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof flatpickr !== 'undefined') {
+                flatpickr.localize(flatpickr.l10ns.es);
+                flatpickr('.datepicker', {
+                    dateFormat: 'Y-m-d',
+                    altInput: true,
+                    altFormat: 'd/m/Y',
+                    locale: 'es'
+                });
+            }
+        });
     </script>
 </body>
 

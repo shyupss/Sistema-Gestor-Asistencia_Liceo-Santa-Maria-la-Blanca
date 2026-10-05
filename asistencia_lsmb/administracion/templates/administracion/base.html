@@ -1,0 +1,359 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<section class="mx-auto max-w-[90%] px-4 py-5 sm:px-6 sm:py-8">
+
+    {% include 'components/global/page_title.html' with page_title=page_title %}
+
+    <!-- Mensajes Django -->
+    {% if messages %}
+    <div class="mb-6 space-y-2">
+        {% for message in messages %}
+        <div class="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium
+            {% if message.tags == 'success' %}bg-verde-claro text-verde-oscuro border border-verde-contraste
+            {% else %}bg-rojo-claro text-rojo-oscuro border border-rojo-contraste{% endif %}">
+            <i data-lucide="{% if message.tags == 'success' %}check-circle{% else %}alert-circle{% endif %}" class="h-4 w-4 shrink-0"></i>
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Tabs -->
+    <div x-data="{ tab: 'matriculas' }">
+
+        <!-- Tab buttons -->
+        <div class="flex gap-1 border-b border-gris-claro mb-6 overflow-x-auto">
+            <button @click="tab = 'matriculas'"
+                :class="tab === 'matriculas' ? 'border-b-2 border-azul text-azul font-semibold' : 'text-gris-texto hover:text-negro-texto'"
+                class="flex items-center gap-2 px-4 py-2.5 text-sm transition-colors whitespace-nowrap">
+                <i data-lucide="graduation-cap" class="h-4 w-4"></i>
+                Matrículas
+                <span class="ml-1 rounded-full bg-azul-fondo text-azul text-xs font-bold px-2 py-0.5">{{ matriculas|length }}</span>
+            </button>
+            <button @click="tab = 'cursos'"
+                :class="tab === 'cursos' ? 'border-b-2 border-azul text-azul font-semibold' : 'text-gris-texto hover:text-negro-texto'"
+                class="flex items-center gap-2 px-4 py-2.5 text-sm transition-colors whitespace-nowrap">
+                <i data-lucide="book-open" class="h-4 w-4"></i>
+                Cursos
+                <span class="ml-1 rounded-full bg-azul-fondo text-azul text-xs font-bold px-2 py-0.5">{{ cursos|length }}</span>
+            </button>
+            <button @click="tab = 'funcionarios'"
+                :class="tab === 'funcionarios' ? 'border-b-2 border-azul text-azul font-semibold' : 'text-gris-texto hover:text-negro-texto'"
+                class="flex items-center gap-2 px-4 py-2.5 text-sm transition-colors whitespace-nowrap">
+                <i data-lucide="users" class="h-4 w-4"></i>
+                Funcionarios
+                <span class="ml-1 rounded-full bg-azul-fondo text-azul text-xs font-bold px-2 py-0.5">{{ funcionarios|length }}</span>
+            </button>
+            <button @click="tab = 'cargos'"
+                :class="tab === 'cargos' ? 'border-b-2 border-azul text-azul font-semibold' : 'text-gris-texto hover:text-negro-texto'"
+                class="flex items-center gap-2 px-4 py-2.5 text-sm transition-colors whitespace-nowrap">
+                <i data-lucide="award" class="h-4 w-4"></i>
+                Cargos
+                <span class="ml-1 rounded-full bg-azul-fondo text-azul text-xs font-bold px-2 py-0.5">{{ cargos|length }}</span>
+            </button>
+            <button @click="tab = 'periodos'"
+                :class="tab === 'periodos' ? 'border-b-2 border-azul text-azul font-semibold' : 'text-gris-texto hover:text-negro-texto'"
+                class="flex items-center gap-2 px-4 py-2.5 text-sm transition-colors whitespace-nowrap">
+                <i data-lucide="calendar" class="h-4 w-4"></i>
+                Períodos Académicos
+                <span class="ml-1 rounded-full bg-azul-fondo text-azul text-xs font-bold px-2 py-0.5">{{ periodos|length }}</span>
+            </button>
+        </div>
+
+        <!-- ═══════════════════ TAB MATRÍCULAS ═══════════════════ -->
+        <div x-show="tab === 'matriculas'" x-cloak>
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-base font-semibold text-negro-texto">Matrículas vigentes</h2>
+                <a href="{% url 'matricular_alumno' %}"
+                    class="flex items-center gap-1.5 rounded-lg bg-azul px-4 py-2 text-sm font-semibold text-blanco transition-colors hover:bg-azul-profundo">
+                    <i data-lucide="plus" class="h-4 w-4"></i>
+                    Nueva matrícula
+                </a>
+            </div>
+
+            <div class="rounded-lg border border-gris-claro bg-blanco-tarjeta shadow-sm overflow-hidden">
+                {% if matriculas %}
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead class="bg-gris-ultraclaro border-b border-gris-claro">
+                            <tr>
+                                <th class="px-4 py-3 text-left font-semibold text-negro-texto">Alumno</th>
+                                <th class="px-4 py-3 text-left font-semibold text-negro-texto">RUT</th>
+                                <th class="px-4 py-3 text-left font-semibold text-negro-texto">Curso</th>
+                                <th class="px-4 py-3 text-left font-semibold text-negro-texto">Periodo</th>
+                                <th class="px-4 py-3 text-left font-semibold text-negro-texto">Estado</th>
+                                <th class="px-4 py-3 text-center font-semibold text-negro-texto">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gris-claro">
+                            {% for matricula in matriculas %}
+                            <tr class="hover:bg-gris-ultraclaro transition-colors">
+                                <td class="px-4 py-3 font-medium text-negro-texto">{{ matricula.alumno.nombre }}</td>
+                                <td class="px-4 py-3 text-gris-texto">{{ matricula.alumno.rut }}</td>
+                                <td class="px-4 py-3 text-gris-texto">{{ matricula.curso.nivel_romano }}° Medio {{ matricula.curso.grupo }}</td>
+                                <td class="px-4 py-3 text-gris-texto">{{ matricula.curso.periodo.anio }}</td>
+                                <td class="px-4 py-3">
+                                    <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold
+                                        {% if matricula.estado_matricula.nombre == 'activo' %}bg-verde-fondo text-verde-oscuro
+                                        {% elif matricula.estado_matricula.nombre == 'retirado' %}bg-rojo-fondo text-rojo-oscuro
+                                        {% else %}bg-amarillo-fondo text-amarillo-oscuro{% endif %}">
+                                        {{ matricula.estado_matricula.nombre|capfirst }}
+                                    </span>
+                                </td>
+                                <td class="px-4 py-3 text-center">
+                                    <a href="{% url 'editar_matricula' matricula.pk %}"
+                                        class="inline-flex items-center gap-1 rounded-lg border border-gris-iconos px-3 py-1.5 text-xs font-medium text-gris-texto transition-colors hover:border-azul hover:text-azul">
+                                        <i data-lucide="pencil" class="h-3 w-3"></i>
+                                        Editar
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="flex flex-col items-center justify-center py-16 text-gris-texto">
+                    <i data-lucide="graduation-cap" class="h-10 w-10 mb-3 text-gris-iconos"></i>
+                    <p class="font-medium">No hay matrículas vigentes</p>
+                    <p class="text-xs mt-1">Haz clic en "Nueva matrícula" para comenzar</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- ═══════════════════ TAB CURSOS ═══════════════════ -->
+        <div x-show="tab === 'cursos'" x-cloak>
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-base font-semibold text-negro-texto">Cursos del liceo</h2>
+                <div class="flex items-center gap-2">
+                    <a href="{% url 'crear_periodo' %}"
+                        class="flex items-center gap-1.5 rounded-lg border border-gris-iconos px-3 py-2 text-sm font-semibold text-negro-texto transition-colors hover:bg-gris-ultraclaro">
+                        <i data-lucide="calendar" class="h-4 w-4"></i>
+                        Nuevo período
+                    </a>
+                    <a href="{% url 'crear_curso_admin' %}"
+                        class="flex items-center gap-1.5 rounded-lg bg-azul px-4 py-2 text-sm font-semibold text-blanco transition-colors hover:bg-azul-profundo">
+                        <i data-lucide="plus" class="h-4 w-4"></i>
+                        Nuevo curso
+                    </a>
+                </div>
+            </div>
+
+            <div class="rounded-lg border border-gris-claro bg-blanco-tarjeta shadow-sm overflow-hidden">
+                {% if cursos %}
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead class="bg-gris-ultraclaro border-b border-gris-claro">
+                            <tr>
+                                <th class="px-4 py-3 text-left font-semibold text-negro-texto">Nivel</th>
+                                <th class="px-4 py-3 text-left font-semibold text-negro-texto">Grupo</th>
+                                <th class="px-4 py-3 text-left font-semibold text-negro-texto">Periodo</th>
+                                <th class="px-4 py-3 text-left font-semibold text-negro-texto">Profesor jefe</th>
+                                <th class="px-4 py-3 text-center font-semibold text-negro-texto">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gris-claro">
+                            {% for curso in cursos %}
+                            <tr class="hover:bg-gris-ultraclaro transition-colors">
+                                <td class="px-4 py-3 font-medium text-negro-texto">{{ curso.nivel_romano }}° Medio</td>
+                                <td class="px-4 py-3 text-gris-texto">{{ curso.grupo }}</td>
+                                <td class="px-4 py-3 text-gris-texto">{{ curso.periodo.anio }}</td>
+                                <td class="px-4 py-3 text-gris-texto">
+                                    {% if curso.profesor_jefe %}
+                                        {{ curso.profesor_jefe.nombre }}
+                                    {% else %}
+                                        <span class="text-gris-iconos italic">Sin asignar</span>
+                                    {% endif %}
+                                </td>
+                                <td class="px-4 py-3 text-center">
+                                    <a href="{% url 'editar_curso_admin' curso.pk %}"
+                                        class="inline-flex items-center gap-1 rounded-lg border border-gris-iconos px-3 py-1.5 text-xs font-medium text-gris-texto transition-colors hover:border-azul hover:text-azul">
+                                        <i data-lucide="pencil" class="h-3 w-3"></i>
+                                        Editar
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="flex flex-col items-center justify-center py-16 text-gris-texto">
+                    <i data-lucide="book-open" class="h-10 w-10 mb-3 text-gris-iconos"></i>
+                    <p class="font-medium">No hay cursos registrados</p>
+                    <p class="text-xs mt-1">Haz clic en "Nuevo curso" para agregar uno</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- ═══════════════════ TAB FUNCIONARIOS ═══════════════════ -->
+        <div x-show="tab === 'funcionarios'" x-cloak>
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-base font-semibold text-negro-texto">Funcionarios</h2>
+                <div class="flex items-center gap-2">
+                    <a href="{% url 'crear_cargo' %}"
+                        class="flex items-center gap-1.5 rounded-lg border border-gris-iconos px-3 py-2 text-sm font-semibold text-negro-texto transition-colors hover:bg-gris-ultraclaro">
+                        <i data-lucide="award" class="h-4 w-4"></i>
+                        Nuevo cargo
+                    </a>
+                    <a href="{% url 'crear_funcionario' %}"
+                        class="flex items-center gap-1.5 rounded-lg bg-azul px-4 py-2 text-sm font-semibold text-blanco transition-colors hover:bg-azul-profundo">
+                        <i data-lucide="plus" class="h-4 w-4"></i>
+                        Nuevo funcionario
+                    </a>
+                </div>
+            </div>
+
+            <div class="rounded-lg border border-gris-claro bg-blanco-tarjeta shadow-sm overflow-hidden">
+                {% if funcionarios %}
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead class="bg-gris-ultraclaro border-b border-gris-claro">
+                            <tr>
+                                <th class="px-4 py-3 text-left font-semibold text-negro-texto">Nombre</th>
+                                <th class="px-4 py-3 text-left font-semibold text-negro-texto">RUT</th>
+                                <th class="px-4 py-3 text-left font-semibold text-negro-texto">Cargo</th>
+                                <th class="px-4 py-3 text-left font-semibold text-negro-texto">Estado</th>
+                                <th class="px-4 py-3 text-center font-semibold text-negro-texto">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gris-claro">
+                            {% for funcionario in funcionarios %}
+                            <tr class="hover:bg-gris-ultraclaro transition-colors">
+                                <td class="px-4 py-3 font-medium text-negro-texto">{{ funcionario.nombre }}</td>
+                                <td class="px-4 py-3 text-gris-texto">{{ funcionario.rut }}</td>
+                                <td class="px-4 py-3 text-gris-texto">{{ funcionario.cargo.nombre }}</td>
+                                <td class="px-4 py-3">
+                                    {% if funcionario.activo %}
+                                    <span class="inline-flex items-center gap-1 rounded-full bg-verde-fondo px-2.5 py-0.5 text-xs font-semibold text-verde-oscuro">
+                                        <i data-lucide="check" class="h-3 w-3"></i> Activo
+                                    </span>
+                                    {% else %}
+                                    <span class="inline-flex items-center gap-1 rounded-full bg-rojo-fondo px-2.5 py-0.5 text-xs font-semibold text-rojo-oscuro">
+                                        <i data-lucide="x" class="h-3 w-3"></i> Inactivo
+                                    </span>
+                                    {% endif %}
+                                </td>
+                                <td class="px-4 py-3 text-center">
+                                    <a href="{% url 'editar_funcionario' funcionario.pk %}"
+                                        class="inline-flex items-center gap-1 rounded-lg border border-gris-iconos px-3 py-1.5 text-xs font-medium text-gris-texto transition-colors hover:border-azul hover:text-azul">
+                                        <i data-lucide="pencil" class="h-3 w-3"></i>
+                                        Editar
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="flex flex-col items-center justify-center py-16 text-gris-texto">
+                    <i data-lucide="users" class="h-10 w-10 mb-3 text-gris-iconos"></i>
+                    <p class="font-medium">No hay funcionarios registrados</p>
+                    <p class="text-xs mt-1">Haz clic en "Nuevo funcionario" para agregar uno (o en "Nuevo cargo" si aún no hay cargos)</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- ═══════════════════ TAB CARGOS ═══════════════════ -->
+        <div x-show="tab === 'cargos'" x-cloak>
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-base font-semibold text-negro-texto">Cargos registrados</h2>
+                <a href="{% url 'crear_cargo' %}"
+                    class="flex items-center gap-1.5 rounded-lg bg-azul px-4 py-2 text-sm font-semibold text-blanco transition-colors hover:bg-azul-profundo">
+                    <i data-lucide="plus" class="h-4 w-4"></i>
+                    Nuevo cargo
+                </a>
+            </div>
+
+            <div class="rounded-lg border border-gris-claro bg-blanco-tarjeta shadow-sm overflow-hidden">
+                {% if cargos %}
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead class="bg-gris-ultraclaro border-b border-gris-claro">
+                            <tr>
+                                <th class="px-4 py-3 text-left font-semibold text-negro-texto">Nombre del cargo</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gris-claro">
+                            {% for cargo in cargos %}
+                            <tr class="hover:bg-gris-ultraclaro transition-colors">
+                                <td class="px-4 py-3 font-medium text-negro-texto flex items-center gap-2">
+                                    <i data-lucide="award" class="h-4 w-4 text-azul"></i>
+                                    {{ cargo.nombre }}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="flex flex-col items-center justify-center py-16 text-gris-texto text-center">
+                    <i data-lucide="award" class="h-10 w-10 mb-3 text-gris-iconos"></i>
+                    <p class="font-medium">No hay cargos registrados</p>
+                    <p class="text-xs mt-1">Haz clic en "Nuevo cargo" para agregar el primero (Ej: Profesor, Inspector)</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- ═══════════════════ TAB PERÍODOS ACADÉMICOS ═══════════════════ -->
+        <div x-show="tab === 'periodos'" x-cloak>
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-base font-semibold text-negro-texto">Períodos Académicos</h2>
+                <a href="{% url 'crear_periodo' %}"
+                    class="flex items-center gap-1.5 rounded-lg bg-azul px-4 py-2 text-sm font-semibold text-blanco transition-colors hover:bg-azul-profundo">
+                    <i data-lucide="plus" class="h-4 w-4"></i>
+                    Nuevo período
+                </a>
+            </div>
+
+            <div class="rounded-lg border border-gris-claro bg-blanco-tarjeta shadow-sm overflow-hidden">
+                {% if periodos %}
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead class="bg-gris-ultraclaro border-b border-gris-claro">
+                            <tr>
+                                <th class="px-4 py-3 text-left font-semibold text-negro-texto">Año</th>
+                                <th class="px-4 py-3 text-left font-semibold text-negro-texto">Fecha Inicio</th>
+                                <th class="px-4 py-3 text-left font-semibold text-negro-texto">Fecha Término</th>
+                                <th class="px-4 py-3 text-center font-semibold text-negro-texto">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gris-claro">
+                            {% for periodo in periodos %}
+                            <tr class="hover:bg-gris-ultraclaro transition-colors">
+                                <td class="px-4 py-3 font-semibold text-azul">{{ periodo.anio }}</td>
+                                <td class="px-4 py-3 text-gris-texto">{{ periodo.fecha_inicio|date:"d/m/Y" }}</td>
+                                <td class="px-4 py-3 text-gris-texto">{{ periodo.fecha_fin|date:"d/m/Y" }}</td>
+                                <td class="px-4 py-3 text-center">
+                                    <a href="{% url 'editar_periodo' periodo.pk %}"
+                                        class="inline-flex items-center gap-1 rounded-lg border border-gris-iconos px-3 py-1.5 text-xs font-medium text-gris-texto transition-colors hover:border-azul hover:text-azul">
+                                        <i data-lucide="pencil" class="h-3 w-3"></i>
+                                        Editar
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="flex flex-col items-center justify-center py-16 text-gris-texto text-center">
+                    <i data-lucide="calendar" class="h-10 w-10 mb-3 text-gris-iconos"></i>
+                    <p class="font-medium">No hay períodos académicos registrados</p>
+                    <p class="text-xs mt-1">Haz clic en "Nuevo período" para agregar uno</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+    </div>
+</section>
+{% endblock %}

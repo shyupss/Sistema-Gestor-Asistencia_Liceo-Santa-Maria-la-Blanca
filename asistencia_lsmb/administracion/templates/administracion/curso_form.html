@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<section class="mx-auto md:max-w-[90%] px-4 py-5 sm:px-6 sm:py-8">
+
+    {% include 'components/global/child_page_title.html' with parent_page_title='Administración' url='/administracion/' %}
+
+    <!-- Mensajes -->
+    {% if messages %}
+    <div class="mb-6 space-y-2">
+        {% for message in messages %}
+        <div class="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium
+            {% if message.tags == 'success' %}bg-verde-claro text-verde-oscuro border border-verde-contraste
+            {% else %}bg-rojo-claro text-rojo-oscuro border border-rojo-contraste{% endif %}">
+            <i data-lucide="{% if message.tags == 'success' %}check-circle{% else %}alert-circle{% endif %}" class="h-4 w-4 shrink-0"></i>
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="rounded-lg bg-blanco-tarjeta p-4 border border-gris-claro shadow-sm md:p-8">
+        <h2 class="text-lg font-bold text-azul mb-6 flex items-center gap-2">
+            <i data-lucide="book-open" class="h-5 w-5"></i>
+            {{ page_title }}
+        </h2>
+
+        <form method="post">
+            {% csrf_token %}
+            <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+
+                <!-- Periodo -->
+                <div>
+                    <label for="{{ form.periodo.id_for_label }}" class="mb-1.5 block text-sm font-medium text-negro-texto">
+                        {{ form.periodo.label }} <span class="text-rojo ml-0.5">*</span>
+                    </label>
+                    {{ form.periodo }}
+                    {% for error in form.periodo.errors %}<p class="mt-1 text-xs text-rojo">{{ error }}</p>{% endfor %}
+                </div>
+
+                <!-- Nivel -->
+                <div>
+                    <label for="{{ form.nivel.id_for_label }}" class="mb-1.5 block text-sm font-medium text-negro-texto">
+                        {{ form.nivel.label }} <span class="text-rojo ml-0.5">*</span>
+                    </label>
+                    {{ form.nivel }}
+                    {% for error in form.nivel.errors %}<p class="mt-1 text-xs text-rojo">{{ error }}</p>{% endfor %}
+                </div>
+
+                <!-- Grupo -->
+                <div>
+                    <label for="{{ form.grupo.id_for_label }}" class="mb-1.5 block text-sm font-medium text-negro-texto">
+                        {{ form.grupo.label }} <span class="text-rojo ml-0.5">*</span>
+                    </label>
+                    {{ form.grupo }}
+                    {% for error in form.grupo.errors %}<p class="mt-1 text-xs text-rojo">{{ error }}</p>{% endfor %}
+                </div>
+
+                <!-- Profesor jefe -->
+                <div>
+                    <label for="{{ form.profesor_jefe.id_for_label }}" class="mb-1.5 block text-sm font-medium text-negro-texto">
+                        {{ form.profesor_jefe.label }}
+                    </label>
+                    {{ form.profesor_jefe }}
+                    {% for error in form.profesor_jefe.errors %}<p class="mt-1 text-xs text-rojo">{{ error }}</p>{% endfor %}
+                    <p class="mt-1 text-xs text-gris-texto">Solo se muestran funcionarios con cargo Profesor y activos.</p>
+                </div>
+
+            </div>
+
+            <div class="mt-6 flex items-center justify-end gap-3">
+                <a href="{% url 'administracion' %}"
+                    class="flex items-center gap-1.5 rounded-lg border border-gris-iconos px-5 py-2.5 text-sm font-semibold text-gris-texto transition-colors hover:bg-gris-ultraclaro">
+                    Cancelar
+                </a>
+                <button type="submit"
+                    class="flex items-center gap-1.5 rounded-lg bg-azul px-5 py-2.5 text-sm font-semibold text-blanco transition-colors hover:bg-azul-profundo">
+                    <i data-lucide="save" class="h-4 w-4"></i>
+                    {% if curso %}Guardar cambios{% else %}Crear curso{% endif %}
+                </button>
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock %}
