@@ -29,7 +29,8 @@ from .forms import (
 # ─────────────────────────── Página principal ────────────────────────────────
 
 def pagina_administracion(request):
-    anio_actual = timezone.now().year
+    fecha_actual = timezone.now()
+    anio_actual = fecha_actual.year
 
     # Garantizar que al menos exista el período del año actual
     PeriodoAcademico.objects.get_or_create(
@@ -58,6 +59,7 @@ def pagina_administracion(request):
 
     return render(request, "administracion/base.html", {
         "page_title": "Administración",
+        "fecha_actual": fecha_actual,
         "matriculas": matriculas,
         "cursos": cursos,
         "funcionarios": funcionarios,
