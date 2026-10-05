@@ -77,13 +77,16 @@ function crearBarras(canvasId, labels, valores, color = PALETA.azulPrimario) {
 function crearDonutSegmentos(canvasId, valores, colores) {
     const canvas = document.getElementById(canvasId);
     if (!canvas) return null;
- 
+
+    const total = valores.reduce((acc, val) => acc + (Number(val) || 0), 0);
+    const esVacio = total === 0;
+
     return new Chart(canvas, {
         type: 'doughnut',
         data: {
             datasets: [{
-                data: valores,
-                backgroundColor: colores,
+                data: esVacio ? [1] : valores,
+                backgroundColor: esVacio ? [PALETA.grisClaro] : colores,
                 borderWidth: 0,
             }],
         },
@@ -95,6 +98,7 @@ function crearDonutSegmentos(canvasId, valores, colores) {
                 legend: { display: false },
                 tooltip: { enabled: false },
             },
+            ...(esVacio && { events: [] }),
         },
     });
 }

@@ -18,6 +18,7 @@
         </div>
         <p class="mt-2 text-center text-xs text-gris-texto">{{ alertas_por_nivel.total }} alertas en total</p>
         
+        <!-- Piechart proporción de alertas críticas vs atención -->
         <div class="mt-4 mb-2 lg:mt-8 lg:mb-0 flex items-center justify-center gap-4">
             <div class="relative h-20 w-20 shrink-0">
                 <canvas id="grafico-alertas-nivel"></canvas>
@@ -49,8 +50,8 @@
     {{ tendencia_alertas|json_script:"datos-tendencia-alertas" }}
  
     <!-- Ranking alertas -->
-    <div class="rounded-lg bg-blanco-tarjeta p-4 shadow-sm lg:col-span-6 lg:row-span-2">
-        <div class="flex items-center justify-between">
+    <div class="flex flex-col rounded-lg bg-blanco-tarjeta p-4 shadow-sm lg:col-span-6 lg:row-span-2 lg:h-[376px] lg:overflow-hidden">
+        <div class="flex items-center justify-between shrink-0">
             <p class="text-base font-semibold text-azul">Ranking · Alumnos con más alertas</p>
             <a href="{% url 'alertas' %}">   
                 <span class="flex flex-row items-center gap-1 text-xs text-azul hover:text-azul-claro transition-colors">
@@ -59,7 +60,7 @@
                 </span>
             </a>
         </div>
-        <ul class="mt-3 space-y-2 border rounded-lg border-gris-ultraclaro p-1.5">
+        <ul class="mt-3 space-y-2 border rounded-lg border-gris-ultraclaro p-1.5 lg:flex-1 lg:overflow-y-auto lg:pr-1">
             {% for item in ranking_alertas %}
                 <li>
                     <a href="{{ item.url }}"
@@ -80,15 +81,18 @@
                     </a>
                 </li>
             {% empty %}
-                <li class="text-sm text-gris-texto">Sin alumnos en el ranking.</li>
+                <div class="flex flex-col justify-center items-center py-3">
+                    <i data-lucide="user-search" class="h-4 w-4 text-gris-texto"></i>
+                    <li class="text-sm text-gris-texto">Sin alumnos en el ranking.</li>
+                </div>
             {% endfor %}
         </ul>
     </div>
  
     <!-- Alertas recientes -->
-    <div class="rounded-lg bg-blanco-tarjeta p-4 shadow-sm lg:col-span-6 lg:row-span-2">
-        <p class="text-base font-semibold text-azul">Alertas recientes</p>
-        <ul class="mt-3 space-y-1.5 border rounded-lg border-gris-ultraclaro p-1.5">
+    <div class="flex flex-col rounded-lg bg-blanco-tarjeta p-4 shadow-sm lg:col-span-6 lg:row-span-2 lg:h-[376px] lg:overflow-hidden">
+        <p class="text-base font-semibold text-azul shrink-0">Alertas recientes</p>
+        <ul class="mt-3 space-y-1.5 border rounded-lg border-gris-ultraclaro p-1.5 lg:flex-1 lg:overflow-y-auto lg:pr-1">
             {% for alerta in alertas_recientes %}
                 <li class="flex items-center gap-2 text-sm">
                     <span class="h-1.5 w-1.5 shrink-0 rounded-full {% if alerta.nivel == 'critico' %}bg-rojo{% else %}bg-amarillo{% endif %}"></span>
@@ -96,7 +100,10 @@
                     <span class="text-gris-texto">· {{ alerta.curso }} · {{ alerta.hace }}</span>
                 </li>
             {% empty %}
-                <li class="text-sm text-gris-texto">Sin alertas recientes.</li>
+                <div class="flex flex-col justify-center items-center py-3">
+                    <i data-lucide="circle-alert" class="h-4 w-4 text-gris-texto"></i>
+                    <li class="text-sm text-gris-texto">Sin alertas recientes.</li>
+                </div>
             {% endfor %}
         </ul>
     </div>
@@ -106,7 +113,7 @@
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         const datosNivel = JSON.parse(document.getElementById('datos-alertas-nivel').textContent);
-        crearDonutSegmentos('grafico-alertas-nivel', [datosNivel.critico, datosNivel.atencion], ['#D9453D', '#E3A72E']);
+        crearDonutSegmentos('grafico-alertas-nivel', [datosNivel.critico, datosNivel.atencion], [PALETA.rojo, PALETA.amarillo]);
  
         const datosCurso = JSON.parse(document.getElementById('datos-alertas-curso').textContent);
         crearBarras('grafico-alertas-curso', datosCurso.labels, datosCurso.valores, PALETA.rojo);

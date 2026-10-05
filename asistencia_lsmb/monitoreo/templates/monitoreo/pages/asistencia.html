@@ -56,12 +56,17 @@
                         {% if curso.porcentaje == None %}—{% else %}{{ curso.porcentaje }}%{% endif %}
                     </p>
                 </div>
+            {% empty %}
+                <div class="flex flex-col justify-center items-center py-3 col-span-2 sm:col-span-4 lg:col-span-8">
+                    <i data-lucide="book-alert" class="h-4 w-4 text-gris-texto"></i>
+                    <p class="text-sm text-gris-texto">Sin cursos que mostrar</p>
+                </div>
             {% endfor %}
         </div>
     </div>
  
     <!-- Calendario de asistencia -->
-    <div class="rounded-lg bg-blanco-tarjeta p-4 shadow-sm lg:col-span-6 lg:row-span-2">
+    <div class="rounded-lg bg-blanco-tarjeta p-4 shadow-sm lg:col-span-6 lg:row-span-2 lg:h-[376px]">
         <p class="text-base font-semibold text-azul">Calendario de asistencia</p>
         <div class="mt-2 flex h-24 items-center justify-center rounded-lg border border-dashed border-gris-claro text-xs text-gris-texto lg:h-[calc(100%-2rem)]">
             Contenido pendiente
@@ -69,9 +74,15 @@
     </div>
  
     <!-- Cursos pendientes -->
-    <div class="rounded-lg bg-blanco-tarjeta p-4 shadow-sm lg:col-span-6 lg:row-span-2">
-        <div class="flex items-center justify-between">
-            <p class="text-base font-semibold text-azul">Cursos pendientes ({{ cursos_pendientes|length }})</p>
+    <div class="flex flex-col rounded-lg bg-blanco-tarjeta p-4 shadow-sm lg:col-span-6 lg:row-span-2 lg:h-[376px] lg:overflow-hidden">
+        <div class="flex items-center justify-between shrink-0">
+            <div class="flex items-center gap-2">
+                <p class="text-base font-semibold text-azul">Cursos pendientes</p>
+                <span class="rounded-full bg-azul-fondo px-2 py-0.5 text-xs font-semibold text-azul-profundo">
+                    {{ cursos_pendientes|length|default:0 }}
+                </span>
+            </div>
+            
             <a href="{% url 'asistencia' %}">   
                 <span class="flex flex-row items-center gap-1 text-xs text-azul hover:text-azul-claro transition-colors">
                     Ver todo
@@ -79,7 +90,7 @@
                 </span>
             </a>
         </div>
-        <ul class="space-y-1.5 mt-3">
+        <ul class="space-y-1.5 mt-3 lg:flex-1 lg:overflow-y-auto lg:pr-1">
             {% for curso in cursos_pendientes %}
             <li>
                 <a href="{{ curso.url }}" class="group flex items-center justify-between rounded-lg border border-gris-claro px-3 py-2 text-sm text-negro-texto transition-colors hover:bg-blanco-fondo hover:border-azul">
