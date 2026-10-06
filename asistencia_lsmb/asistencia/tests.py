@@ -16,7 +16,7 @@ class ModificarAsistenciaTests(TestCase):
 			fecha_fin=datetime.date(2026, 12, 31),
 		)
 		curso = Curso.objects.create(periodo=periodo, nivel=1, grupo="A")
-		estado_matricula = EstadoMatricula.objects.create(nombre="activo")
+		estado_matricula = EstadoMatricula.objects.create(nombre="vigente")
 		alumno = Alumno.objects.create(nombre="Estudiante de Prueba", rut="11111111-1")
 		Matricula.objects.create(
 			alumno=alumno,

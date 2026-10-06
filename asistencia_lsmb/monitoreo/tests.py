@@ -22,7 +22,7 @@ class MonitoreoOperativoTests(TestCase):
 			fecha_fin=datetime.date(2026, 12, 31),
 		)
 		self.curso = Curso.objects.create(periodo=self.periodo, nivel=1, grupo="A")
-		estado_matricula = EstadoMatricula.objects.create(nombre="activo")
+		estado_matricula = EstadoMatricula.objects.create(nombre="vigente")
 		self.alumno = Alumno.objects.create(nombre="Estudiante de Monitoreo", rut="12345678-5")
 		Matricula.objects.create(
 			alumno=self.alumno,

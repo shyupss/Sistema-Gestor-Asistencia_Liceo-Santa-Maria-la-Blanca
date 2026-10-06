@@ -14,6 +14,7 @@ TIPOS_VALIDOS = { 'justificacion', 'retiro' }
 def pagina_justificaciones_formulario(request):
     tipo = request.GET.get('tipo')
     busqueda_estudiante = ''
+    estudiante_id = ''
     estudiante_contexto = None
 
     if tipo not in TIPOS_VALIDOS:
@@ -26,6 +27,7 @@ def pagina_justificaciones_formulario(request):
         tipo = request.POST.get('tipo')
         volver_url = request.POST.get('next') or reverse('justificaciones')
         busqueda = request.POST.get('busqueda_estudiante', '').strip()
+        estudiante_id = request.POST.get('estudiante_id', '').strip()
         busqueda_estudiante = busqueda
         fecha_inicio = parse_date(request.POST.get('fecha_inicio', ''))
         fecha_fin = parse_date(request.POST.get('fecha_fin', ''))
@@ -41,20 +43,24 @@ def pagina_justificaciones_formulario(request):
             ),
             'apoderados',
         )
-        estudiantes_exactos = estudiantes.filter(
-            Q(rut__iexact=busqueda) | Q(nombre__iexact=busqueda)
-        )
-        if estudiantes_exactos.exists():
-            estudiantes = estudiantes_exactos
-        elif busqueda:
-            estudiantes = estudiantes.filter(nombre__icontains=busqueda)
-        else:
-            estudiantes = estudiantes_exactos
+        estudiante = estudiantes.filter(pk=estudiante_id).first() if estudiante_id else None
+        if estudiante is None:
+            estudiantes_exactos = estudiantes.filter(
+                Q(rut__iexact=busqueda) | Q(nombre__iexact=busqueda)
+            )
+            if estudiantes_exactos.exists():
+                estudiantes = estudiantes_exactos
+            elif busqueda:
+                estudiantes = estudiantes.filter(nombre__icontains=busqueda)
+            else:
+                estudiantes = estudiantes_exactos
 
-        if estudiantes.count() != 1:
-            errores.append('Selecciona un único estudiante válido por nombre o RUT.')
-        else:
+        if estudiante is None and estudiantes.count() == 1:
             estudiante = estudiantes.first()
+
+        if estudiante is None:
+            errores.append('Selecciona un estudiante válido de la lista.')
+        else:
             matriculas = estudiante.matriculas_formulario
             estudiante_contexto = {
                 'alumno': estudiante,
@@ -79,7 +85,7 @@ def pagina_justificaciones_formulario(request):
         if not errores:
             with transaction.atomic():
                 justificacion = Justificaciones.objects.create(
-                    alumno=estudiantes.first(),
+                    alumno=estudiante,
                     tipo=tipo,
                     estado_solicitud=estado,
                     fecha_inicio=fecha_inicio,
@@ -99,12 +105,22 @@ def pagina_justificaciones_formulario(request):
         for error in errores:
             messages.error(request, error)
 
+    estudiantes_disponibles = Alumno.objects.prefetch_related(
+        Prefetch(
+            'matriculas',
+            queryset=Matricula.objects.select_related('curso').order_by('-fecha_matricula'),
+            to_attr='matriculas_formulario',
+        ),
+    ).order_by('nombre')
+
     contexto = {
         'page_title': 'Nueva justificación' if tipo == 'justificacion' else 'Nuevo retiro' if tipo == 'retiro' else 'Nuevo registro',
         'tipo': tipo,
         'volver_url': volver_url,
         'volver_label': volver_label,
         'busqueda_estudiante': busqueda_estudiante,
+        'estudiante_id': estudiante_id,
+        'estudiantes_disponibles': estudiantes_disponibles,
         'estudiante_contexto': estudiante_contexto,
     }
     return render(request, 'justificaciones/formulario.html', contexto)

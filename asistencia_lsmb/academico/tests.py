@@ -5,7 +5,7 @@ Pruebas automatizadas — H13: Gestionar los alumnos del colegio
 Cobertura:
   - Creación y validación de Alumno (RUT único, normalización)
   - Edición de datos básicos de un alumno
-  - Matrícula activa única por periodo (no duplicados simultáneos)
+  - Matrícula vigente única por periodo (no duplicados simultáneos)
   - Cambio de curso: cierre de matrícula anterior y apertura de una nueva
   - Retiro del colegio: matrícula con fecha_termino y estado "retirado"
 """
@@ -51,8 +51,8 @@ class BaseAlumnoTestCase(TestCase):
             nivel=1,
             grupo="B",
         )
-        self.estado_activo = EstadoMatricula.objects.create(
-            nombre="activo",
+        self.estado_vigente = EstadoMatricula.objects.create(
+            nombre="vigente",
             descripcion="Alumno con matrícula vigente",
         )
         self.estado_retirado = EstadoMatricula.objects.create(
@@ -163,7 +163,7 @@ class MatriculaActivaUnicaTests(BaseAlumnoTestCase):
             alumno=self.alumno,
             curso=self.curso_1a,
             periodo=self.periodo,
-            estado_matricula=self.estado_activo,
+            estado_matricula=self.estado_vigente,
             fecha_matricula=datetime.date(2026, 3, 1),
         )
         self.assertIsNotNone(m.pk)
@@ -177,7 +177,7 @@ class MatriculaActivaUnicaTests(BaseAlumnoTestCase):
             alumno=self.alumno,
             curso=self.curso_1a,
             periodo=self.periodo,
-            estado_matricula=self.estado_activo,
+            estado_matricula=self.estado_vigente,
             fecha_matricula=datetime.date(2026, 3, 1),
         )
         from django.db import IntegrityError
@@ -186,7 +186,7 @@ class MatriculaActivaUnicaTests(BaseAlumnoTestCase):
                 alumno=self.alumno,
                 curso=self.curso_1b,
                 periodo=self.periodo,
-                estado_matricula=self.estado_activo,
+                estado_matricula=self.estado_vigente,
                 fecha_matricula=datetime.date(2026, 3, 1),
             )
 
@@ -210,7 +210,7 @@ class CambioCursoTests(BaseAlumnoTestCase):
             alumno=self.alumno,
             curso=self.curso_1a,
             periodo=self.periodo,
-            estado_matricula=self.estado_activo,
+            estado_matricula=self.estado_vigente,
             fecha_matricula=datetime.date(2026, 3, 1),
         )
 
@@ -226,7 +226,7 @@ class CambioCursoTests(BaseAlumnoTestCase):
             alumno=self.alumno,
             curso=self.curso_1b,
             periodo=self.periodo,
-            estado_matricula=self.estado_activo,
+            estado_matricula=self.estado_vigente,
             fecha_matricula=fecha_cambio,
         )
 
@@ -250,7 +250,7 @@ class CambioCursoTests(BaseAlumnoTestCase):
             alumno=self.alumno,
             curso=self.curso_1b,
             periodo=self.periodo,
-            estado_matricula=self.estado_activo,
+            estado_matricula=self.estado_vigente,
             fecha_matricula=fecha_cambio,
         )
 
@@ -280,7 +280,7 @@ class RetiroAlumnoTests(BaseAlumnoTestCase):
             alumno=self.alumno,
             curso=self.curso_1a,
             periodo=self.periodo,
-            estado_matricula=self.estado_activo,
+            estado_matricula=self.estado_vigente,
             fecha_matricula=datetime.date(2026, 3, 1),
         )
 

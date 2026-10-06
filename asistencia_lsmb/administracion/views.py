@@ -1,3 +1,5 @@
+import re
+
 from django.contrib import messages
 from django.db import transaction
 from django.shortcuts import get_object_or_404, redirect, render
@@ -58,6 +60,13 @@ def _guardar_apoderado(form, existing_id=None):
     return apoderado
 
 
+def _clave_orden_natural(texto):
+    return [
+        int(fragmento) if fragmento.isdigit() else fragmento.casefold()
+        for fragmento in re.split(r"(\d+)", texto or "")
+    ]
+
+
 # ─────────────────────────── Página principal ────────────────────────────────
 
 def pagina_administracion(request):
@@ -73,7 +82,7 @@ def pagina_administracion(request):
         },
     )
 
-    matriculas = (
+    matriculas = list(
         Matricula.objects.filter(fecha_termino__isnull=True)
         .select_related(
             "alumno",
@@ -81,8 +90,8 @@ def pagina_administracion(request):
             "curso__periodo",
             "estado_matricula",
         )
-        .order_by("alumno__nombre")
     )
+    matriculas.sort(key=lambda matricula: _clave_orden_natural(matricula.alumno.nombre))
 
     cursos = (
         Curso.objects.select_related("periodo", "profesor_jefe")
@@ -183,7 +192,20 @@ def matricular_alumno(request):
         apoderado_forms = []
         relacion_forms = []
         for i in _indices_apoderados(request.POST):
-            apoderado_forms.append(ApoderadoForm(request.POST, prefix=f"apoderado_{i}"))
+            prefix = f"apoderado_{i}"
+            existing_id = request.POST.get(f"{prefix}-existing_id")
+            apoderado_instance = (
+                Apoderado.objects.filter(pk=existing_id).first()
+                if existing_id
+                else None
+            )
+            apoderado_forms.append(
+                ApoderadoForm(
+                    request.POST,
+                    prefix=prefix,
+                    instance=apoderado_instance,
+                )
+            )
             relacion_forms.append(AlumnoApoderadoForm(request.POST, prefix=f"relacion_{i}"))
 
         all_valid = alumno_form.is_valid() and matricula_form.is_valid()
@@ -192,10 +214,13 @@ def matricular_alumno(request):
         if all_valid and apoderados_valid:
             try:
                 alumno = alumno_form.save()
-                estado_activo, _ = EstadoMatricula.objects.get_or_create(nombre="activo")
+                estado_vigente, _ = EstadoMatricula.objects.get_or_create(
+                    nombre="vigente",
+                    defaults={"descripcion": "Alumno con matrícula vigente"},
+                )
                 matricula = matricula_form.save(commit=False)
                 matricula.alumno = alumno
-                matricula.estado_matricula = estado_activo
+                matricula.estado_matricula = estado_vigente
                 matricula.save()
 
                 for ap_form, rel_form in zip(apoderado_forms, relacion_forms):

@@ -128,7 +128,7 @@ class AlumnoApoderado(models.Model):
 
 
 class EstadoMatricula(models.Model):
-    nombre = models.CharField(max_length=30, unique=True) # activo, retirado, egresado
+    nombre = models.CharField(max_length=30, unique=True) # vigente, retirado, egresado
     descripcion = models.CharField(max_length=255, null=True, blank=True)
 
     def __str__(self):
@@ -139,7 +139,7 @@ class Matricula(models.Model):
     alumno = models.ForeignKey(Alumno, on_delete=models.CASCADE, related_name='matriculas')
     curso = models.ForeignKey(Curso, on_delete=models.CASCADE, related_name='matriculas')
     periodo = models.ForeignKey(PeriodoAcademico, on_delete=models.CASCADE)
-    # Si se intenta borrar un estado ("activo"), PROTECT lo impedirá si hay alumnos usándolo
+    # Si se intenta borrar un estado ("vigente"), PROTECT lo impedirá si hay alumnos usándolo
     estado_matricula = models.ForeignKey(EstadoMatricula, on_delete=models.PROTECT) 
     
     fecha_matricula = models.DateField()

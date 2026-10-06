@@ -12,7 +12,7 @@
 
     <!-- Contenido -->
     <div class="rounded-lg bg-blanco-tarjeta p-4 border border-gris-claro shadow-sm md:p-8"
-        x-data="{ tipo: '{{ tipo }}' }"
+        x-data="{ tipo: '{{ tipo }}', estudianteSeleccionado: '{{ estudiante_id }}' }"
     >
 
         <div class="flex justify-between">
@@ -43,15 +43,34 @@
                             Estudiante
                             <span class="text-rojo ml-0.5" aria-hidden="true" title="Campo obligatorio">*</span>
                         </label>
-                        <div class="relative">
+                        <div class="relative" data-selector-estudiante>
                             <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-gris-texto">
                                 <i data-lucide="user" class="h-4 w-4"></i>
                             </span>
-                            <input type="text" name="busqueda_estudiante" id="id_estudiante" value="{{ busqueda_estudiante }}" autocomplete="off" required
-                                placeholder="Buscar estudiante por nombre, RUT o curso"
+                            <input type="search" id="buscador_estudiante" value="{{ busqueda_estudiante }}" autocomplete="off"
+                                placeholder="Buscar estudiante por nombre o curso"
                                 class="w-full rounded-lg border border-gris-iconos py-2.5 pl-9 pr-3 text-sm text-negro-texto
                                 placeholder:text-gris-iconos focus:border-azul focus:outline-none focus:ring-1 focus:ring-azul"
                             >
+                            <input type="hidden" name="busqueda_estudiante" id="id_estudiante" value="{{ busqueda_estudiante }}">
+                            <input type="hidden" name="estudiante_id" id="id_estudiante_id" value="{{ estudiante_id }}" required>
+                            <div id="selector_estudiante"
+                                class="absolute left-0 right-0 top-full z-20 mt-1 hidden max-h-60 overflow-y-auto rounded-lg border border-gris-claro bg-blanco-tarjeta py-1 shadow-lg">
+                                {% for estudiante in estudiantes_disponibles %}
+                                {% with matricula=estudiante.matriculas_formulario.0 %}
+                                <button type="button"
+                                    class="opcion-estudiante grid w-full grid-cols-[minmax(0,1fr)_8rem] items-center gap-4 px-3 py-2 text-left text-sm text-negro-texto transition-colors hover:bg-azul-fondo"
+                                    data-id="{{ estudiante.pk }}"
+                                    data-texto="{{ estudiante.nombre }} {% if matricula %}{{ matricula.curso.nivel_romano }} Medio {{ matricula.curso.grupo }}{% endif %}"
+                                    data-nombre="{{ estudiante.nombre }}">
+                                    <span class="min-w-0 truncate">{{ estudiante.nombre }}</span>
+                                    <span class="w-32 text-right text-xs text-gris-texto">
+                                        {% if matricula %}{{ matricula.curso.nivel_romano }}° Medio {{ matricula.curso.grupo }}{% else %}Sin curso{% endif %}
+                                    </span>
+                                </button>
+                                {% endwith %}
+                                {% endfor %}
+                            </div>
                         </div>
                     </div>
 
@@ -268,4 +287,45 @@
         </form>
     </div> 
 </section>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const contenedor = document.querySelector('[data-selector-estudiante]');
+        if (!contenedor) return;
+
+        const buscador = contenedor.querySelector('#buscador_estudiante');
+        const selector = contenedor.querySelector('#selector_estudiante');
+        const idInput = contenedor.querySelector('#id_estudiante_id');
+        const textoInput = contenedor.querySelector('#id_estudiante');
+        const opciones = Array.from(selector.querySelectorAll('.opcion-estudiante'));
+
+        const actualizarOpciones = () => {
+            const termino = buscador.value.trim().toLowerCase();
+            let visibles = 0;
+            opciones.forEach((opcion) => {
+                const coincide = !termino || opcion.dataset.texto.toLowerCase().includes(termino);
+                opcion.classList.toggle('hidden', !coincide);
+                if (coincide) visibles++;
+            });
+            selector.classList.toggle('hidden', visibles === 0 || idInput.value !== '');
+        };
+
+        buscador.addEventListener('input', function () {
+            idInput.value = '';
+            textoInput.value = buscador.value;
+            actualizarOpciones();
+        });
+
+        opciones.forEach((opcion) => {
+            opcion.addEventListener('click', function () {
+            idInput.value = opcion.dataset.id;
+            buscador.value = opcion.dataset.nombre;
+            textoInput.value = buscador.value;
+            selector.classList.add('hidden');
+            });
+        });
+
+        buscador.addEventListener('focus', actualizarOpciones);
+        actualizarOpciones();
+    });
+</script>
 {% endblock %}
