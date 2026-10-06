@@ -28,4 +28,4 @@ ssh "$SERVER" "cd '$REMOTE_DIR' && docker-compose pull && docker-compose up -d"
 echo "==> Estado:"
 ssh "$SERVER" "cd '$REMOTE_DIR' && docker-compose ps"
 
-echo "==> Listo -> http://grupo7.146.83.216.166.nip.io"
+echo "==> Listo -> https://asistencias-lsmb.inf.uach.cl/administracion/"
