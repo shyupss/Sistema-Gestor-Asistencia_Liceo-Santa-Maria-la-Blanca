@@ -3,6 +3,8 @@ from administracion import views
 
 urlpatterns = [
     path("", views.pagina_administracion, name="administracion"),
+    path("configuracion-asistencia/cargar/", views.cargar_configuracion_asistencia, name="cargar_configuracion_asistencia"),
+    path("alumnos/eliminar/", views.eliminar_alumnos, name="eliminar_alumnos"),
     path("matricular/", views.matricular_alumno, name="matricular_alumno"),
     path("matricula/<int:matricula_id>/editar/", views.editar_matricula, name="editar_matricula"),
     path("cursos/nuevo/", views.crear_curso, name="crear_curso_admin"),

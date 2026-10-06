@@ -220,3 +220,17 @@ class FuncionarioForm(forms.ModelForm):
             "email": "Correo electrónico",
             "activo": "Funcionario activo",
         }
+
+
+class EliminarAlumnosForm(forms.Form):
+    alumnos = forms.ModelMultipleChoiceField(
+        queryset=Alumno.objects.filter(
+            matriculas__fecha_termino__isnull=True,
+            matriculas__isnull=False,
+        ).distinct(),
+        error_messages={
+            "required": "Selecciona al menos un alumno para eliminar.",
+            "invalid_choice": "La selección cambió o contiene alumnos sin matrícula vigente. Actualiza el listado.",
+            "invalid_pk_value": "La selección de alumnos no es válida.",
+        },
+    )

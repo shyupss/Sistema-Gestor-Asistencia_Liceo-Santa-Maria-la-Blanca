@@ -10,6 +10,9 @@
 </style>
 <section class="min-h-[calc(100vh-15vh)] bg-blanco-fondo px-4 py-5 pb-28 md:px-8">
     <div class="mx-auto max-w-2xl">
+        {% for error in errores_registro %}
+        <p role="alert" class="mb-3 rounded-lg border border-rojo-contraste bg-rojo-claro p-3 text-sm text-rojo-oscuro">{{ error }}</p>
+        {% endfor %}
         {% if request.GET.guardado %}
         {% include "asistencia/components/resumen-asistencia.html" %}
         {% else %}
@@ -57,6 +60,10 @@
                 </div>
             </div>
 
+            <p class="mb-3 text-xs text-gris-texto">
+                Casilla marcada: presente. Sin marcar: ausente.
+                Las nuevas marcas de presente guardadas después de las 09:30 (hora de Chile) se registran como atrasado y cuentan como ausencia.
+            </p>
             <button type="button" @click="marcarTodos()"
                 class="mb-3 flex w-full items-center justify-center gap-2 rounded-lg border border-azul-medio bg-celeste-claro px-4 py-2 text-sm font-semibold text-azul-profundo hover:bg-azul-fondo">
                 <i data-lucide="check-check" class="h-4 w-4"></i>

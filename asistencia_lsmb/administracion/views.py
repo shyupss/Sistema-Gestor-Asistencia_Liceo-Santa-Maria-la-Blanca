@@ -1,7 +1,9 @@
 from django.contrib import messages
+from django.core.exceptions import MultipleObjectsReturned
 from django.db import transaction
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from django.views.decorators.http import require_POST
 
 from academico.models import (
     Alumno,
@@ -14,12 +16,15 @@ from academico.models import (
 )
 from alertas.models import Cargo, Funcionario
 
+from .catalogos import cargar_catalogos_asistencia
+
 from .forms import (
     AlumnoApoderadoForm,
     AlumnoForm,
     ApoderadoForm,
     CargoForm,
     CursoForm,
+    EliminarAlumnosForm,
     FuncionarioForm,
     MatriculaForm,
     PeriodoForm,
@@ -95,6 +100,25 @@ def pagina_administracion(request):
         "cargos": cargos,
         "periodos": periodos,
     })
+
+
+@require_POST
+def cargar_configuracion_asistencia(request):
+    try:
+        creados, actualizados = cargar_catalogos_asistencia()
+    except MultipleObjectsReturned:
+        messages.error(
+            request,
+            "Hay estados o tipos repetidos que solo se diferencian por mayúsculas. "
+            "Revisa esos registros antes de cargar la configuración; no se guardaron cambios.",
+        )
+    else:
+        messages.success(
+            request,
+            f"Configuración de asistencia lista: {creados} registros creados y "
+            f"{actualizados} actualizados.",
+        )
+    return redirect("administracion")
 
 
 # ─────────────────────────── Cargos y Periodos ───────────────────────────────
@@ -298,6 +322,30 @@ def editar_matricula(request, matricula_id):
         "apoderado_forms": list(zip(apoderado_forms, relacion_forms)),
         "apoderado_count": len(apoderado_forms),
         "matricula": matricula,
+    })
+
+
+@require_POST
+@transaction.atomic
+def eliminar_alumnos(request):
+    form = EliminarAlumnosForm(request.POST)
+    if not form.is_valid():
+        for error in form.errors.get("alumnos", []):
+            messages.error(request, error)
+        return redirect("administracion")
+
+    alumnos = list(form.cleaned_data["alumnos"].order_by("nombre", "pk"))
+    if request.POST.get("confirmar") == "si":
+        Alumno.objects.filter(pk__in=[alumno.pk for alumno in alumnos]).delete()
+        messages.success(
+            request,
+            f"Se eliminaron permanentemente {len(alumnos)} alumno(s) y sus registros asociados.",
+        )
+        return redirect("administracion")
+
+    return render(request, "administracion/eliminar_alumnos.html", {
+        "page_title": "Confirmar eliminación de alumnos",
+        "alumnos": alumnos,
     })
 
 

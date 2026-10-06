@@ -1,3 +1,5 @@
+from datetime import time
+
 from django.contrib import messages
 from django.db import transaction
 from django.shortcuts import get_object_or_404, redirect, render
@@ -38,6 +40,7 @@ def pagina_registrar_asistencia(request):
     curso = None
     alumnos = []
     paso_lista = None
+    errores_registro = []
 
     if curso_id:
         curso = get_object_or_404(cursos, pk=curso_id)
@@ -47,33 +50,58 @@ def pagina_registrar_asistencia(request):
     if request.method == "POST":
         funcionario_id = request.POST.get("funcionario")
         if not curso or not funcionario_id:
-            messages.error(request, "Selecciona un curso y un funcionario.")
+            errores_registro.append("Selecciona un curso y un funcionario.")
         else:
             funcionario = get_object_or_404(
                 funcionarios,
                 pk=funcionario_id,
             )
-            tipos = {str(tipo.pk): tipo for tipo in tipos_asistencia}
-            tipo_ausente = next(
-                (tipo for tipo in tipos_asistencia if tipo.cuenta_como_ausencia),
-                None,
-            )
-
+            tipos = {tipo.nombre.casefold(): tipo for tipo in tipos_asistencia}
+            tipo_presente = tipos.get("presente")
+            tipo_ausente = tipos.get("ausente")
+            tipo_atrasado = tipos.get("atrasado")
             presentes = set(request.POST.getlist("presentes"))
-            tipo_presente = next(
-                (tipo for tipo in tipos_asistencia if not tipo.cuenta_como_ausencia),
-                None,
-            )
+            error = None
+            if not tipo_presente or not tipo_ausente:
+                error = "Carga los tipos presente y ausente desde Administración."
+            elif tipo_presente.cuenta_como_ausencia or not tipo_ausente.cuenta_como_ausencia:
+                error = "Revisa las reglas de presente y ausente desde Administración."
 
+            # Solo se admiten las dos opciones del paso de lista, incluso por POST.
             for matricula in alumnos:
                 tipo_id = request.POST.get(f"alumno_{matricula.alumno_id}")
-                if not tipo_id and str(matricula.alumno_id) in presentes:
-                    tipo_id = str(tipo_presente.pk) if tipo_presente else None
-                if tipo_id not in tipos:
-                    tipo_id = str(tipo_ausente.pk) if tipo_ausente else None
-                if tipo_id is None:
-                    messages.error(request, "Configura al menos un tipo de asistencia ausente.")
-                    break
+                if tipo_id:
+                    if tipo_presente and tipo_id == str(tipo_presente.pk):
+                        presentes.add(str(matricula.alumno_id))
+                    elif tipo_ausente and tipo_id == str(tipo_ausente.pk):
+                        presentes.discard(str(matricula.alumno_id))
+                    else:
+                        error = "Al pasar lista solo puedes marcar presente o ausente."
+                        break
+
+            despues_del_corte = timezone.localtime().time() > time(9, 30)
+            tipos_por_id = {tipo.pk: tipo for tipo in tipos_asistencia}
+            anteriores = obtener_asistencias(paso_lista) if paso_lista else {}
+            asignaciones = {}
+            if not error:
+                for matricula in alumnos:
+                    tipo = tipo_ausente
+                    if str(matricula.alumno_id) in presentes:
+                        anterior = tipos_por_id.get(anteriores.get(matricula.alumno_id))
+                        if anterior and (not anterior.cuenta_como_ausencia or anterior.nombre.casefold() == "atrasado"):
+                            # Guardar otra vez no cambia la llegada ya registrada.
+                            tipo = anterior
+                        elif despues_del_corte:
+                            if not tipo_atrasado or not tipo_atrasado.cuenta_como_ausencia:
+                                error = "Carga el tipo atrasado, que cuenta como ausencia, desde Administración."
+                                break
+                            tipo = tipo_atrasado
+                        else:
+                            tipo = tipo_presente
+                    asignaciones[matricula.alumno_id] = tipo
+
+            if error:
+                errores_registro.append(error)
             else:
                 with transaction.atomic():
                     paso_lista, _ = Paso_Lista.objects.update_or_create(
@@ -83,40 +111,24 @@ def pagina_registrar_asistencia(request):
                         defaults={"funcionario": funcionario},
                     )
                     for matricula in alumnos:
-                        tipo_id = request.POST.get(f"alumno_{matricula.alumno_id}")
-                        if not tipo_id and str(matricula.alumno_id) in presentes and tipo_presente:
-                            tipo_id = str(tipo_presente.pk)
-                        if tipo_id not in tipos:
-                            tipo_id = str(tipo_ausente.pk)
                         Asistencia_Alumnos.objects.update_or_create(
                             paso_lista=paso_lista,
                             alumno=matricula.alumno,
-                            defaults={"tipo_asistencia_id": tipo_id},
+                            defaults={"tipo_asistencia": asignaciones[matricula.alumno_id]},
                         )
-
-                    for matricula in alumnos:
                         recalcular_estado_alumno(
                             alumno=matricula.alumno,
                             periodo=curso.periodo,
                         )
 
                 messages.success(request, "La asistencia fue guardada correctamente.")
-                presentes_guardados = sum(
-                    1
-                    for matricula in alumnos
-                    if str(matricula.alumno_id) in presentes
-                )
                 query = urlencode({
                     "curso": curso.pk,
                     "fecha": fecha.isoformat(),
                     "jornada": jornada,
                     "guardado": 1,
-                    "presentes": presentes_guardados,
-                    "ausentes": len(alumnos) - presentes_guardados,
                 })
-                return redirect(
-                    f"{reverse('registrar_asistencia')}?{query}"
-                )
+                return redirect(f"{reverse('registrar_asistencia')}?{query}")
 
     asistencias_guardadas = {}
     if paso_lista:
@@ -125,30 +137,37 @@ def pagina_registrar_asistencia(request):
         alumnos_por_id = {matricula.alumno_id: matricula for matricula in alumnos}
         registro_presentes = []
         registro_ausentes = []
+        registro_atrasados = []
 
         for alumno_id, tipo_id in asistencias_guardadas.items():
             matricula = alumnos_por_id.get(alumno_id)
             tipo = tipos_por_id.get(tipo_id)
             if not matricula or not tipo:
                 continue
-            if tipo.cuenta_como_ausencia:
+            if tipo.nombre.casefold() == "atrasado":
+                registro_atrasados.append(matricula)
+            elif tipo.cuenta_como_ausencia:
                 registro_ausentes.append(matricula)
             else:
                 registro_presentes.append(matricula)
 
         tipos_presentes = {
-            tipo.pk for tipo in tipos_asistencia if not tipo.cuenta_como_ausencia
+            tipo.pk for tipo in tipos_asistencia
+            if not tipo.cuenta_como_ausencia or tipo.nombre.casefold() == "atrasado"
         }
         for matricula in alumnos:
             matricula.tipo_asistencia_id = asistencias_guardadas.get(
                 matricula.alumno_id
             )
+            tipo_guardado = tipos_por_id.get(matricula.tipo_asistencia_id)
+            matricula.es_atrasado = bool(tipo_guardado and tipo_guardado.nombre.casefold() == "atrasado")
             matricula.es_presente = (
                 matricula.tipo_asistencia_id in tipos_presentes
             )
     else:
         registro_presentes = []
         registro_ausentes = []
+        registro_atrasados = []
 
     total_alumnos = len(alumnos)
     progreso = round(len(asistencias_guardadas) * 100 / total_alumnos) if total_alumnos else 0
@@ -158,6 +177,7 @@ def pagina_registrar_asistencia(request):
         "asistencia/registrar.html",
         {
             "cursos": cursos,
+            "errores_registro": errores_registro,
             "curso": curso,
             "alumnos": alumnos,
             "tipos_asistencia": tipos_asistencia,
@@ -170,5 +190,6 @@ def pagina_registrar_asistencia(request):
             "progreso": progreso,
             "registro_presentes": registro_presentes,
             "registro_ausentes": registro_ausentes,
+            "registro_atrasados": registro_atrasados,
         },
     )

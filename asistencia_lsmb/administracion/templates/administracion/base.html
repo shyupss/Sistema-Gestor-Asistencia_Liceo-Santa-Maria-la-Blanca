@@ -21,6 +21,25 @@
     </div>
     {% endif %}
 
+    <div class="mb-6 rounded-lg border border-gris-claro bg-blanco-tarjeta p-4">
+        <h2 class="font-semibold text-azul-profundo">Configuración de asistencia</h2>
+        <p class="mt-1 text-sm text-gris-texto">
+            Carga presente, ausente, atrasado y justificado, y los estados pendiente, aceptada y rechazada.
+            Ausente y atrasado cuentan como falta; presente y justificado no.
+            Aceptada y rechazada son estados finales; solo aceptada cubre la ausencia.
+        </p>
+        <p class="mt-1 text-sm text-gris-texto">
+            Puedes repetir la carga: actualiza estas reglas en los registros existentes sin duplicarlos.
+        </p>
+        <form method="post" action="{% url 'cargar_configuracion_asistencia' %}" class="mt-3">
+            {% csrf_token %}
+            <button type="submit" class="inline-flex items-center gap-2 rounded-lg bg-azul px-4 py-2 text-sm font-medium text-white hover:opacity-90">
+                <i data-lucide="settings" class="h-4 w-4" aria-hidden="true"></i>
+                Cargar configuración de asistencia
+            </button>
+        </form>
+    </div>
+
     <!-- Tabs -->
     <div x-data="{ tab: 'matriculas' }">
 
@@ -64,7 +83,7 @@
         </div>
 
         <!-- ═══════════════════ TAB MATRÍCULAS ═══════════════════ -->
-        <div x-show="tab === 'matriculas'" x-cloak>
+        <div x-show="tab === 'matriculas'" x-cloak x-data="{ seleccionados: [] }">
             <div class="flex items-center justify-between mb-4">
                 <h2 class="text-base font-semibold text-negro-texto">Matrículas vigentes</h2>
                 <a href="{% url 'matricular_alumno' %}"
@@ -74,12 +93,28 @@
                 </a>
             </div>
 
+            {% if matriculas %}
+            <form id="eliminar-alumnos" method="post" action="{% url 'eliminar_alumnos' %}"
+                class="flex flex-wrap items-center gap-3 mb-4">
+                {% csrf_token %}
+                <button type="submit" :disabled="seleccionados.length === 0"
+                    class="rounded-lg bg-rojo px-4 py-2 text-sm font-semibold text-white disabled:opacity-50 disabled:cursor-not-allowed">
+                    Eliminar alumnos seleccionados
+                </button>
+                <span class="text-sm text-gris-texto" aria-live="polite">
+                    <span x-text="seleccionados.length">0</span> alumno(s) seleccionado(s)
+                </span>
+            </form>
+            {% endif %}
+
+
             <div class="rounded-lg border border-gris-claro bg-blanco-tarjeta shadow-sm overflow-hidden">
                 {% if matriculas %}
                 <div class="overflow-x-auto">
                     <table class="w-full text-sm">
                         <thead class="bg-gris-ultraclaro border-b border-gris-claro">
                             <tr>
+                                <th class="px-4 py-3 text-left font-semibold text-negro-texto">Seleccionar</th>
                                 <th class="px-4 py-3 text-left font-semibold text-negro-texto">Alumno</th>
                                 <th class="px-4 py-3 text-left font-semibold text-negro-texto">RUT</th>
                                 <th class="px-4 py-3 text-left font-semibold text-negro-texto">Curso</th>
@@ -91,6 +126,12 @@
                         <tbody class="divide-y divide-gris-claro">
                             {% for matricula in matriculas %}
                             <tr class="hover:bg-gris-ultraclaro transition-colors">
+                                <td class="px-4 py-3">
+                                    <input type="checkbox" name="alumnos" value="{{ matricula.alumno_id }}"
+                                        form="eliminar-alumnos" x-model="seleccionados"
+                                        aria-label="Seleccionar a {{ matricula.alumno.nombre }}, RUT {{ matricula.alumno.rut }}"
+                                        class="h-4 w-4 rounded border-gris-iconos text-rojo focus:ring-rojo">
+                                </td>
                                 <td class="px-4 py-3 font-medium text-negro-texto">{{ matricula.alumno.nombre }}</td>
                                 <td class="px-4 py-3 text-gris-texto">{{ matricula.alumno.rut }}</td>
                                 <td class="px-4 py-3 text-gris-texto">{{ matricula.curso.nivel_romano }}° Medio {{ matricula.curso.grupo }}</td>
