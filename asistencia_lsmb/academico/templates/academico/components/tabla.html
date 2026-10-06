@@ -20,14 +20,14 @@
                 <select name="orden" onchange="this.form.submit()"
                     class="appearance-none bg-blanco-tarjeta border border-gris-claro rounded-xl px-4 py-2.5 pr-10 text-sm text-gris-texto focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm">
                     {% if page_title == "Cursos" %}
-                    <option value="curso" {% if orden=='curso' %}selected{% endif %}>
+                    <option value="curso" {% if orden == 'curso' %}selected{% endif %}>
                         Ordenar: Curso
                     </option>
                     {% endif %}
-                    <option value="asc" {% if orden=='asc' %}selected{% endif %}>
+                    <option value="asc" {% if orden == 'asc' %}selected{% endif %}>
                         Ordenar: Asistencia (ascendente)
                     </option>
-                    <option value="desc" {% if orden=='desc' %}selected{% endif %}>
+                    <option value="desc" {% if orden == 'desc' %}selected{% endif %}>
                         Ordenar: Asistencia (descendente)
                     </option>
                 </select>
