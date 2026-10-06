@@ -2,6 +2,8 @@ from django.contrib import messages
 from django.db import transaction
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from django.db.models import IntegerField, Case, When, Value
+from django.db.models.functions import Cast, RegexReplace
 
 from academico.models import (
     Alumno,
@@ -73,7 +75,20 @@ def pagina_administracion(request):
     matriculas = (
         Matricula.objects.filter(fecha_termino__isnull=True)
         .select_related("alumno", "curso", "curso__periodo", "estado_matricula")
-        .order_by("alumno__nombre")
+        .annotate(
+            alumno_num=Case(
+            # Si el nombre contiene al menos un número (\d), extrae el número y conviértelo a entero
+            When(
+                alumno__nombre__regex=r'\d',
+                then=Cast(RegexReplace("alumno__nombre", r"\D", ""), output_field=IntegerField())
+            ),
+            # Si NO contiene números (como "Juanito Pérez"), le asignamos un valor por defecto (ej. 0)
+            default=Value(0),
+            output_field=IntegerField()
+            )
+        )
+        # Ordenamos primero por el texto (alfabéticamente) y luego por el número extraído
+        .order_by("alumno__nombre", "alumno_num")
     )
     cursos = (
         Curso.objects.select_related("periodo", "profesor_jefe")
