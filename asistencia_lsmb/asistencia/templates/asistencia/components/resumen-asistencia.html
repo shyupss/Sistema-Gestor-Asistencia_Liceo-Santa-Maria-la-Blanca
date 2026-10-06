@@ -8,7 +8,7 @@
         {{ curso.nivel_romano }}° Medio {{ curso.grupo }} · {{ fecha|date:'d M Y' }}
     </p>
 
-    <div class="mt-7 grid grid-cols-2 gap-3">
+    <div class="mt-7 grid grid-cols-3 gap-3">
         <div class="rounded-xl bg-verde-fondo p-4 text-verde-oscuro">
             <strong class="block text-2xl">{{ registro_presentes|length }}</strong>
             <span class="text-xs">Presentes</span>
@@ -17,7 +17,12 @@
             <strong class="block text-2xl">{{ registro_ausentes|length }}</strong>
             <span class="text-xs">Ausentes</span>
         </div>
+        <div class="rounded-xl bg-amarillo-fondo p-4 text-amarillo-oscuro">
+            <strong class="block text-2xl">{{ registro_atrasados|length }}</strong>
+            <span class="text-xs">Atrasados</span>
+        </div>
     </div>
+    <p class="mt-2 text-xs text-gris-texto">Los atrasados cuentan como ausencia.</p>
 
     <button
         type="button"
@@ -65,7 +70,17 @@
         {% endfor %}
         {% endif %}
 
-        {% if not registro_presentes and not registro_ausentes %}
+        {% if registro_atrasados %}
+        <div class="bg-amarillo-fondo px-4 py-2 text-xs font-bold uppercase tracking-wide text-amarillo-oscuro">Atrasados</div>
+        {% for matricula in registro_atrasados %}
+        <div class="flex items-center justify-between gap-3 border-b border-gris-claro px-4 py-3">
+            <div><p class="text-sm font-semibold">{{ matricula.alumno.nombre }}</p><p class="text-[10px] text-gris-texto">RUT · {{ matricula.alumno.rut }}</p></div>
+            <span class="text-xs text-amarillo-oscuro">Atrasado</span>
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        {% if not registro_presentes and not registro_ausentes and not registro_atrasados %}
         <p class="px-4 py-6 text-center text-sm text-gris-texto">No hay detalle disponible para este registro.</p>
         {% endif %}
     </div>

@@ -2,6 +2,7 @@ import re
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Q
+from django.db.models.functions import Trim, Upper
 
 class PeriodoAcademico(models.Model):
     anio = models.SmallIntegerField(unique=True, verbose_name="Año")
@@ -27,11 +28,43 @@ class Curso(models.Model):
     nivel = models.IntegerField()
     grupo = models.CharField(max_length=3)
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                models.F("periodo"), models.F("nivel"), Upper(Trim("grupo")),
+                name="uq_curso_periodo_nivel_grupo",
+            ),
+        ]
+
+    def clean_fields(self, exclude=None):
+        # Normalizar antes de validar longitud y obligatoriedad del grupo.
+        if self.grupo is not None:
+            self.grupo = self.grupo.strip().upper()
+        super().clean_fields(exclude=exclude)
+
     def clean(self):
         super().clean()
 
+        if self.periodo_id and self.nivel is not None and self.grupo:
+            duplicados = Curso.objects.annotate(
+                grupo_normalizado=Upper(Trim("grupo")),
+            ).filter(
+                periodo_id=self.periodo_id,
+                nivel=self.nivel,
+                grupo_normalizado=self.grupo.strip().upper(),
+            )
+            if self.pk:
+                duplicados = duplicados.exclude(pk=self.pk)
+            if duplicados.exists():
+                raise ValidationError({
+                    "grupo": (
+                        f"Ya existe el curso {self.nivel_romano} Medio "
+                        f"{self.grupo.strip().upper()} para el período {self.periodo.anio}."
+                    ),
+                })
+
         # Validar solo si hay un profesor asignado y un periodo definido
-        if self.profesor_jefe and self.periodo:
+        if self.profesor_jefe_id and self.periodo_id:
             # Buscar otros cursos en el mismo periodo con el mismo profesor
             cursos_duplicados = Curso.objects.filter(
                 periodo=self.periodo,

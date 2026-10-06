@@ -15,6 +15,7 @@
             </h3>
             <p class="text-[10px] text-gris-texto">
                 RUT - {{ matricula.alumno.rut }}
+                {% if matricula.es_atrasado %}<span class="ml-1 text-amarillo-oscuro">· Registrado como atrasado</span>{% endif %}
             </p>
         </div>
 
@@ -22,6 +23,7 @@
             <input
                 type="checkbox"
                 name="presentes"
+                aria-label="Marcar presente a {{ matricula.alumno.nombre }}"
                 value="{{ matricula.alumno_id }}"
                 id="asistencia-{{ matricula.alumno_id }}"
                 x-model="presente"
