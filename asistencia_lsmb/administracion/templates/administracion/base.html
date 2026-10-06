@@ -138,8 +138,8 @@
                                 <td class="px-4 py-3 text-gris-texto">{{ matricula.curso.periodo.anio }}</td>
                                 <td class="px-4 py-3">
                                     <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold
-                                        {% if matricula.estado_matricula.nombre == 'activo' %}bg-verde-fondo text-verde-oscuro
-                                        {% elif matricula.estado_matricula.nombre == 'retirado' %}bg-rojo-fondo text-rojo-oscuro
+                                        {% if matricula.estado_matricula.nombre == 'vigente' %}bg-verde-fondo text-verde-oscuro
+                                        {% elif matricula.estado_matricula.nombre == 'no vigente' %}bg-rojo-fondo text-rojo-oscuro
                                         {% else %}bg-amarillo-fondo text-amarillo-oscuro{% endif %}">
                                         {{ matricula.estado_matricula.nombre|capfirst }}
                                     </span>

@@ -49,10 +49,13 @@ def _indices_apoderados(post_data):
     return sorted(set(indices))
 
 
-def _guardar_apoderado(form):
-    apoderado, _ = Apoderado.objects.get_or_create(
-        rut=form.cleaned_data["rut"],
-    )
+def _guardar_apoderado(form, existing_id=None):
+    if existing_id:
+        apoderado = get_object_or_404(Apoderado, pk=existing_id)
+    else:
+        apoderado, _ = Apoderado.objects.get_or_create(
+            rut=form.cleaned_data["rut"],
+        )
     apoderado.nombre = form.cleaned_data["nombre"]
     apoderado.telefono = form.cleaned_data.get("telefono")
     apoderado.email = form.cleaned_data.get("email")
@@ -77,29 +80,41 @@ def pagina_administracion(request):
 
     matriculas = (
         Matricula.objects.filter(fecha_termino__isnull=True)
-        .select_related("alumno", "curso", "curso__periodo", "estado_matricula")
+        .select_related(
+            "alumno",
+            "curso",
+            "curso__periodo",
+            "estado_matricula",
+        )
         .order_by("alumno__nombre")
     )
+
     cursos = (
         Curso.objects.select_related("periodo", "profesor_jefe")
         .order_by("-periodo__anio", "nivel", "grupo")
     )
+
     funcionarios = (
         Funcionario.objects.select_related("cargo")
         .order_by("nombre")
     )
+
     cargos = Cargo.objects.order_by("nombre")
     periodos = PeriodoAcademico.objects.order_by("-anio")
 
-    return render(request, "administracion/base.html", {
-        "page_title": "Administración",
-        "fecha_actual": fecha_actual,
-        "matriculas": matriculas,
-        "cursos": cursos,
-        "funcionarios": funcionarios,
-        "cargos": cargos,
-        "periodos": periodos,
-    })
+    return render(
+        request,
+        "administracion/base.html",
+        {
+            "page_title": "Administración",
+            "fecha_actual": fecha_actual,
+            "matriculas": matriculas,
+            "cursos": cursos,
+            "funcionarios": funcionarios,
+            "cargos": cargos,
+            "periodos": periodos,
+        },
+    )
 
 
 @require_POST
@@ -208,7 +223,10 @@ def matricular_alumno(request):
                 matricula.save()
 
                 for ap_form, rel_form in zip(apoderado_forms, relacion_forms):
-                    apoderado = _guardar_apoderado(ap_form)
+                    apoderado = _guardar_apoderado(
+                        ap_form,
+                        request.POST.get(f"{ap_form.prefix}-existing_id"),
+                    )
                     AlumnoApoderado.objects.create(
                         alumno=alumno,
                         apoderado=apoderado,
@@ -228,6 +246,7 @@ def matricular_alumno(request):
             "matricula_form": matricula_form,
             "apoderado_forms": list(zip(apoderado_forms, relacion_forms)),
             "apoderado_count": len(apoderado_forms),
+            "apoderados_disponibles": Apoderado.objects.order_by("nombre"),
         })
 
     # GET
@@ -242,6 +261,7 @@ def matricular_alumno(request):
         "matricula_form": matricula_form,
         "apoderado_forms": list(zip(apoderado_forms, relacion_forms)),
         "apoderado_count": 1,
+        "apoderados_disponibles": Apoderado.objects.order_by("nombre"),
     })
 
 

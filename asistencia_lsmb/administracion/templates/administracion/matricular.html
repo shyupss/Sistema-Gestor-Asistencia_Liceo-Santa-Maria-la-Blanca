@@ -112,7 +112,30 @@
                 <p class="text-sm font-semibold text-negro-texto mb-3">Apoderado {{ forloop.counter }}</p>
                 <!-- Campos ocultos con prefijo para que Django los detecte -->
                 <input type="hidden" name="{{ ap_form.prefix }}_exists" value="1">
+                <input type="hidden" name="{{ ap_form.prefix }}-existing_id">
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div class="sm:col-span-2">
+                        <label for="{{ ap_form.prefix }}-busqueda" class="mb-1.5 block text-sm font-medium text-negro-texto">
+                            Seleccionar apoderado existente
+                        </label>
+                        <select id="{{ ap_form.prefix }}-busqueda"
+                            name="{{ ap_form.prefix }}-busqueda"
+                            class="w-full rounded-lg border border-gris-iconos bg-white py-2.5 px-3 text-sm text-negro-texto focus:border-azul focus:outline-none focus:ring-1 focus:ring-azul"
+                            data-apoderado-buscador>
+                            <option value="">Selecciona un apoderado para reutilizarlo</option>
+                            {% for apoderado in apoderados_disponibles %}
+                            <option value="{{ apoderado.pk }}"
+                                data-id="{{ apoderado.pk }}"
+                                data-rut="{{ apoderado.rut }}"
+                                data-nombre="{{ apoderado.nombre }}"
+                                data-telefono="{{ apoderado.telefono|default_if_none:'' }}"
+                                data-email="{{ apoderado.email|default_if_none:'' }}">
+                                {{ apoderado.nombre }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                        <p class="mt-1 text-xs text-gris-texto">También puedes dejarlo vacío para completar un apoderado nuevo.</p>
+                    </div>
                     <div>
                         <label class="mb-1.5 block text-sm font-medium text-negro-texto">RUT <span class="text-rojo ml-0.5">*</span></label>
                         {{ ap_form.rut }}
@@ -148,7 +171,29 @@
             <template x-for="i in Array.from({length: apoderadoCount - {{ apoderado_count }}}, (_, k) => k + {{ apoderado_count }})" :key="i">
                 <div class="mb-6 pb-6 border-b border-gris-claro">
                     <p class="text-sm font-semibold text-negro-texto mb-3" x-text="`Apoderado ${i + 1}`"></p>
+                    <input type="hidden" :name="`apoderado_${i}-existing_id`">
                     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <div class="sm:col-span-2">
+                            <label class="mb-1.5 block text-sm font-medium text-negro-texto">
+                                Seleccionar apoderado existente
+                            </label>
+                            <select :name="`apoderado_${i}-busqueda`"
+                                data-apoderado-buscador
+                                class="w-full rounded-lg border border-gris-iconos bg-white py-2.5 px-3 text-sm text-negro-texto focus:border-azul focus:outline-none focus:ring-1 focus:ring-azul">
+                                <option value="">Selecciona un apoderado para reutilizarlo</option>
+                                {% for apoderado in apoderados_disponibles %}
+                                <option value="{{ apoderado.pk }}"
+                                    data-id="{{ apoderado.pk }}"
+                                    data-rut="{{ apoderado.rut }}"
+                                    data-nombre="{{ apoderado.nombre }}"
+                                    data-telefono="{{ apoderado.telefono|default_if_none:'' }}"
+                                    data-email="{{ apoderado.email|default_if_none:'' }}">
+                                    {{ apoderado.nombre }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <p class="mt-1 text-xs text-gris-texto">También puedes dejarlo vacío para completar un apoderado nuevo.</p>
+                        </div>
                         <div>
                             <label class="mb-1.5 block text-sm font-medium text-negro-texto">RUT <span class="text-rojo ml-0.5">*</span></label>
                             <input type="text" :name="`apoderado_${i}-rut`" placeholder="12.345.678-9" required
@@ -240,4 +285,31 @@
 
     </form>
 </section>
+
+<script>
+    document.addEventListener('change', function (event) {
+        const buscador = event.target.closest('[data-apoderado-buscador]');
+        if (!buscador) return;
+
+        const opcion = buscador.selectedOptions[0];
+        const bloque = buscador.closest('.border-b');
+        if (!bloque) return;
+
+        const idInput = bloque.querySelector('input[name$="-existing_id"]');
+        if (!opcion || !opcion.value) {
+            if (idInput) idInput.value = '';
+            return;
+        }
+
+        const completar = (campo, valor) => {
+            const input = bloque.querySelector(`input[name$="-${campo}"]`);
+            if (input) input.value = valor || '';
+        };
+        if (idInput) idInput.value = opcion.dataset.id;
+        completar('rut', opcion.dataset.rut);
+        completar('nombre', opcion.dataset.nombre);
+        completar('telefono', opcion.dataset.telefono);
+        completar('email', opcion.dataset.email);
+    });
+</script>
 {% endblock %}
