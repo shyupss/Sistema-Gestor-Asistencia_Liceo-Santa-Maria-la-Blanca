@@ -20,7 +20,12 @@
                     </div>
                 </div>
                 <div class="text-right">
-                    <span class="inline-flex max-w-full rounded-full px-3 py-1 text-xs font-bold {% if estado_genera_alerta %}bg-rojo-fondo text-rojo-oscuro{% elif estado_asistencia == 'Sin datos' %}bg-gris-ultraclaro text-gris-texto{% else %}bg-verde-fondo text-verde-oscuro{% endif %}">{{ estado_asistencia }}</span>
+                    <span class="inline-flex max-w-full rounded-full px-3 py-1 text-xs font-bold
+                        {% if estado_asistencia == 'Óptimo' or estado_asistencia == 'Optimo' %}bg-verde-fondo text-verde-oscuro
+                        {% elif estado_asistencia == 'Adecuado' %}bg-azul-fondo text-azul-profundo
+                        {% elif estado_asistencia == 'Atención' or estado_asistencia == 'Alerta' %}bg-amarillo-fondo text-amarillo-oscuro
+                        {% elif estado_asistencia == 'Crítico' or estado_asistencia == 'Critico' %}bg-rojo-fondo text-rojo-oscuro
+                        {% else %}bg-gris-ultraclaro text-gris-texto{% endif %}">{{ estado_asistencia }}</span>
                     <p class="text-2xl font-extrabold text-negro-texto">{% if porcentaje_asistencia is not None %}{{ porcentaje_asistencia }}%{% else %}-{% endif %}</p>
                     <p class="mt-1 text-xs text-gris-texto">Asistencia</p>
                 </div>

@@ -1,5 +1,3 @@
-from datetime import time
-
 from django.contrib import messages
 from django.db import transaction
 from django.shortcuts import get_object_or_404, redirect, render
@@ -79,7 +77,7 @@ def pagina_registrar_asistencia(request):
                         error = "Al pasar lista solo puedes marcar presente o ausente."
                         break
 
-            despues_del_corte = timezone.localtime().time() > time(9, 30)
+            # despues_del_corte = timezone.localtime().time() > time(9, 30)
             tipos_por_id = {tipo.pk: tipo for tipo in tipos_asistencia}
             anteriores = obtener_asistencias(paso_lista) if paso_lista else {}
             asignaciones = {}
@@ -91,11 +89,11 @@ def pagina_registrar_asistencia(request):
                         if anterior and (not anterior.cuenta_como_ausencia or anterior.nombre.casefold() == "atrasado"):
                             # Guardar otra vez no cambia la llegada ya registrada.
                             tipo = anterior
-                        elif despues_del_corte:
-                            if not tipo_atrasado or not tipo_atrasado.cuenta_como_ausencia:
-                                error = "Carga el tipo atrasado, que cuenta como ausencia, desde Administración."
-                                break
-                            tipo = tipo_atrasado
+                        # elif despues_del_corte:
+                        #     if not tipo_atrasado or not tipo_atrasado.cuenta_como_ausencia:
+                        #         error = "Carga el tipo atrasado, que cuenta como ausencia, desde Administración."
+                        #         break
+                        #     tipo = tipo_atrasado
                         else:
                             tipo = tipo_presente
                     asignaciones[matricula.alumno_id] = tipo

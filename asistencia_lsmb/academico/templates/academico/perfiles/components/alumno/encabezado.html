@@ -23,7 +23,12 @@
         </div>
         <div class="flex min-w-0 flex-col items-end justify-center text-right leading-none">
             <span
-                class="inline-flex max-w-full truncate rounded-full px-3 py-1 text-xs font-bold {% if estado_actual.estado.genera_alerta %}bg-rojo-fondo text-rojo-oscuro{% else %}bg-verde-fondo text-verde-oscuro{% endif %}">
+                class="inline-flex max-w-full truncate rounded-full px-3 py-1 text-xs font-bold
+                    {% if estado_actual.estado.nombre == 'Óptimo' or estado_actual.estado.nombre == 'Optimo' %}bg-verde-fondo text-verde-oscuro
+                    {% elif estado_actual.estado.nombre == 'Adecuado' %}bg-azul-fondo text-azul-profundo
+                    {% elif estado_actual.estado.nombre == 'Atención' or estado_actual.estado.nombre == 'Alerta' %}bg-amarillo-fondo text-amarillo-oscuro
+                    {% elif estado_actual.estado.nombre == 'Crítico' or estado_actual.estado.nombre == 'Critico' %}bg-rojo-fondo text-rojo-oscuro
+                    {% else %}bg-gris-ultraclaro text-gris-texto{% endif %}">
                 {{ estado_actual.estado.nombre|default:'Sin estado' }}
             </span>
             <p class="mt-2 text-2xl font-extrabold text-negro-texto">
