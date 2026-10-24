@@ -26,6 +26,12 @@
                     {% if curso %}{{ curso.nivel_romano }}° Medio {{ curso.grupo }}{% else %}Sin curso asignado{% endif %}
                     · {{ rut|default:"RUT no existente" }}
                 </div>
+                <a href="{% url 'perfil_alumno' alumno_id %}?tab=justificaciones&next={{ request.get_full_path|urlencode }}"
+                    class="inline-flex items-center gap-1.5 rounded-lg border border-gris-claro px-3 py-2 text-xs font-semibold text-azul transition-colors hover:bg-celeste-claro"
+                    title="Ver perfil del estudiante">
+                    <i data-lucide="user-round" class="h-4 w-4"></i>
+                    <span class="hidden sm:inline">Ver perfil</span>
+                </a>
             </div>
 
             <div class="flex flex-col md:flex-row justify-end items-center gap-3">

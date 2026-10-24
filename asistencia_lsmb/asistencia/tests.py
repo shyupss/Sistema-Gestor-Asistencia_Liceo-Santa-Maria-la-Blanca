@@ -5,7 +5,13 @@ from django.test import TestCase
 
 from academico.models import Alumno, Curso, EstadoMatricula, Matricula, PeriodoAcademico
 from alertas.models import Cargo, Estado, Funcionario
-from asistencia.models import Asistencia_Alumnos, Paso_Lista, Tipos_Asistencia
+from asistencia.models import (
+	Asistencia_Alumnos,
+	Estados_Solicitud,
+	Justificaciones,
+	Paso_Lista,
+	Tipos_Asistencia,
+)
 
 
 class ModificarAsistenciaTests(TestCase):
@@ -69,3 +75,27 @@ class ModificarAsistenciaTests(TestCase):
 		self.assertEqual(Paso_Lista.objects.count(), 1)
 		self.assertEqual(Asistencia_Alumnos.objects.count(), 1)
 		self.assertEqual(Asistencia_Alumnos.objects.get().tipo_asistencia, self.ausente)
+
+	def test_ausencia_futura_usa_justificacion_aprobada(self):
+		estado_aprobada = Estados_Solicitud.objects.create(
+			nombre="Aprobada",
+			es_estado_final=True,
+			cubre_ausencia=True,
+		)
+		justificacion = Justificaciones.objects.create(
+			alumno=self.alumno,
+			estado_solicitud=estado_aprobada,
+			fecha_inicio=self.fecha,
+			fecha_fin=self.fecha,
+			resumen="Viaje deportivo",
+		)
+
+		respuesta = self.client.post(
+			reverse("registrar_asistencia"),
+			self._datos(presentes=False),
+		)
+
+		self.assertEqual(respuesta.status_code, 302)
+		asistencia = Asistencia_Alumnos.objects.get()
+		self.assertEqual(asistencia.tipo_asistencia, self.ausente)
+		self.assertEqual(asistencia.justificacion, justificacion)

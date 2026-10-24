@@ -82,6 +82,7 @@ def pagina_justificaciones_ficha(request):
         'volver_label': volver_label,
 
         'nombre': justificacion.alumno.nombre,
+        'alumno_id': justificacion.alumno_id,
         'rut': justificacion.alumno.rut,
         'curso': matricula.curso if matricula else None,
         'estado': justificacion.estado_solicitud.nombre,

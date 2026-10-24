@@ -17,7 +17,10 @@ from asistencia.queries.asistencia_queries import (
     obtener_paso_lista,
     obtener_tipos_asistencia,
 )
-from asistencia.services.asistencia_service import recalcular_estado_alumno
+from asistencia.services.asistencia_service import (
+    obtener_justificacion_aplicable,
+    recalcular_estado_alumno,
+)
 
 
 def pagina_registrar_asistencia(request):
@@ -109,10 +112,21 @@ def pagina_registrar_asistencia(request):
                         defaults={"funcionario": funcionario},
                     )
                     for matricula in alumnos:
+                        tipo_asistencia = asignaciones[matricula.alumno_id]
                         Asistencia_Alumnos.objects.update_or_create(
                             paso_lista=paso_lista,
                             alumno=matricula.alumno,
-                            defaults={"tipo_asistencia": asignaciones[matricula.alumno_id]},
+                            defaults={
+                                "tipo_asistencia": tipo_asistencia,
+                                "justificacion": (
+                                    obtener_justificacion_aplicable(
+                                        matricula.alumno,
+                                        fecha,
+                                    )
+                                    if tipo_asistencia.cuenta_como_ausencia
+                                    else None
+                                ),
+                            },
                         )
                         recalcular_estado_alumno(
                             alumno=matricula.alumno,

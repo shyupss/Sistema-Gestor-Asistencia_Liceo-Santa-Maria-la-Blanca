@@ -10,7 +10,7 @@
             </span>
             <input type="text" name="q" value="{{ search_query }}" placeholder="Buscar por nombre, curso o RUT"
                 class="w-full pl-11 pr-4 py-2.5 bg-blanco-tarjeta border border-gris-claro rounded-xl text-sm text-gris-texto placeholder-gris-text-gris-texto focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm">
-            <input type="hidden" name="estado" value="{{ estado_filtro }}">
+            <input id="estado-filtro" type="hidden" name="estado" value="{{ estado_filtro }}">
         </div>
 
         <!-- Controles Derechos (Ordenar y Filtro) -->
@@ -45,8 +45,13 @@
             <!-- Botón Filtro Avanzado -->
             <button type="button" onclick="document.getElementById('panel-filtro').classList.toggle('hidden')"
                 aria-label="Filtrar por nivel de asistencia" title="Filtrar por nivel de asistencia"
-                class="p-2.5 bg-blanco-tarjeta border border-gris-claro rounded-xl text-gris-icono hover:bg-gris-claro transition-colors shadow-sm">
+                class="relative p-2.5 rounded-xl border transition-colors shadow-sm
+                {% if estado_filtro %}border-azul-primario bg-azul-fondo text-azul-profundo{% else %}bg-blanco-tarjeta border-gris-claro text-gris-icono hover:bg-gris-claro{% endif %}">
                 <i data-lucide="funnel" class="w-5 h-5"></i>
+                {% if estado_filtro %}
+                <span class="absolute -right-1.5 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-azul-primario px-1 text-[10px] font-bold text-white"
+                    aria-label="Filtro activo: {{ estado_filtro }}">1</span>
+                {% endif %}
             </button>
         </div>
 
@@ -55,17 +60,24 @@
             <p class="mb-2 text-xs font-semibold text-gris-texto">Filtrar por asistencia</p>
             {% for nivel, cuenta in alertas.items %}
             {% if cuenta > 0 %}
-            <button type="submit" name="estado" value="{{ nivel }}"
+            <button type="button" data-estado="{{ nivel }}" onclick="aplicarFiltroEstado(this.dataset.estado)"
                 class="block w-full px-3 py-2 text-left text-sm rounded-lg hover:bg-gris-ultraclaro {% if estado_filtro == nivel %}bg-azul-fondo text-azul-profundo font-semibold{% endif %}">
                 {{ nivel }}
             </button>
             {% endif %}
             {% endfor %}
-            <button type="submit" name="estado" value=""
+            <button type="button" onclick="aplicarFiltroEstado('')"
                 class="block w-full mt-1 px-3 py-2 text-left text-sm text-gris-texto rounded-lg hover:bg-gris-ultraclaro">
                 Ver todos
             </button>
         </div>
+
+        <script>
+            function aplicarFiltroEstado(estado) {
+                document.getElementById('estado-filtro').value = estado;
+                document.getElementById('filtro-form').submit();
+            }
+        </script>
     </form>
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 pl-4 pr-4">
 

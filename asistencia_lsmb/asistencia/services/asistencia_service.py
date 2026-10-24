@@ -4,7 +4,7 @@ from django.db.models import Count, Q
 
 from alertas.models import Estado
 from alertas.models import EstadoAlumno, HistorialEstadoAlumno
-from asistencia.models import Asistencia_Alumnos
+from asistencia.models import Asistencia_Alumnos, Justificaciones
 
 
 def clasificar_asistencia(porcentaje, estados):
@@ -56,6 +56,20 @@ def contar_alertas(cursos):
         conteo[estado] = conteo.get(estado, 0) + 1
 
     return conteo
+
+
+def obtener_justificacion_aplicable(alumno, fecha):
+    return (
+        Justificaciones.objects.filter(
+            alumno=alumno,
+            estado_solicitud__cubre_ausencia=True,
+            fecha_inicio__lte=fecha,
+            fecha_fin__gte=fecha,
+        )
+        .select_related("estado_solicitud")
+        .order_by("-fecha_resolucion", "-pk")
+        .first()
+    )
 
 
 def recalcular_estado_alumno(alumno, periodo):

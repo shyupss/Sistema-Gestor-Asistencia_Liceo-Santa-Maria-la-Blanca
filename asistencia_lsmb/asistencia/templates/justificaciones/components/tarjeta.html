@@ -14,7 +14,10 @@
                 <i data-lucide="file-text" class="h-5 w-5 text-azul"></i>
             </span>
             <div>
-                <p class="font-semibold leading-tight text-negro-texto">{{ tarjeta.justificacion.alumno.nombre }}</p>
+                <a href="{% url 'perfil_alumno' tarjeta.justificacion.alumno_id %}?tab=justificaciones&next={{ request.get_full_path|urlencode }}"
+                    class="font-semibold leading-tight text-negro-texto hover:text-azul">
+                    {{ tarjeta.justificacion.alumno.nombre }}
+                </a>
                     <p class="text-sm text-gris-texto">
                         {% if tarjeta.curso %}{{ tarjeta.curso.nivel_romano }}° Medio {{ tarjeta.curso.grupo }}{% else %}Sin curso asignado{% endif %}
                         · {{ tarjeta.justificacion.alumno.rut }}
@@ -45,7 +48,7 @@
     </div>
 
     <!-- Botón ver detalle -->
-    <a href="{% url 'justificaciones_ficha' %}?id={{ tarjeta.justificacion.id }}"
+    <a href="{% url 'justificaciones_ficha' %}?id={{ tarjeta.justificacion.id }}&next={{ request.get_full_path|urlencode }}"
         class="py-4 flex items-center justify-center gap-1 text-sm font-medium text-azul transition-colors hover:bg-celeste-claro"
     >
         Ver detalle
