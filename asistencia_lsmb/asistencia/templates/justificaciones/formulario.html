@@ -61,8 +61,9 @@
                                 <button type="button"
                                     class="opcion-estudiante grid w-full grid-cols-[minmax(0,1fr)_8rem] items-center gap-4 px-3 py-2 text-left text-sm text-negro-texto transition-colors hover:bg-azul-fondo"
                                     data-id="{{ estudiante.pk }}"
-                                    data-texto="{{ estudiante.nombre }} {% if matricula %}{{ matricula.curso.nivel_romano }} Medio {{ matricula.curso.grupo }}{% endif %}"
-                                    data-nombre="{{ estudiante.nombre }}">
+                                    data-texto="{{ estudiante.nombre }} · {% if matricula %}{{ matricula.curso.nivel_romano }}° Medio {{ matricula.curso.grupo }}{% else %}Sin curso{% endif %}"
+                                    data-nombre="{{ estudiante.nombre }}"
+                                    data-curso="{% if matricula %}{{ matricula.curso.nivel_romano }}° Medio {{ matricula.curso.grupo }}{% else %}Sin curso{% endif %}">
                                     <span class="min-w-0 truncate">{{ estudiante.nombre }}</span>
                                     <span class="w-32 text-right text-xs text-gris-texto">
                                         {% if matricula %}{{ matricula.curso.nivel_romano }}° Medio {{ matricula.curso.grupo }}{% else %}Sin curso{% endif %}
@@ -317,10 +318,10 @@
 
         opciones.forEach((opcion) => {
             opcion.addEventListener('click', function () {
-            idInput.value = opcion.dataset.id;
-            buscador.value = opcion.dataset.nombre;
-            textoInput.value = buscador.value;
-            selector.classList.add('hidden');
+                idInput.value = opcion.dataset.id;
+                buscador.value = `${opcion.dataset.nombre} · ${opcion.dataset.curso}`;
+                textoInput.value = opcion.dataset.nombre;
+                selector.classList.add('hidden');
             });
         });
 

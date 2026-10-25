@@ -1,4 +1,5 @@
 from django.db.models import Count, Exists, F, OuterRef, Q
+from django.core.paginator import Paginator
 from django.urls import reverse
 from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
@@ -115,6 +116,9 @@ def perfil_curso(request, curso_id):
             distinct=True,
         ),
     ).order_by("-fecha")
+    resumen_diario_page = Paginator(
+        resumen_diario, 10
+    ).get_page(request.GET.get("asistencia_page"))
     solicitudes_aceptadas = Justificaciones.objects.filter(
         alumno_id=OuterRef("alumno_id"),
         estado_solicitud__nombre__iexact="aceptada",
@@ -192,7 +196,7 @@ def perfil_curso(request, curso_id):
         "curso": curso,
         "matriculas": matriculas,
         "asistencias": asistencias,
-        "resumen_diario": resumen_diario,
+        "resumen_diario": resumen_diario_page,
         "total_estudiantes": len(matriculas),
         "total_dias_clase": total_dias_clase,
         "total_registros": total_registros,
@@ -257,6 +261,9 @@ def perfil_alumno(request, alumno_id):
         .select_related("tipo_asistencia", "paso_lista", "justificacion")
         .order_by("-paso_lista__fecha")
     )
+    registros_asistencia_page = Paginator(
+        registros_asistencia, 10
+    ).get_page(request.GET.get("asistencia_page"))
     ausencia_no_cubierta = (
         Q(tipo_asistencia__cuenta_como_ausencia=True)
         & (
@@ -334,6 +341,7 @@ def perfil_alumno(request, alumno_id):
         "matricula": matricula,
         "estado_actual": estado_actual,
         "registros_asistencia": registros_asistencia,
+        "registros_asistencia_page": registros_asistencia_page,
         "justificaciones": justificaciones,
         "total_solicitudes": total_solicitudes,
         "solicitudes_pendientes": solicitudes_pendientes,

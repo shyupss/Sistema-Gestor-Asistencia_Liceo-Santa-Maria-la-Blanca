@@ -1,20 +1,42 @@
 {% include 'academico/perfiles/components/compartidos/evolucion_asistencia.html' %}
-<h2 class="mb-4 text-lg font-bold text-azul-profundo">Registro de asistencia</h2>
+<div class="mb-4 flex flex-wrap items-end justify-between gap-2">
+    <div>
+        <h2 class="text-lg font-bold text-azul-profundo">Registro de asistencia</h2>
+        <p class="mt-1 text-sm text-gris-texto">Detalle de las asistencias registradas durante el periodo {{ fecha_hoy.year }}.</p>
+    </div>
+    <span class="text-xs text-gris-texto">{{ registros_asistencia_page.paginator.count }} registros</span>
+</div>
 <div class="overflow-x-auto">
-    <table class="w-full min-w-[520px] text-left text-sm">
+    <table class="w-full min-w-[560px] text-left text-sm">
         <thead class="border-b border-gris-claro text-xs uppercase text-gris-texto">
             <tr>
                 <th class="px-3 py-3">Fecha</th>
                 <th class="px-3 py-3">Curso</th>
                 <th class="px-3 py-3">Estado</th>
+                <th class="px-3 py-3">Observación</th>
             </tr>
         </thead>
         <tbody class="divide-y divide-gris-claro">
-            {% for registro in registros_asistencia %}
+            {% for registro in registros_asistencia_page %}
             <tr>
-                <td class="px-3 py-3">{{ registro.paso_lista.fecha|date:'d/m/Y' }}</td>
+                <td class="px-3 py-3">
+                    <span class="font-medium text-negro-texto">{{ registro.paso_lista.fecha|date:'d/m/Y' }}</span>
+                    <span class="block text-xs text-gris-texto">{{ registro.paso_lista.fecha|date:'l'|capfirst }}</span>
+                </td>
                 <td class="px-3 py-3">{{ matricula.curso.nivel_romano }}° Medio {{ matricula.curso.grupo }}</td>
-                <td class="px-3 py-3 font-semibold">{{ registro.tipo_asistencia.nombre }}</td>
+                <td class="px-3 py-3">
+                    <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold
+                        {% if registro.tipo_asistencia.cuenta_como_ausencia %}bg-rojo-fondo text-rojo-oscuro{% else %}bg-verde-fondo text-verde-oscuro{% endif %}">
+                        {{ registro.tipo_asistencia.nombre }}
+                    </span>
+                </td>
+                <td class="px-3 py-3 text-xs text-gris-texto">
+                    {% if registro.justificacion %}
+                        <span class="font-medium text-azul-profundo">Con justificación</span>
+                    {% else %}
+                        Sin observaciones
+                    {% endif %}
+                </td>
             </tr>{% empty %}<tr>
                 <td colspan="4" class="px-3 py-8 text-center text-gris-texto">No hay registros de asistencia este año.
                 </td>
@@ -23,3 +45,26 @@
         </tbody>
     </table>
 </div>
+{% if registros_asistencia_page.has_other_pages %}
+<nav class="mt-4 flex flex-wrap items-center justify-between gap-3 text-sm" aria-label="Paginación del registro de asistencia">
+    {% if registros_asistencia_page.has_previous %}
+    <a href="?tab=asistencia&asistencia_page={{ registros_asistencia_page.previous_page_number }}"
+        class="rounded-lg border border-gris-claro px-3 py-2 font-medium text-azul-profundo hover:bg-gris-ultraclaro">
+        Anterior
+    </a>
+    {% else %}
+    <span></span>
+    {% endif %}
+    <span class="text-xs text-gris-texto">
+        Página {{ registros_asistencia_page.number }} de {{ registros_asistencia_page.paginator.num_pages }}
+    </span>
+    {% if registros_asistencia_page.has_next %}
+    <a href="?tab=asistencia&asistencia_page={{ registros_asistencia_page.next_page_number }}"
+        class="rounded-lg border border-gris-claro px-3 py-2 font-medium text-azul-profundo hover:bg-gris-ultraclaro">
+        Siguiente
+    </a>
+    {% else %}
+    <span></span>
+    {% endif %}
+</nav>
+{% endif %}
