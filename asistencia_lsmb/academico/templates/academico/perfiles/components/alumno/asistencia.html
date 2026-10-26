@@ -10,7 +10,7 @@
             </tr>
         </thead>
         <tbody class="divide-y divide-gris-claro">
-            {% for registro in registros_asistencia %}
+            {% for registro in registros_asistencia_paginados %}
             <tr>
                 <td class="px-3 py-3">{{ registro.paso_lista.fecha|date:'d/m/Y' }}</td>
                 <td class="px-3 py-3">{{ matricula.curso.nivel_romano }}° Medio {{ matricula.curso.grupo }}</td>
@@ -23,3 +23,14 @@
         </tbody>
     </table>
 </div>
+{% if registros_asistencia_paginados.has_other_pages %}
+<nav class="mt-4 flex items-center justify-between text-sm" aria-label="Paginación de asistencias">
+    {% if registros_asistencia_paginados.has_previous %}
+    <a href="?tab=asistencia&asistencia_page={{ registros_asistencia_paginados.previous_page_number }}" class="font-medium text-azul hover:underline">Anterior</a>
+    {% else %}<span></span>{% endif %}
+    <span class="text-gris-texto">Página {{ registros_asistencia_paginados.number }} de {{ registros_asistencia_paginados.paginator.num_pages }}</span>
+    {% if registros_asistencia_paginados.has_next %}
+    <a href="?tab=asistencia&asistencia_page={{ registros_asistencia_paginados.next_page_number }}" class="font-medium text-azul hover:underline">Siguiente</a>
+    {% else %}<span></span>{% endif %}
+</nav>
+{% endif %}
