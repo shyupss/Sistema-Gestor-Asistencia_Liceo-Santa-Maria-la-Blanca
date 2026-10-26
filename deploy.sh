@@ -12,7 +12,7 @@ echo "==> Verificando .env en el servidor..."
 if ! ssh "$SERVER" "test -f '$REMOTE_DIR/.env'"; then
   echo "!! Falta ~/$REMOTE_DIR/.env en el servidor."
   echo "   Crealo una sola vez con los valores de .env.server.example:"
-  echo "     scp .env.server.example $SERVER:$REMOTE_DIR/.env   # y luego editalo"
+  echo "     scp .env.server $SERVER:$REMOTE_DIR/.env   # y luego editalo"
   exit 1
 fi
 
