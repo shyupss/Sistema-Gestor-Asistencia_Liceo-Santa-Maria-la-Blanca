@@ -9,7 +9,10 @@
 <div class="divide-y divide-gris-claro border-y border-gris-claro">
     {% for dia in resumen_diario %}
     <div class="flex flex-wrap items-center justify-between gap-3 py-4">
-        <p class="min-w-[7rem] font-semibold text-negro-texto">{{ dia.fecha|date:'l d/m/Y'|capfirst }}</p>
+        <p class="min-w-[7rem]">
+            <span class="block font-semibold text-negro-texto">{{ dia.fecha|date:'d/m/Y' }}</span>
+            <span class="block text-xs text-gris-texto">{{ dia.fecha|date:'l'|capfirst }}</span>
+        </p>
         <div class="flex flex-wrap gap-2 text-xs font-semibold">
             <span class="inline-flex items-center gap-1 rounded-full bg-verde-fondo px-3 py-1 text-verde-oscuro">
                 <i data-lucide="user-check" class="h-3.5 w-3.5"></i>{{ dia.presentes }} Presentes
@@ -23,3 +26,26 @@
     <p class="py-8 text-center text-sm text-gris-texto">No hay registros de asistencia este año.</p>
     {% endfor %}
 </div>
+{% if resumen_diario.has_other_pages %}
+<nav class="mt-4 flex flex-wrap items-center justify-between gap-3 text-sm" aria-label="Paginación del resumen diario">
+    {% if resumen_diario.has_previous %}
+    <a href="?tab=asistencia&asistencia_page={{ resumen_diario.previous_page_number }}"
+        class="rounded-lg border border-gris-claro px-3 py-2 font-medium text-azul-profundo hover:bg-gris-ultraclaro">
+        Anterior
+    </a>
+    {% else %}
+    <span></span>
+    {% endif %}
+    <span class="text-xs text-gris-texto">
+        Página {{ resumen_diario.number }} de {{ resumen_diario.paginator.num_pages }}
+    </span>
+    {% if resumen_diario.has_next %}
+    <a href="?tab=asistencia&asistencia_page={{ resumen_diario.next_page_number }}"
+        class="rounded-lg border border-gris-claro px-3 py-2 font-medium text-azul-profundo hover:bg-gris-ultraclaro">
+        Siguiente
+    </a>
+    {% else %}
+    <span></span>
+    {% endif %}
+</nav>
+{% endif %}

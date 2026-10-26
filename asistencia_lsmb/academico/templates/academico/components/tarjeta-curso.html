@@ -97,11 +97,18 @@
             <span class="text-xs font-bold text-negro-texto">Alumnos del curso</span>
             <ul class="mt-2 space-y-1 text-[11px] text-gris-texto">
                 {% for matricula in curso.matriculas_activas %}
-                    <li>{{ matricula.alumno.nombre }} · {{ matricula.alumno.rut }}</li>
+                    {% if forloop.counter <= 5 %}
+                        <li class="truncate">{{ matricula.alumno.nombre }} · {{ matricula.alumno.rut }}</li>
+                    {% endif %}
                 {% empty %}
                     <li>Sin alumnos matriculados</li>
                 {% endfor %}
             </ul>
+            {% if curso.total_estudiantes > 5 %}
+                <p class="mt-2 text-[11px] font-medium text-azul-profundo">
+                    + {{ curso.total_estudiantes|add:"-5" }} estudiantes más
+                </p>
+            {% endif %}
         </div>
 
     </div>
