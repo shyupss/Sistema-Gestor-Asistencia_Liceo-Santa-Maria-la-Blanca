@@ -1,9 +1,20 @@
 <h2 class="mb-4 text-lg font-bold text-azul-profundo">Alumnos del curso</h2>
 <div class="divide-y divide-gris-claro border-y border-gris-claro">
-    {% for matricula in matriculas %}
+    {% for matricula in matriculas_paginadas %}
     <a href="{% url 'perfil_alumno' matricula.alumno_id %}?next=/cursos/{{ curso.id }}/" class="flex items-center justify-between gap-4 py-3 text-sm hover:text-azul-primario">
         <span class="min-w-0"><span class="block truncate font-semibold text-negro-texto">{{ matricula.alumno.nombre }}</span><span class="text-xs text-gris-texto">{{ matricula.alumno.rut }}</span></span>
         <span class="flex-shrink-0 text-right text-xs font-semibold {% if matricula.estado_asistencia == 'Óptimo' or matricula.estado_asistencia == 'Optimo' %}text-verde-oscuro{% elif matricula.estado_asistencia == 'Crítico' or matricula.estado_asistencia == 'Critico' %}text-rojo-oscuro{% else %}text-azul-profundo{% endif %}">{% if matricula.porcentaje_asistencia is not None %}{{ matricula.porcentaje_asistencia }}%{% else %}-{% endif %}<span class="block font-normal text-gris-texto">{{ matricula.estado_asistencia }}</span></span>
     </a>
     {% empty %}<p class="py-6 text-sm text-gris-texto">No hay alumnos matriculados.</p>{% endfor %}
 </div>
+{% if matriculas_paginadas.has_other_pages %}
+<nav class="mt-4 flex items-center justify-between text-sm" aria-label="Paginación de estudiantes">
+    {% if matriculas_paginadas.has_previous %}
+    <a href="?tab=estudiantes&estudiantes_page={{ matriculas_paginadas.previous_page_number }}" class="font-medium text-azul hover:underline">Anterior</a>
+    {% else %}<span></span>{% endif %}
+    <span class="text-gris-texto">Página {{ matriculas_paginadas.number }} de {{ matriculas_paginadas.paginator.num_pages }}</span>
+    {% if matriculas_paginadas.has_next %}
+    <a href="?tab=estudiantes&estudiantes_page={{ matriculas_paginadas.next_page_number }}" class="font-medium text-azul hover:underline">Siguiente</a>
+    {% else %}<span></span>{% endif %}
+</nav>
+{% endif %}

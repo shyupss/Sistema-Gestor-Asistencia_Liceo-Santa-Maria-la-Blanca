@@ -62,7 +62,9 @@
                                     class="opcion-estudiante grid w-full grid-cols-[minmax(0,1fr)_8rem] items-center gap-4 px-3 py-2 text-left text-sm text-negro-texto transition-colors hover:bg-azul-fondo"
                                     data-id="{{ estudiante.pk }}"
                                     data-texto="{{ estudiante.nombre }} {% if matricula %}{{ matricula.curso.nivel_romano }} Medio {{ matricula.curso.grupo }}{% endif %}"
-                                    data-nombre="{{ estudiante.nombre }}">
+                                    data-nombre="{{ estudiante.nombre }}"
+                                    data-rut="{{ estudiante.rut }}"
+                                    data-curso="{% if matricula %}{{ matricula.curso.nivel_romano }}° Medio {{ matricula.curso.grupo }}{% else %}Sin curso asignado{% endif %}">
                                     <span class="min-w-0 truncate">{{ estudiante.nombre }}</span>
                                     <span class="w-32 text-right text-xs text-gris-texto">
                                         {% if matricula %}{{ matricula.curso.nivel_romano }}° Medio {{ matricula.curso.grupo }}{% else %}Sin curso{% endif %}
@@ -76,18 +78,14 @@
 
                     <!-- Información del estudiante -->
                     <div class="mt-2 flex flex-wrap items-center justify-evenly divide-x divide-azul-contraste rounded-xl bg-azul-fondo py-3 text-sm">
-                        {% if estudiante_contexto %}
+                        <div id="datos_estudiante_seleccionado" class="w-full flex-wrap items-center justify-evenly divide-x divide-azul-contraste {% if estudiante_contexto %}flex{% else %}hidden{% endif %}">
                             <div class="flex flex-col items-center justify-center px-8">
                                 <span class="flex items-center gap-1.5 text-azul">
                                     <i data-lucide="book-open" class="h-4 w-4"></i>
                                     <h2 class="font-bold">Curso</h2>
                                 </span>
                                 <p class="text-negro-texto font-medium">
-                                    {% if estudiante_contexto.curso %}
-                                        {{ estudiante_contexto.curso.nivel_romano }}° Medio {{ estudiante_contexto.curso.grupo }}
-                                    {% else %}
-                                        Sin curso asignado
-                                    {% endif %}
+                                    <span id="estudiante_curso">{% if estudiante_contexto.curso %}{{ estudiante_contexto.curso.nivel_romano }}° Medio {{ estudiante_contexto.curso.grupo }}{% else %}Sin curso asignado{% endif %}</span>
                                 </p>
                             </div>
                             <div class="flex flex-col items-center justify-center px-8">
@@ -95,7 +93,7 @@
                                     <i data-lucide="file-text" class="h-4 w-4"></i>
                                     <h2 class="font-bold">RUT</h2>
                                 </span>
-                                <p class="text-negro-texto font-medium">{{ estudiante_contexto.alumno.rut }}</p>
+                                <p id="estudiante_rut" class="text-negro-texto font-medium">{{ estudiante_contexto.alumno.rut }}</p>
                             </div>
                             <div class="flex flex-col items-center justify-center px-8">
                                 <span class="flex items-center gap-1.5 text-azul">
@@ -104,12 +102,11 @@
                                 </span>
                                 <p class="text-negro-texto font-medium">{{ estudiante_contexto.apoderado.nombre|default:'Sin apoderado' }}</p>
                             </div>
-                        {% else %}
-                            <div class="flex flex-row gap-2 items-center justify-center text-azul font-semibold">
+                        </div>
+                        <div id="estado_estudiante_vacio" class="{% if estudiante_contexto %}hidden{% else %}flex{% endif %} flex-row gap-2 items-center justify-center text-azul font-semibold">
                                 <i data-lucide="user-search" class="h-5 w-5"></i>
                                 <h2 class="text-azul font-semibold">Primero, selecciona un estudiante</h2>
-                            </div>
-                        {% endif %}
+                        </div>
                     </div>
 
                     <!-- Botón justificación/retiro -->
@@ -296,6 +293,10 @@
         const selector = contenedor.querySelector('#selector_estudiante');
         const idInput = contenedor.querySelector('#id_estudiante_id');
         const textoInput = contenedor.querySelector('#id_estudiante');
+        const datosEstudiante = document.querySelector('#datos_estudiante_seleccionado');
+        const estadoVacio = document.querySelector('#estado_estudiante_vacio');
+        const cursoEstudiante = document.querySelector('#estudiante_curso');
+        const rutEstudiante = document.querySelector('#estudiante_rut');
         const opciones = Array.from(selector.querySelectorAll('.opcion-estudiante'));
 
         const actualizarOpciones = () => {
@@ -312,6 +313,10 @@
         buscador.addEventListener('input', function () {
             idInput.value = '';
             textoInput.value = buscador.value;
+            datosEstudiante.classList.add('hidden');
+            datosEstudiante.classList.remove('flex');
+            estadoVacio.classList.remove('hidden');
+            estadoVacio.classList.add('flex');
             actualizarOpciones();
         });
 
@@ -320,6 +325,12 @@
             idInput.value = opcion.dataset.id;
             buscador.value = opcion.dataset.nombre;
             textoInput.value = buscador.value;
+            cursoEstudiante.textContent = opcion.dataset.curso;
+            rutEstudiante.textContent = opcion.dataset.rut;
+            datosEstudiante.classList.remove('hidden');
+            datosEstudiante.classList.add('flex');
+            estadoVacio.classList.add('hidden');
+            estadoVacio.classList.remove('flex');
             selector.classList.add('hidden');
             });
         });
