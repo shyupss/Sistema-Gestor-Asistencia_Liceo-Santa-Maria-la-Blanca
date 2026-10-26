@@ -58,18 +58,21 @@
                                 class="absolute left-0 right-0 top-full z-20 mt-1 hidden max-h-60 overflow-y-auto rounded-lg border border-gris-claro bg-blanco-tarjeta py-1 shadow-lg">
                                 {% for estudiante in estudiantes_disponibles %}
                                 {% with matricula=estudiante.matriculas_formulario.0 %}
+                                {% with apoderado=estudiante.apoderados.all|first %}
                                 <button type="button"
                                     class="opcion-estudiante grid w-full grid-cols-[minmax(0,1fr)_8rem] items-center gap-4 px-3 py-2 text-left text-sm text-negro-texto transition-colors hover:bg-azul-fondo"
                                     data-id="{{ estudiante.pk }}"
                                     data-texto="{{ estudiante.nombre }} · {% if matricula %}{{ matricula.curso.nivel_romano }}° Medio {{ matricula.curso.grupo }}{% else %}Sin curso{% endif %}"
                                     data-nombre="{{ estudiante.nombre }}"
                                     data-rut="{{ estudiante.rut }}"
-                                    data-curso="{% if matricula %}{{ matricula.curso.nivel_romano }}° Medio {{ matricula.curso.grupo }}{% else %}Sin curso{% endif %}">
+                                    data-curso="{% if matricula %}{{ matricula.curso.nivel_romano }}° Medio {{ matricula.curso.grupo }}{% else %}Sin curso{% endif %}"
+                                    data-apoderado="{% if apoderado %}{{ apoderado.nombre }}{% else %}Sin apoderado{% endif %}">
                                     <span class="min-w-0 truncate">{{ estudiante.nombre }}</span>
                                     <span class="w-32 text-right text-xs text-gris-texto">
                                         {% if matricula %}{{ matricula.curso.nivel_romano }}° Medio {{ matricula.curso.grupo }}{% else %}Sin curso{% endif %}
                                     </span>
                                 </button>
+                                {% endwith %}
                                 {% endwith %}
                                 {% endfor %}
                             </div>
@@ -100,7 +103,7 @@
                                     <i data-lucide="user-shield" class="h-4 w-4"></i>
                                     <h2 class="font-bold">Apoderado</h2>
                                 </span>
-                                <p class="text-negro-texto font-medium">{{ estudiante_contexto.apoderado.nombre|default:'Sin apoderado' }}</p>
+                                <p id="estudiante_apoderado" class="text-negro-texto font-medium">{{ estudiante_contexto.apoderado.nombre|default:'Sin apoderado' }}</p>
                             </div>
                         </div>
                         <div id="estado_estudiante_vacio" class="{% if estudiante_contexto %}hidden{% else %}flex{% endif %} flex-row gap-2 items-center justify-center text-azul font-semibold">
@@ -297,6 +300,7 @@
         const estadoVacio = document.querySelector('#estado_estudiante_vacio');
         const cursoEstudiante = document.querySelector('#estudiante_curso');
         const rutEstudiante = document.querySelector('#estudiante_rut');
+        const apoderadoEstudiante = document.querySelector('#estudiante_apoderado');
         const opciones = Array.from(selector.querySelectorAll('.opcion-estudiante'));
 
         const actualizarOpciones = () => {
@@ -327,6 +331,7 @@
                 textoInput.value = opcion.dataset.nombre;
                 cursoEstudiante.textContent = opcion.dataset.curso;
                 rutEstudiante.textContent = opcion.dataset.rut;
+                apoderadoEstudiante.textContent = opcion.dataset.apoderado;
                 datosEstudiante.classList.remove('hidden');
                 datosEstudiante.classList.add('flex');
                 estadoVacio.classList.add('hidden');
