@@ -111,6 +111,7 @@ def pagina_justificaciones_formulario(request):
             queryset=Matricula.objects.select_related('curso').order_by('-fecha_matricula'),
             to_attr='matriculas_formulario',
         ),
+        'apoderados',
     ).order_by('nombre')
 
     contexto = {

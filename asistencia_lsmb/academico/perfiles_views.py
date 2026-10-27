@@ -1,3 +1,4 @@
+from django.core.paginator import Paginator
 from django.db.models import Count, Exists, F, OuterRef, Q
 from django.core.paginator import Paginator
 from django.urls import reverse
@@ -38,6 +39,9 @@ def perfil_curso(request, curso_id):
         pk=curso_id,
     )
     matriculas = list(obtener_alumnos_curso(curso, fecha_hoy))
+    matriculas_paginadas = Paginator(matriculas, 20).get_page(
+        request.GET.get("estudiantes_page")
+    )
     alumno_ids = [matricula.alumno_id for matricula in matriculas]
     pasos_lista = Paso_Lista.objects.filter(
         curso=curso,
@@ -195,6 +199,7 @@ def perfil_curso(request, curso_id):
         "page_title": f"Perfil de {curso.nivel_romano}° Medio {curso.grupo}",
         "curso": curso,
         "matriculas": matriculas,
+        "matriculas_paginadas": matriculas_paginadas,
         "asistencias": asistencias,
         "resumen_diario": resumen_diario_page,
         "total_estudiantes": len(matriculas),
