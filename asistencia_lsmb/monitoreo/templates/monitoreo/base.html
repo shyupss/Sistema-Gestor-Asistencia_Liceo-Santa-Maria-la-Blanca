@@ -4,6 +4,16 @@
 
 {% block content %}
 
+{{ filtros_monitoreo|json_script:"datos-filtros-monitoreo" }}
+{{ asistencia_por_curso|json_script:"datos-asistencia-por-curso" }}
+{{ cursos_disponibles|json_script:"datos-cursos-disponibles" }}
+{{ cursos_pendientes|json_script:"datos-cursos-pendientes" }}
+{{ ranking_alertas|json_script:"datos-ranking-alertas" }}
+{{ ranking_ver_todos_url|json_script:"datos-ranking-ver-todos-url" }}
+{{ alertas_recientes|json_script:"datos-alertas-recientes" }}
+{{ justificaciones_pendientes|json_script:"datos-justificaciones-pendientes" }}
+{{ actividad_reciente|json_script:"datos-actividad-reciente" }}
+
 <!-- Contenedor principal del contenido -->
 <section 
     class="mx-auto max-w-[95%] px-1 py-5 sm:px-2 sm:py-8"
