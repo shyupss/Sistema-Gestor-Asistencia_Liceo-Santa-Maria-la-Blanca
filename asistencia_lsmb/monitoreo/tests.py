@@ -15,11 +15,11 @@ from monitoreo.services.monitoreo_service import (
 
 class MonitoreoOperativoTests(TestCase):
 	def setUp(self):
-		self.fecha = datetime.date(2026, 10, 5)
+		self.fecha = timezone.localdate()
 		self.periodo = PeriodoAcademico.objects.create(
-			anio=2026,
-			fecha_inicio=datetime.date(2026, 3, 1),
-			fecha_fin=datetime.date(2026, 12, 31),
+			anio=self.fecha.year,
+			fecha_inicio=datetime.date(self.fecha.year, 3, 1),
+			fecha_fin=datetime.date(self.fecha.year, 12, 31),
 		)
 		self.curso = Curso.objects.create(periodo=self.periodo, nivel=1, grupo="A")
 		estado_matricula = EstadoMatricula.objects.create(nombre="vigente")
