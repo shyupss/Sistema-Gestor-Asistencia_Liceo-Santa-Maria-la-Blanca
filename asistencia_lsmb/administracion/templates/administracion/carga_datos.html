@@ -1,0 +1,258 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<section class="mx-auto max-w-[90%] px-4 py-8 sm:px-6">
+    <div class="mx-auto max-w-4xl rounded-lg border border-gris-claro bg-blanco-tarjeta p-6 shadow-sm sm:p-8">
+        {% if resultado_carga %}
+        <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-verde-claro text-verde-oscuro">
+            <i data-lucide="check" class="h-9 w-9" aria-hidden="true"></i>
+        </div>
+        <div class="mt-4 text-center">
+            <span class="inline-flex items-center gap-2 rounded-full bg-verde-claro px-3 py-1 text-xs font-semibold text-verde-oscuro">
+                <i data-lucide="check-circle-2" class="h-4 w-4" aria-hidden="true"></i>
+                Operación exitosa
+            </span>
+            <h1 class="mt-3 text-xl font-bold text-negro-texto">Carga de {{ tipo_carga }} completada</h1>
+            <p class="mt-1 text-sm text-gris-texto">Los datos válidos fueron guardados correctamente.</p>
+        </div>
+        {% if tipo_carga == "Asistencia" %}
+        <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div class="rounded-lg bg-verde-claro px-5 py-4">
+                <p class="text-sm text-gris-texto">Pases de lista creados</p>
+                <p data-format-number class="mt-1 text-2xl font-bold text-verde-oscuro">{{ resultado_carga.pasos_creados }}</p>
+            </div>
+            <div class="rounded-lg bg-azul-fondo px-5 py-4">
+                <p class="text-sm text-gris-texto">Pases actualizados</p>
+                <p data-format-number class="mt-1 text-2xl font-bold text-azul-profundo">{{ resultado_carga.pasos_actualizados }}</p>
+            </div>
+            <div class="rounded-lg bg-verde-claro px-5 py-4">
+                <p class="text-sm text-gris-texto">Asistencias creadas</p>
+                <p data-format-number class="mt-1 text-2xl font-bold text-verde-oscuro">{{ resultado_carga.asistencias_creadas }}</p>
+            </div>
+            <div class="rounded-lg bg-azul-fondo px-5 py-4">
+                <p class="text-sm text-gris-texto">Asistencias actualizadas</p>
+                <p data-format-number class="mt-1 text-2xl font-bold text-azul-profundo">{{ resultado_carga.asistencias_actualizadas }}</p>
+            </div>
+        </div>
+        {% else %}
+        <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div class="rounded-lg bg-verde-claro px-5 py-4">
+                <p class="text-sm text-gris-texto">Matrículas creadas</p>
+                <p class="mt-1 text-2xl font-bold text-verde-oscuro">{{ resultado_carga.matriculas_creadas }}</p>
+            </div>
+            <div class="rounded-lg bg-azul-fondo px-5 py-4">
+                <p class="text-sm text-gris-texto">Matrículas actualizadas</p>
+                <p class="mt-1 text-2xl font-bold text-azul-profundo">{{ resultado_carga.matriculas_actualizadas }}</p>
+            </div>
+            <div class="rounded-lg bg-azul-fondo px-5 py-4">
+                <p class="text-sm text-gris-texto">Estudiantes actualizados</p>
+                <p class="mt-1 text-2xl font-bold text-azul-profundo">{{ resultado_carga.alumnos_actualizados }}</p>
+            </div>
+            <div class="rounded-lg bg-verde-claro px-5 py-4">
+                <p class="text-sm text-gris-texto">Estudiantes nuevos</p>
+                <p class="mt-1 text-2xl font-bold text-verde-oscuro">{{ resultado_carga.alumnos_creados }}</p>
+            </div>
+            <div class="rounded-lg bg-verde-claro px-5 py-4">
+                <p class="text-sm text-gris-texto">Cursos creados</p>
+                <p data-format-number class="mt-1 text-2xl font-bold text-verde-oscuro">{{ resultado_carga.cursos_creados }}</p>
+            </div>
+        </div>
+        {% endif %}
+        <div class="mt-8 flex justify-center">
+            <a href="{% url 'administracion' %}?tab=carga_datos"
+                class="inline-flex items-center justify-center gap-2 rounded-full bg-azul px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-azul-profundo">
+                Ir a Administración
+            </a>
+        </div>
+        {% elif procesando_carga %}
+        <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-azul-fondo text-azul">
+            <i data-lucide="loader-circle" class="h-9 w-9 animate-spin" aria-hidden="true"></i>
+        </div>
+        <div class="mt-4 text-center">
+            <h1 class="text-xl font-bold text-negro-texto">Procesando carga de {{ tipo_carga }}</h1>
+            <p class="mt-1 text-sm text-gris-texto">
+                La carga se ejecuta en segundo plano. Puedes esperar en esta pantalla.
+            </p>
+        </div>
+        <div class="mt-8" aria-live="polite">
+            <div class="flex items-center justify-between text-sm font-semibold text-negro-texto">
+                <span id="carga-progreso-texto">Preparando la carga y validando los registros...</span>
+                <span id="carga-progreso-porcentaje">0%</span>
+            </div>
+            <div class="mt-2 h-3 overflow-hidden rounded-full bg-azul-fondo">
+                <div id="carga-progreso-barra" class="h-full rounded-full bg-azul transition-all duration-300"
+                    style="width: 0%"></div>
+            </div>
+            <p id="carga-progreso-detalle" class="mt-2 text-center text-xs text-gris-texto">
+                No cierres esta ventana mientras se procesa la carga.
+            </p>
+        </div>
+        <script>
+            (() => {
+                const statusUrl = "{% url 'estado_carga_datos' carga_id %}?tarea={{ tarea_id }}";
+                const resultUrl = "{% url 'resultado_carga_datos' carga_id %}";
+                const bar = document.getElementById("carga-progreso-barra");
+                const percentage = document.getElementById("carga-progreso-porcentaje");
+                const text = document.getElementById("carga-progreso-texto");
+                const detail = document.getElementById("carga-progreso-detalle");
+
+                const consultarEstado = async () => {
+                    try {
+                        const response = await fetch(statusUrl, {headers: {"X-Requested-With": "XMLHttpRequest"}});
+                        if (!response.ok) {
+                            throw new Error("No se pudo consultar el estado.");
+                        }
+                        const estado = await response.json();
+                        const percent = Math.max(0, Math.min(100, Number(estado.percent) || 0));
+                        bar.style.width = `${percent}%`;
+                        percentage.textContent = `${percent}%`;
+                        if (estado.phase === "preparando") {
+                            text.textContent = `${estado.message || "Preparando la carga y validando los registros..."} 0 de ${new Intl.NumberFormat("es-CL").format(estado.total || 0)} registros`;
+                        } else if (estado.total) {
+                            text.textContent = `${estado.message || "Procesando registros"} ${new Intl.NumberFormat("es-CL").format(estado.current || 0)} de ${new Intl.NumberFormat("es-CL").format(estado.total)} registros`;
+                        }
+                        if (estado.estado === "completada" || estado.estado === "error") {
+                            window.location.href = estado.redirect_url || resultUrl;
+                            return;
+                        }
+                        window.setTimeout(consultarEstado, 1000);
+                    } catch (error) {
+                        detail.textContent = "No se pudo consultar el progreso. Reintentando...";
+                        window.setTimeout(consultarEstado, 2000);
+                    }
+                };
+                consultarEstado();
+            })();
+        </script>
+        {% elif carga_archivo %}
+        <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-verde-claro text-verde-oscuro">
+            <i data-lucide="check" class="h-9 w-9" aria-hidden="true"></i>
+        </div>
+
+        <div class="mt-4 text-center">
+            <h1 class="text-xl font-bold text-negro-texto">Archivo verificado</h1>
+            <p class="mt-1 text-sm text-gris-texto">
+                Revisa la información antes de confirmar la carga.
+            </p>
+        </div>
+
+        <div class="mt-6 grid gap-4 sm:grid-cols-2">
+            <div class="rounded-lg bg-azul-fondo px-5 py-4">
+                <p class="text-sm text-gris-texto">Tipo de datos</p>
+                <p class="mt-1 text-lg font-semibold text-azul-profundo">{{ carga_archivo.tipo }}</p>
+            </div>
+            <div class="rounded-lg bg-azul-fondo px-5 py-4">
+                <p class="text-sm text-gris-texto">Filas detectadas</p>
+                <p data-format-number class="mt-1 text-lg font-semibold text-azul-profundo">{{ carga_archivo.filas }}</p>
+            </div>
+        </div>
+
+        <div class="mt-6 flex items-start gap-3 rounded-lg border border-verde-contraste bg-verde-claro px-4 py-3 text-sm text-verde-oscuro">
+            <i data-lucide="file-check-2" class="mt-0.5 h-5 w-5 shrink-0" aria-hidden="true"></i>
+            <div>
+                <p class="font-semibold">{{ carga_archivo.nombre }}</p>
+                <p class="mt-1">El archivo es compatible y todavía no se han guardado cambios.</p>
+            </div>
+        </div>
+
+        <div class="mt-6 overflow-x-auto rounded-lg border border-gris-claro">
+            <table class="w-full text-left text-xs">
+                <thead class="border-b border-gris-claro bg-gris-ultraclaro">
+                    <tr>
+                        {% for encabezado in carga_archivo.encabezados %}
+                        <th class="whitespace-nowrap px-3 py-2 font-semibold text-negro-texto">{{ encabezado }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for fila in carga_archivo.vista_previa %}
+                    <tr class="border-b border-gris-claro last:border-0">
+                        {% for valor in fila %}
+                        <td class="whitespace-nowrap px-3 py-2 text-gris-texto">{{ valor|default:"—" }}</td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if carga_archivo.filas_omitidas %}
+        <p class="mt-2 text-xs text-gris-texto">
+            Se muestran las primeras 8 filas; {{ carga_archivo.filas_omitidas }} quedan pendientes de revisión.
+        </p>
+        {% endif %}
+
+        {% if carga_archivo.errores %}
+        <div class="mt-5 rounded-lg border border-rojo-contraste bg-rojo-claro p-4 text-sm text-rojo-oscuro">
+            <p class="font-semibold">Corrige estos errores y vuelve a cargar el archivo:</p>
+            <ul class="mt-2 list-disc space-y-1 pl-5">
+                {% for error in carga_archivo.errores %}
+                <li>Fila {{ error.fila }}: {{ error.detalle }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        <div class="mt-8 flex flex-col-reverse gap-3 sm:flex-row sm:justify-center">
+            <a href="{% url 'administracion' %}?tab=carga_datos"
+                class="inline-flex items-center justify-center gap-2 rounded-full border border-azul px-5 py-2.5 text-sm font-semibold text-azul transition hover:bg-azul-fondo">
+                <i data-lucide="arrow-left" class="h-4 w-4" aria-hidden="true"></i>
+                Volver a cargar
+            </a>
+            {% if carga_archivo and not carga_archivo.errores %}
+            <form method="post" action="{% url 'administracion' %}"
+                onsubmit="this.querySelector('button[type=submit]').disabled = true; document.getElementById('carga-progreso').classList.remove('hidden');">
+                {% csrf_token %}
+                <input type="hidden" name="confirmar_carga"
+                    value="{% if carga_archivo.tipo == 'Matrículas' %}matriculas{% else %}asistencia{% endif %}">
+                <button type="submit"
+                    class="inline-flex items-center justify-center gap-2 rounded-full bg-azul px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-azul-profundo">
+                    <i data-lucide="check" class="h-4 w-4" aria-hidden="true"></i>
+                    Confirmar carga
+                </button>
+            </form>
+            {% endif %}
+        </div>
+        {% else %}
+        <div class="text-center">
+            <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-rojo-claro text-rojo-oscuro">
+                <i data-lucide="circle-alert" class="h-9 w-9" aria-hidden="true"></i>
+            </div>
+            <h1 class="mt-4 text-xl font-bold text-negro-texto">No se pudo completar la carga</h1>
+            <p class="mt-2 whitespace-pre-line text-sm text-rojo-oscuro">{{ carga_error }}</p>
+            <a href="{% url 'administracion' %}?tab=carga_datos"
+                class="mt-6 inline-flex items-center justify-center gap-2 rounded-full bg-azul px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-azul-profundo">
+                Volver a cargar archivo
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<div id="carga-progreso" class="fixed inset-0 z-50 hidden items-center justify-center bg-negro-texto/50 px-4 flex"
+    role="status" aria-live="polite" aria-label="Procesando carga">
+    <div class="w-full max-w-md rounded-xl bg-blanco-tarjeta p-8 text-center shadow-xl">
+        <div class="mx-auto h-14 w-14 animate-spin rounded-full border-4 border-azul-fondo border-t-azul"
+            aria-hidden="true"></div>
+        <h2 class="mt-5 text-lg font-bold text-negro-texto">Procesando carga</h2>
+        <p class="mt-2 text-sm text-gris-texto">
+            Estamos registrando la asistencia. No cierres esta ventana ni vuelvas a presionar el botón.
+        </p>
+        <div class="mt-5 h-2 overflow-hidden rounded-full bg-azul-fondo">
+            <div class="h-full w-1/3 animate-pulse rounded-full bg-azul"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.querySelectorAll("[data-format-number]").forEach((element) => {
+        const value = Number(element.textContent.trim());
+        if (Number.isFinite(value)) {
+            element.textContent = new Intl.NumberFormat("es-CL").format(value);
+        }
+    });
+</script>
+
+{% endblock %}

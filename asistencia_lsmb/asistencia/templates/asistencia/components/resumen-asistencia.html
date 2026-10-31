@@ -27,8 +27,7 @@
     <button
         type="button"
         @click="detalleAbierto = !detalleAbierto"
-        class="mt-6 flex w-full items-center justify-center gap-2 border-b border-gris-claro pb-3 text-sm font-medium text-azul-primario hover:text-azul-profundo"
-    >
+        class="mt-6 flex w-full items-center justify-center gap-2 border-b border-gris-claro pb-3 text-sm font-medium text-azul-primario hover:text-azul-profundo">
         <span x-text="detalleAbierto ? 'Minimizar detalle' : 'Ver detalle del registro'"></span>
         <i data-lucide="chevron-down" class="h-4 w-4 transition-transform" :class="detalleAbierto ? 'rotate-180' : ''"></i>
     </button>

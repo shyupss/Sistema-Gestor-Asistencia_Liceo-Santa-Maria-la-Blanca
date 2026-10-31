@@ -9,6 +9,13 @@
 version: "3.8"
 
 services:
+  redis:
+    image: redis:7-alpine
+    container_name: grupo7_redis
+    restart: unless-stopped
+    networks:
+      - red_taller_software
+
   grupo7_db:
     image: postgres:15-alpine
     container_name: grupo7_db
@@ -32,8 +39,24 @@ services:
     depends_on:
       grupo7_db:
         condition: service_healthy
+      redis:
+        condition: service_started
     networks:
       - red_taller_software
+
+  grupo7_worker:
+    image: ghcr.io/shyupss/sistema-gestor-asistencia_liceo-santa-maria-la-blanca:latest
+    container_name: grupo7_worker
+    restart: unless-stopped
+    env_file: .env
+    depends_on:
+      grupo7_db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    networks:
+      - red_taller_software
+    command: ["uv", "run", "celery", "-A", "project", "worker", "--loglevel=info"]
 
 volumes:
   data:
