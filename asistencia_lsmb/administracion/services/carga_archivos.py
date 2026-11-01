@@ -295,10 +295,12 @@ def _preparar_asistencia(rows, data_rows, headers):
                     "detalle": f"valor '{valor}' inválido para {fecha:%d/%m/%Y}; usa P o A",
                 })
                 continue
+            if not valor:
+                continue
             registros.append({
                 "rut": rut,
                 "fecha": fecha.isoformat(),
-                "estado": valor or "A",
+                "estado": valor,
                 "fila": numero,
             })
 
@@ -429,6 +431,7 @@ def cargar_asistencia(registros, progress_callback=None):
     }
     errores_por_alumno = {}
     matriculas = {}
+    registros_omitidos_sin_matricula = 0
     for numero, registro in enumerate(registros, start=1):
         fecha = date.fromisoformat(registro["fecha"])
         alumno = alumnos.get(registro["rut"])
@@ -454,9 +457,20 @@ def cargar_asistencia(registros, progress_callback=None):
             .first()
         )
         if not matricula:
-            errores_por_alumno.setdefault(
-                ("sin matrícula", registro["fila"], registro["rut"]), set()
-            ).add(fecha)
+            matricula_periodo = (
+                Matricula.objects.filter(
+                    alumno=alumno,
+                    periodo__anio=fecha.year,
+                )
+                .order_by("fecha_matricula")
+                .first()
+            )
+            if matricula_periodo and fecha < matricula_periodo.fecha_matricula:
+                registros_omitidos_sin_matricula += 1
+            else:
+                errores_por_alumno.setdefault(
+                    ("sin matrícula", registro["fila"], registro["rut"]), set()
+                ).add(fecha)
             if progress_callback:
                 progress_callback(
                     "validando",
@@ -491,12 +505,16 @@ def cargar_asistencia(registros, progress_callback=None):
         "pasos_actualizados": 0,
         "asistencias_creadas": 0,
         "asistencias_actualizadas": 0,
+        "registros_omitidos_sin_matricula": registros_omitidos_sin_matricula,
     }
     agrupados = {}
     for registro in registros:
+        clave_matricula = (registro["rut"], registro["fecha"])
+        if clave_matricula not in matriculas:
+            continue
         fecha = date.fromisoformat(registro["fecha"])
         alumno = alumnos[registro["rut"]]
-        matricula = matriculas[(registro["rut"], registro["fecha"])]
+        matricula = matriculas[clave_matricula]
         agrupados.setdefault((matricula.curso_id, fecha), []).append(
             (alumno, registro["estado"], matricula.curso)
         )

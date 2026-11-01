@@ -11,9 +11,14 @@ from .services.carga_archivos import (
 
 class CargaDatosTask(Task):
     def on_failure(self, exc, task_id, args, kwargs, einfo):
+        error = (
+            str(exc)
+            if isinstance(exc, ArchivoCargaError)
+            else "Ocurrió un error inesperado durante la carga."
+        )
         CargaDatos.objects.filter(pk=kwargs.get("carga_id") or args[0]).update(
             estado="error",
-            error="Ocurrió un error inesperado durante la carga.",
+            error=error,
         )
 
 

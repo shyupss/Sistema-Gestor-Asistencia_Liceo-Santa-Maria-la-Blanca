@@ -36,6 +36,12 @@
                 <p data-format-number class="mt-1 text-2xl font-bold text-azul-profundo">{{ resultado_carga.asistencias_actualizadas }}</p>
             </div>
         </div>
+        {% if resultado_carga.registros_omitidos_sin_matricula %}
+        <p class="mt-4 text-center text-xs text-gris-texto">
+            Se omitieron {{ resultado_carga.registros_omitidos_sin_matricula }}
+            registros anteriores a la fecha de matrícula del estudiante.
+        </p>
+        {% endif %}
         {% else %}
         <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <div class="rounded-lg bg-verde-claro px-5 py-4">
