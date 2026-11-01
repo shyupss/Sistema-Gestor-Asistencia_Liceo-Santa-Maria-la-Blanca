@@ -3,6 +3,7 @@ import re
 from django.contrib import messages
 from django.core.exceptions import MultipleObjectsReturned
 from django.db import transaction
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_POST
@@ -16,9 +17,19 @@ from academico.models import (
     Matricula,
     PeriodoAcademico,
 )
+from celery.exceptions import CeleryError
+from kombu.exceptions import OperationalError
+from redis.exceptions import RedisError
 from alertas.models import Cargo, Funcionario
 
 from .catalogos import cargar_catalogos_asistencia
+from .services.carga_archivos import (
+    ArchivoCargaError,
+    limpiar_datos_cargas,
+    validar_archivo_carga,
+)
+from .models import CargaDatos
+from .tasks import procesar_carga_datos
 
 from .forms import (
     AlumnoApoderadoForm,
@@ -78,6 +89,47 @@ def pagina_administracion(request):
     fecha_actual = timezone.now()
     anio_actual = fecha_actual.year
 
+    tipo_confirmacion = request.POST.get("confirmar_carga")
+    if request.method == "POST" and tipo_confirmacion in {"matriculas", "asistencia"}:
+        clave_sesion = f"carga_{tipo_confirmacion}_pendiente"
+        carga_pendiente = request.session.pop(clave_sesion, None)
+        if not carga_pendiente:
+            messages.error(request, "La carga pendiente expiró. Vuelve a seleccionar el archivo.")
+            return redirect("administracion")
+        tipo = "Matrículas" if tipo_confirmacion == "matriculas" else "Asistencia"
+        carga = CargaDatos.objects.create(
+            tipo=tipo,
+            registros=carga_pendiente,
+            total=len(carga_pendiente),
+        )
+        try:
+            tarea = procesar_carga_datos.delay(str(carga.id))
+        except (CeleryError, OperationalError, RedisError) as exc:
+            carga.estado = "error"
+            carga.error = "No se pudo iniciar el procesamiento en segundo plano."
+            carga.save(update_fields=["estado", "error", "actualizado_en"])
+            return render(
+                request,
+                "administracion/carga_datos.html",
+                {
+                    "page_title": "Revisar carga de datos",
+                    "fecha_actual": fecha_actual,
+                    "carga_error": carga.error,
+                },
+            )
+        return render(
+            request,
+            "administracion/carga_datos.html",
+            {
+                "page_title": "Procesando carga",
+                "fecha_actual": fecha_actual,
+                "procesando_carga": True,
+                "carga_id": carga.id,
+                "tipo_carga": tipo,
+                "tarea_id": tarea.id,
+            },
+        )
+
     # Garantizar que al menos exista el período del año actual
     PeriodoAcademico.objects.get_or_create(
         anio=anio_actual,
@@ -111,6 +163,44 @@ def pagina_administracion(request):
     cargos = Cargo.objects.order_by("nombre")
     periodos = PeriodoAcademico.objects.order_by("-anio")
 
+    carga_archivo = None
+    carga_error = None
+    tipo_carga = request.POST.get("tipo", "Asistencia")
+    if request.method == "POST":
+        try:
+            carga_archivo = validar_archivo_carga(request.FILES.get("archivo"), tipo_carga)
+        except ArchivoCargaError as exc:
+            carga_error = str(exc)
+        else:
+            if carga_archivo.get("errores"):
+                return render(
+                    request,
+                    "administracion/carga_datos.html",
+                    {
+                        "page_title": "Revisar carga de datos",
+                        "fecha_actual": fecha_actual,
+                        "carga_archivo": carga_archivo,
+                        "carga_error": "El archivo contiene errores y no se puede confirmar todavía.",
+                    },
+                )
+
+            if tipo_carga in {"Matrículas", "Asistencia"}:
+                clave_sesion = (
+                    "carga_matriculas_pendiente"
+                    if tipo_carga == "Matrículas"
+                    else "carga_asistencia_pendiente"
+                )
+                request.session[clave_sesion] = carga_archivo.get("registros", [])
+            return render(
+                request,
+                "administracion/carga_datos.html",
+                {
+                    "page_title": "Revisar carga de datos",
+                    "fecha_actual": fecha_actual,
+                    "carga_archivo": carga_archivo,
+                },
+            )
+
     return render(
         request,
         "administracion/base.html",
@@ -122,8 +212,89 @@ def pagina_administracion(request):
             "funcionarios": funcionarios,
             "cargos": cargos,
             "periodos": periodos,
+            "carga_archivo": carga_archivo,
+            "carga_error": carga_error,
+            "tipo_carga": tipo_carga,
         },
     )
+
+
+def estado_carga_datos(request, carga_id):
+    carga = get_object_or_404(CargaDatos, pk=carga_id)
+    if carga.estado == "error":
+        return JsonResponse({
+            "estado": "error",
+            "percent": 0,
+            "error": carga.error,
+        })
+    if carga.estado == "completada":
+        return JsonResponse({
+            "estado": "completada",
+            "percent": 100,
+            "redirect_url": f"/administracion/cargas/{carga.id}/resultado/",
+        })
+    from celery.result import AsyncResult
+
+    tarea_id = request.GET.get("tarea")
+    if tarea_id:
+        estado = AsyncResult(tarea_id)
+        info = estado.info if isinstance(estado.info, dict) else {}
+        return JsonResponse({
+            "estado": "procesando",
+            "percent": info.get("percent", carga.progreso_porcentaje),
+            "current": info.get("current", carga.progreso_actual),
+            "total": info.get("total", carga.total),
+            "phase": info.get("phase", carga.etapa),
+            "message": info.get("message", carga.mensaje_progreso),
+        })
+    return JsonResponse({
+        "estado": "procesando",
+        "percent": carga.progreso_porcentaje,
+        "current": carga.progreso_actual,
+        "total": carga.total,
+        "phase": carga.etapa,
+        "message": carga.mensaje_progreso,
+    })
+
+
+def resultado_carga_datos(request, carga_id):
+    carga = get_object_or_404(CargaDatos, pk=carga_id)
+    if carga.estado == "completada":
+        return render(
+            request,
+            "administracion/carga_datos.html",
+            {
+                "page_title": "Carga completada",
+                "fecha_actual": timezone.now(),
+                "resultado_carga": carga.resultado,
+                "tipo_carga": carga.tipo,
+            },
+        )
+    return render(
+        request,
+        "administracion/carga_datos.html",
+        {
+            "page_title": "Carga de datos",
+            "fecha_actual": timezone.now(),
+            "carga_error": carga.error or "La carga aún no ha terminado.",
+        },
+    )
+
+
+@require_POST
+def limpiar_datos_cargas_view(request):
+    if request.POST.get("limpiar_cargas") != "LIMPIAR":
+        messages.error(request, "La limpieza no fue confirmada.")
+        return redirect("/administracion/?tab=carga_datos")
+    resultado = limpiar_datos_cargas()
+    messages.success(
+        request,
+        "Limpieza completada: "
+        f"{resultado['matriculas']} matrículas, "
+        f"{resultado['asistencias']} asistencias y "
+        f"{resultado['alumnos']} alumnos eliminados.",
+    )
+    return redirect("/administracion/?tab=carga_datos")
 
 
 @require_POST
