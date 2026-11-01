@@ -1,8 +1,14 @@
 {% include 'monitoreo/components/section-title.html' with icon='activity' title='Actividad reciente' %}
 
-<div class="mt-4 rounded-lg bg-blanco-tarjeta p-4 shadow-sm">
+{% with act=filtros_monitoreo.activos.act %}
+<div class="mt-4 rounded-lg bg-blanco-tarjeta p-4 shadow-sm
+    {% include 'monitoreo/components/borde-filtro.html' with curso=act.curso nivel=None %}"
+>
     <div class="flex items-center gap-2">
-        <p class="text-base font-semibold text-azul">Actividad reciente</p>
+        <p class="text-base font-semibold text-azul">
+            Actividad reciente
+            <span x-text="$store.filtros.tituloFiltrado('act')"></span>
+        </p>
         <span class="rounded-full bg-azul-fondo px-2 py-0.5 text-xs font-semibold text-azul-profundo">
             {{ actividad_reciente|length|default:0 }}
         </span>
@@ -82,3 +88,4 @@
         {% endfor %}
     </ul>
 </div>
+{% endwith %}

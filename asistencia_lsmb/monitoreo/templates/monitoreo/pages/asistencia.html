@@ -1,13 +1,18 @@
 {% include 'monitoreo/components/section-title.html' with icon='calendar-check' title='Asistencia' %}
 
-
+{% with ag=filtros_monitoreo.activos.ag evo=filtros_monitoreo.activos.evo %}
 <div class="mt-4 flex flex-col gap-4 lg:grid lg:grid-cols-12 lg:grid-flow-dense lg:gap-4">
 
     <!-- % Asistencia general -->
-    <div class="flex flex-col justify-center rounded-lg bg-blanco-tarjeta px-6 py-4 shadow-sm lg:col-span-4 lg:h-[180px]">
+    <div class="flex flex-col justify-center bg-blanco-tarjeta px-6 py-4 shadow-sm lg:col-span-4 lg:h-[180px]
+        {% include 'monitoreo/components/borde-filtro.html' with curso=ag.curso nivel=ag.nivel %}"
+    >
         <div class="flex items-center justify-between gap-2">
             <div>
-                <p class="text-base font-semibold text-azul">Asistencia general</p>
+                <p class="text-base font-semibold text-azul">
+                    Asistencia general
+                    <span x-text="$store.filtros.tituloFiltrado('ag')"></span>
+                </p>
                 <p class="text-5xl font-semibold text-azul-profundo">{{ asistencia_general.porcentaje }}%</p>
                 <p class="text-xs text-gris-texto">{{ asistencia_general.periodo }}</p>
             </div>
@@ -21,8 +26,13 @@
     {{ asistencia_general|json_script:"datos-asistencia-general" }}
  
     <!-- Evolución de asistencia -->
-    <div class="rounded-lg bg-blanco-tarjeta p-4 shadow-sm lg:col-span-8 lg:h-[180px]">
-        <p class="text-base font-semibold text-azul">Evolución de asistencia</p>
+    <div class="rounded-lg bg-blanco-tarjeta p-4 shadow-sm lg:col-span-8 lg:h-[180px]
+        {% include 'monitoreo/components/borde-filtro.html' with curso=evo.curso nivel=evo.nivel %}"
+    >
+        <p class="text-base font-semibold text-azul">
+            Evolución de asistencia
+            <span x-text="$store.filtros.tituloFiltrado('evo')"></span>
+        </p>
 
         <!-- Gráfico de barras -->
         <div class="relative mt-2 h-32 lg:h-[calc(100%-2rem)]">
@@ -32,11 +42,11 @@
     {{ evolucion_asistencia|json_script:"datos-evolucion-asistencia" }}
  
     <!-- Nivel de asistencia por curso -->
-    <div class="rounded-lg bg-blanco-tarjeta p-4 shadow-sm lg:col-span-12">
+    <div class="rounded-lg bg-blanco-tarjeta p-4 shadow-sm lg:col-span-6 lg:row-span-2">
         <p class="text-base font-semibold text-azul">Nivel de asistencia por curso</p>
 
         <!-- Grilla de tarjetas de curso -->
-        <div class="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-8">
+        <div class="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
             {% for curso in asistencia_por_curso %}
                 <div class="rounded-lg p-3 text-center
                     {% if curso.porcentaje == None %}bg-gris-ultraclaro
@@ -62,14 +72,6 @@
                     <p class="text-sm text-gris-texto">Sin cursos que mostrar</p>
                 </div>
             {% endfor %}
-        </div>
-    </div>
- 
-    <!-- Calendario de asistencia -->
-    <div class="rounded-lg bg-blanco-tarjeta p-4 shadow-sm lg:col-span-6 lg:row-span-2 lg:h-[376px]">
-        <p class="text-base font-semibold text-azul">Calendario de asistencia</p>
-        <div class="mt-2 flex h-24 items-center justify-center rounded-lg border border-dashed border-gris-claro text-xs text-gris-texto lg:h-[calc(100%-2rem)]">
-            Contenido pendiente
         </div>
     </div>
  
@@ -110,6 +112,7 @@
     </div>
 
 </div>
+{% endwith %}
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {

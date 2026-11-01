@@ -1,11 +1,17 @@
 {% include 'monitoreo/components/section-title.html' with icon='square-pen' title='Justificaciones' %}
 
+{% with just=filtros_monitoreo.activos.just %}
 <div class="mt-4 flex flex-col gap-4 lg:grid lg:grid-cols-12 lg:auto-rows-[180px] lg:grid-flow-dense lg:gap-4">
  
     <!-- Pendientes / Tiempo promedio de resolución -->
-    <div class="flex flex-col justify-between rounded-lg bg-blanco-tarjeta p-4 shadow-sm lg:col-span-4 lg:row-span-2 lg:h-[376px]">
+    <div class="flex flex-col justify-between bg-blanco-tarjeta p-4 shadow-sm lg:col-span-4 lg:row-span-2 lg:h-[376px]
+        {% include 'monitoreo/components/borde-filtro.html' with curso=just.curso nivel=just.nivel %}"
+    >
         <div class="flex items-center justify-between">
-            <p class="text-base font-semibold text-azul">Métricas de justificaciones</p>
+            <p class="text-base font-semibold text-azul">
+                Métricas de justificaciones
+                <span x-text="$store.filtros.tituloFiltrado('just')"></span>
+            </p>
             <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-azul-fondo text-azul-profundo">
                 <i data-lucide="file-clock" class="h-4 w-4"></i>
             </span>
@@ -42,10 +48,15 @@
     </div>
  
     <!-- Pendientes por revisar -->
-    <div class="flex flex-col rounded-lg bg-blanco-tarjeta p-4 shadow-sm lg:col-span-8 lg:row-span-2 lg:h-[376px] lg:overflow-hidden">
+    <div class="flex flex-col bg-blanco-tarjeta p-4 shadow-sm lg:col-span-8 lg:row-span-2 lg:h-[376px] lg:overflow-hidden
+        {% include 'monitoreo/components/borde-filtro.html' with curso=just.curso nivel=just.nivel %}"
+    >
         <div class="flex items-center justify-between shrink-0">
             <div class="flex items-center gap-2">
-                <p class="text-base font-semibold text-azul">Justificaciones pendientes por revisar</p>
+                <p class="text-base font-semibold text-azul">
+                    Justificaciones pendientes por revisar
+                    <span x-text="$store.filtros.tituloFiltrado('just')"></span>
+                </p>
                 <span class="rounded-full bg-azul-fondo px-2 py-0.5 text-xs font-semibold text-azul-profundo">
                     {{ pendientes_count|default:0 }}
                 </span>
@@ -96,3 +107,4 @@
         </ul>
     </div>
 </div>
+{% endwith %}

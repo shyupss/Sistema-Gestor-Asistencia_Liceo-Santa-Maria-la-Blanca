@@ -1,8 +1,11 @@
-{% extends 'base.html' %}
+﻿{% extends 'base.html' %}
+{% load static %}
 
 {% block title %}{{page_title}}{% endblock %}
 
 {% block content %}
+
+<script src="{% static 'monitoreo/js/monitoreo-filtros.js' %}"></script>
 
 {{ filtros_monitoreo|json_script:"datos-filtros-monitoreo" }}
 {{ asistencia_por_curso|json_script:"datos-asistencia-por-curso" }}
@@ -16,10 +19,25 @@
 
 <!-- Contenedor principal del contenido -->
 <section 
+    id="monitoreo-root"
     class="mx-auto max-w-[95%] px-1 py-5 sm:px-2 sm:py-8"
     x-data="{
         seccionActiva: 'asistencia',
         init() {
+            let estado = null;
+
+            try {
+                estado = JSON.parse(sessionStorage.getItem('monitoreo:estado'));
+                sessionStorage.removeItem('monitoreo:estado');
+                if (estado && estado.seccion) this.seccionActiva = estado.seccion;
+                if (estado && estado.scroll) {
+                    const restaurar = () => window.scrollTo(0, estado.scroll);
+                    if (document.readyState === 'complete') restaurar();
+                    else window.addEventListener('load', restaurar, { once: true });
+                }
+            }
+            catch (e) { /* sessionStorage no disponible o JSON inválido */ }
+
             const secciones = ['asistencia', 'alertas', 'justificaciones', 'actividad_reciente'];
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach(e => {

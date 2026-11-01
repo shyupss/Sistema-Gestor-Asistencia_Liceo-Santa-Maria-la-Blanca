@@ -1,0 +1,97 @@
+{% with ag=filtros_monitoreo.activos.ag %}
+<div class="space-y-4">
+    <div class="flex items-center justify-between">
+        <span class="hidden lg:block text-base font-semibold text-texto-negro">
+            Filtros
+        </span>
+
+        {% if ag.curso or ag.nivel %}
+            <button type="button"
+                @click="$store.filtros.limpiarGlobales()"
+                class="text-xs font-medium text-azul transition-colors hover:text-azul-claro"
+            >
+                Limpiar
+            </button>
+        {% endif %}
+    </div>
+
+    <!-- Curso -->
+    <div class="space-y-1.5">
+        <label for="{{ tipo }}-filtro-curso"
+            class="flex items-center gap-1.5 text-xs text-gris-texto"
+        >
+            <i data-lucide="book-open" class="h-3.5 w-3.5"></i>
+            Curso
+        </label>
+
+        <select id="{{ tipo }}-filtro-curso"
+            @change="$store.filtros.fijarGlobal('curso', $event.target.value)"
+            class="w-full rounded-lg border bg-blanco-tarjeta px-2 py-1.5 text-xs text-negro-texto 
+            focus:outline-none focus:ring-azul-primario/30 hover:border-azul transition-colors cursor-pointer
+            {% if ag.curso %}border-azul-primario{% else %}border-gris-claro{% endif %}"
+        >
+            <option value="">Todos</option>
+            <!-- Cursos -->
+            {% for curso in filtros_monitoreo.cursos %}
+                <option value="{{ curso.id }}" {% if ag.curso == curso.id %}selected{% endif %}>{{ curso.nombre }}</option>
+            {% endfor %}
+        </select>
+
+        {% if ag.nivel %}
+            <p class="text-xs leading-tight text-gris-texto">
+                <span class="text-rojo">* </span>
+                Cambiar este filtro limpiará el filtro de nivel
+            </p>
+        {% endif %}
+    </div>
+
+    <!-- Nivel -->
+    <div class="space-y-1.5">
+        <span class="flex items-center gap-1.5 text-xs text-gris-texto">
+            <i data-lucide="layers" class="h-3.5 w-3.5"></i>
+            Nivel
+        </span>
+
+        <div class="flex flex-wrap gap-1">
+            <!-- Pastillas -->
+            {% if ag.nivel and not ag.curso %}
+                {% include 'monitoreo/components/pastilla-filtro.html' with tipo='nivel' valor='' texto='Todos' activo=False %}
+            {% else %}
+                {% include 'monitoreo/components/pastilla-filtro.html' with tipo='nivel' valor='' texto='Todos' activo=True %}
+            {% endif %}
+
+            {% for nivel in filtros_monitoreo.niveles %}
+                {% if ag.nivel == nivel.valor and not ag.curso %}
+                    {% include 'monitoreo/components/pastilla-filtro.html' with tipo='nivel' valor=nivel.valor texto=nivel.nombre|cut:' Medio' activo=True %}
+                {% else %}
+                    {% include 'monitoreo/components/pastilla-filtro.html' with tipo='nivel' valor=nivel.valor texto=nivel.nombre|cut:' Medio' activo=False %}
+                {% endif %}
+            {% endfor %}
+        </div>
+        
+        {% if ag.curso %}
+            <p class="text-xs leading-tight text-gris-texto">
+                <span class="text-rojo">* </span>
+                Cambiar este filtro limpiará el filtro de cursos
+            </p>
+        {% endif %}
+    </div>
+
+    <!-- Periodo -->
+    <div class="space-y-1.5">
+        <label for="{{ tipo }}-filtro-periodo"
+            class="flex items-center gap-1.5 text-xs text-gris-texto"
+        >
+            <i data-lucide="calendar" class="h-3.5 w-3.5"></i>
+            Periodo
+        </label>
+
+        <select id="{{ tipo }}-filtro-periodo" disabled
+            class="w-full rounded-lg px-2 py-1.5 text-gris-texto text-xs 
+            cursor-not-allowed border border-gris-claro bg-blanco"
+        >
+            <option value="">Actual · 2026</option>
+        </select>
+    </div>
+</div>
+{% endwith %}
