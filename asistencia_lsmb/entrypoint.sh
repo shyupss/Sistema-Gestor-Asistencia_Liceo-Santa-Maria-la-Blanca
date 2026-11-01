@@ -5,11 +5,12 @@ set -e
 # Pasos comunes para desarrollo y producción
 # =============================================================
 
-# Aplicamos las migraciones pendientes antes de levantar el servidor
-uv run manage.py migrate
-
-# Crea el superusuario solo si no existe; si ya existe, continúa sin error
-uv run manage.py createsuperuser --noinput --username admin --email admin@gmail.com || true
+if [ "${RUN_DJANGO_INIT:-1}" = "1" ]; then
+  # Aplicamos las migraciones pendientes antes de levantar el servidor
+  uv run manage.py migrate
+  # Crea el superusuario solo si no existe; si ya existe, continúa sin error
+  uv run manage.py createsuperuser --noinput --username admin --email admin@gmail.com || true
+fi
 
 # =============================================================
 # Si estamos en desarrollo, ejecuta runserver (con hot-reload)
