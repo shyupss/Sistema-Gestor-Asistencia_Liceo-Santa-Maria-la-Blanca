@@ -5,4 +5,9 @@
         {% include 'monitoreo/components/desktop-navbar-item.html' with label='Justificaciones' seccion='justificaciones' %}
         {% include 'monitoreo/components/desktop-navbar-item.html' with label='Actividad reciente' seccion='actividad_reciente' %}
     </ul>
+
+    <!-- FILTROS GLOBALES -->
+    <div class="mt-4 border-t border-gris-claro pt-4">
+        {% include 'monitoreo/components/filtros-globales-desktop.html' with tipo='desktop' %}
+    </div>
 </nav>

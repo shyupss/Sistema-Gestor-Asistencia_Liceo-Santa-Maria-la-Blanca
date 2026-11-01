@@ -1,10 +1,16 @@
 {% include 'monitoreo/components/section-title.html' with icon='alert-triangle' title='Alertas' %}
 
+{% with apn=filtros_monitoreo.activos.apn ten=filtros_monitoreo.activos.ten %}
 <div class="mt-4 flex flex-col gap-4 lg:grid lg:grid-cols-12 lg:auto-rows-[180px] lg:grid-flow-dense lg:gap-4">
  
     <!-- Alertas por nivel -->
-    <div class="rounded-lg bg-blanco-tarjeta p-4 shadow-sm lg:col-span-4 lg:row-span-2">
-        <p class="text-base font-semibold text-azul">Alertas por nivel</p>
+    <div class="rounded-lg bg-blanco-tarjeta p-4 shadow-sm lg:col-span-4 lg:row-span-2
+        {% include 'monitoreo/components/borde-filtro.html' with curso=apn.curso nivel=apn.nivel %}"
+    >
+        <p class="text-base font-semibold text-azul">
+            Alertas por nivel
+            <span x-text="$store.filtros.tituloFiltrado('apn')"></span>
+        </p>
 
         <div class="mt-3 grid grid-cols-2 lg:grid-cols-1 gap-3">
             <div class="rounded-lg bg-amarillo-fondo p-3 text-center">
@@ -41,8 +47,13 @@
     {{ alertas_por_curso|json_script:"datos-alertas-curso" }}
  
     <!-- Tendencia de alertas activas -->
-    <div class="rounded-lg bg-blanco-tarjeta p-4 shadow-sm lg:col-span-8">
-        <p class="text-base font-semibold text-azul">Tendencia de alertas activas</p>
+    <div class="rounded-lg bg-blanco-tarjeta p-4 shadow-sm lg:col-span-8
+        {% include 'monitoreo/components/borde-filtro.html' with curso=ten.curso nivel=ten.nivel %}"
+    >
+        <p class="text-base font-semibold text-azul">
+            Tendencia de alertas activas
+            <span x-text="$store.filtros.tituloFiltrado('ten')"></span>
+        </p>
         <div class="relative mt-2 h-32 lg:h-[calc(100%-2rem)]">
             <canvas id="grafico-tendencia-alertas"></canvas>
         </div>
@@ -110,6 +121,7 @@
     </div>
  
 </div>
+{% endwith %}
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
