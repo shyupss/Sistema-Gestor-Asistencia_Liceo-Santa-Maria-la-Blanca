@@ -1,4 +1,4 @@
-const PARAMS_FILTROS = {
+﻿const PARAMS_FILTROS = {
     curso: {
         ag: ['ag_curso'],
         evo: ['evo_curso'],
@@ -93,5 +93,25 @@ document.addEventListener(
                 this.navegar(construirParamsGlobales(this.leerParams(), 'curso', ''));
             }
         });
+
+        Alpine.data('graficoScrollable', () => ({
+            hayOverflow: false, puedeIzquierda: false, puedeDerecha: false, seMovio: false, arrastrando: false, textoPista: 'Desliza para ver más', _listo: false,
+            init() {
+                if (window.matchMedia && matchMedia('(hover: hover)').matches) this.textoPista = 'Arrastra para ver más';
+                const s = this.$refs.scroller;
+                if (window.ResizeObserver) { const o = new ResizeObserver(() => this.actualizar()); o.observe(s); o.observe(this.$refs.lienzo); }
+                this._habilitarArrastre(s); this.actualizar();
+                setTimeout(() => { this._listo = true; }, 500);
+            },
+            actualizar() { const s = this.$refs.scroller, max = s.scrollWidth - s.clientWidth; this.hayOverflow = max > 2; this.puedeIzquierda = s.scrollLeft > 2; this.puedeDerecha = s.scrollLeft < max - 2; },
+            alDesplazar() { this.actualizar(); if (this._listo) this.seMovio = true; },
+            mover(d) { const s = this.$refs.scroller; s.scrollBy({ left: d * s.clientWidth * 0.6, behavior: 'smooth' }); },
+            _habilitarArrastre(s) {
+                let x0 = 0, l0 = 0, down = false, drag = false;
+                s.addEventListener('mousedown', e => { if (e.button !== 0) return; down = true; drag = false; x0 = e.clientX; l0 = s.scrollLeft; s.dataset.arrastre = '0'; });
+                window.addEventListener('mousemove', e => { if (!down) return; const dx = e.clientX - x0; if (!drag && Math.abs(dx) > 5) { drag = true; this.arrastrando = true; s.dataset.arrastre = '1'; } if (drag) s.scrollLeft = l0 - dx; });
+                window.addEventListener('mouseup', () => { if (!down) return; down = false; this.arrastrando = false; setTimeout(() => { s.dataset.arrastre = '0'; }, 0); });
+            },
+        }));
     }
 );

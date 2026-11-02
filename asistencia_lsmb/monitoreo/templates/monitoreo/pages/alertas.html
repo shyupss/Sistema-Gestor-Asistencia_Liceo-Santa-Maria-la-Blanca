@@ -1,10 +1,10 @@
 {% include 'monitoreo/components/section-title.html' with icon='alert-triangle' title='Alertas' %}
 
 {% with apn=filtros_monitoreo.activos.apn ten=filtros_monitoreo.activos.ten %}
-<div class="mt-4 flex flex-col gap-4 lg:grid lg:grid-cols-12 lg:auto-rows-[180px] lg:grid-flow-dense lg:gap-4">
+<div class="lg:mt-2 flex flex-col gap-4 lg:grid lg:grid-cols-12 lg:auto-rows-[180px] lg:grid-flow-dense lg:gap-4">
  
     <!-- Alertas por nivel -->
-    <div class="rounded-lg bg-blanco-tarjeta p-4 shadow-sm lg:col-span-4 lg:row-span-2
+    <div class="bg-blanco-tarjeta p-4 shadow-sm lg:col-span-4 lg:row-span-2
         {% include 'monitoreo/components/borde-filtro.html' with curso=apn.curso nivel=apn.nivel %}"
     >
         <p class="text-base font-semibold text-azul">
@@ -40,22 +40,22 @@
     <!-- Alertas por curso -->
     <div class="rounded-lg bg-blanco-tarjeta p-4 shadow-sm lg:col-span-8">
         <p class="text-base font-semibold text-azul">Porcentaje de alertas por curso</p>
-        <div class="relative mt-2 h-32 lg:h-[calc(100%-2rem)]">
-            <canvas id="grafico-alertas-curso"></canvas>
+        <div class="relative mt-1 mb-6 h-28 lg:h-[calc(100%-3rem)]">
+            {% include 'monitoreo/components/grafico-scrolleable.html' with canvas_id='grafico-alertas-curso' %}
         </div>
     </div>
     {{ alertas_por_curso|json_script:"datos-alertas-curso" }}
  
     <!-- Tendencia de alertas activas -->
-    <div class="rounded-lg bg-blanco-tarjeta p-4 shadow-sm lg:col-span-8
+    <div class="bg-blanco-tarjeta p-4 shadow-sm lg:col-span-8
         {% include 'monitoreo/components/borde-filtro.html' with curso=ten.curso nivel=ten.nivel %}"
     >
         <p class="text-base font-semibold text-azul">
             Tendencia de alertas activas
             <span x-text="$store.filtros.tituloFiltrado('ten')"></span>
         </p>
-        <div class="relative mt-2 h-32 lg:h-[calc(100%-2rem)]">
-            <canvas id="grafico-tendencia-alertas"></canvas>
+        <div class="relative mt-1 mb-6 h-28 lg:h-[calc(100%-3rem)]">
+            {% include 'monitoreo/components/grafico-scrolleable.html' with canvas_id='grafico-tendencia-alertas' %}
         </div>
     </div>
     {{ tendencia_alertas|json_script:"datos-tendencia-alertas" }}
@@ -71,7 +71,7 @@
                 </span>
             </a>
         </div>
-        <ul class="mt-3 space-y-2 border rounded-lg border-gris-ultraclaro p-1.5 lg:flex-1 lg:overflow-y-auto lg:pr-1">
+        <ul class="mt-3 flex min-h-[8rem] flex-col space-y-2 border rounded-lg border-gris-ultraclaro p-1.5 lg:min-h-0 lg:flex-1 lg:overflow-y-auto lg:pr-1">
             {% for item in ranking_alertas %}
                 <li>
                     <a href="{{ item.url }}"
@@ -93,10 +93,10 @@
                     </a>
                 </li>
             {% empty %}
-                <div class="flex flex-col justify-center items-center py-3">
-                    <i data-lucide="user-search" class="h-4 w-4 text-gris-texto"></i>
-                    <li class="text-sm text-gris-texto">Sin alumnos en el ranking.</li>
-                </div>
+                <li class="flex flex-1 flex-col items-center justify-center gap-1 py-6 text-center">
+                    <i data-lucide="user-search" class="h-5 w-5 text-gris-texto"></i>
+                    <span class="text-sm text-gris-texto">Sin alumnos en el ranking</span>
+                </li>
             {% endfor %}
         </ul>
     </div>
@@ -104,7 +104,7 @@
     <!-- Alertas recientes -->
     <div class="flex flex-col rounded-lg bg-blanco-tarjeta p-4 shadow-sm lg:col-span-6 lg:row-span-2 lg:h-[376px] lg:overflow-hidden">
         <p class="text-base font-semibold text-azul shrink-0">Alertas recientes</p>
-        <ul class="mt-3 space-y-1.5 border rounded-lg border-gris-ultraclaro p-1.5 lg:flex-1 lg:overflow-y-auto lg:pr-1">
+        <ul class="mt-3 flex min-h-[8rem] flex-col space-y-1.5 border rounded-lg border-gris-ultraclaro p-1.5 lg:min-h-0 lg:flex-1 lg:overflow-y-auto lg:pr-1">
             {% for alerta in alertas_recientes %}
                 <li class="flex items-center gap-2 text-sm">
                     <span class="h-1.5 w-1.5 shrink-0 rounded-full {% if alerta.nivel == 'critico' %}bg-rojo{% else %}bg-amarillo{% endif %}"></span>
@@ -112,10 +112,10 @@
                     <span class="text-gris-texto">· {{ alerta.curso }} · {{ alerta.hace }}</span>
                 </li>
             {% empty %}
-                <div class="flex flex-col justify-center items-center py-3">
-                    <i data-lucide="circle-alert" class="h-4 w-4 text-gris-texto"></i>
-                    <li class="text-sm text-gris-texto">Sin alertas recientes.</li>
-                </div>
+                <li class="flex flex-1 flex-col items-center justify-center gap-1 py-6 text-center">
+                    <i data-lucide="circle-alert" class="h-5 w-5 text-gris-texto"></i>
+                    <span class="text-sm text-gris-texto">Sin alertas recientes</span>
+                </li>
             {% endfor %}
         </ul>
     </div>
@@ -129,9 +129,15 @@
         crearDonutSegmentos('grafico-alertas-nivel', [datosNivel.critico, datosNivel.atencion], [PALETA.rojo, PALETA.amarillo]);
  
         const datosCurso = JSON.parse(document.getElementById('datos-alertas-curso').textContent);
-        crearBarras('grafico-alertas-curso', datosCurso.labels, datosCurso.valores, PALETA.rojo);
+        crearBarras('grafico-alertas-curso', datosCurso.labels, datosCurso.valores, {
+            color: PALETA.rojo,
+            minPx: GRAFICOS_SCROLL.barrasCurso,
+        });
  
         const datosTendencia = JSON.parse(document.getElementById('datos-tendencia-alertas').textContent);
-        crearLinea('grafico-tendencia-alertas', datosTendencia.labels, datosTendencia.valores);
+        crearLinea('grafico-tendencia-alertas', datosTendencia.labels, datosTendencia.valores, {
+            minPx: GRAFICOS_SCROLL.lineaMes,
+            scrollInicial: 'fin', // Se inicializa el gráfico mostrando lo más reciente
+        });
     });
 </script>

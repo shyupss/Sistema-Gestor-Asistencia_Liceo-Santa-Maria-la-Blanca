@@ -1,7 +1,7 @@
 {% include 'monitoreo/components/section-title.html' with icon='activity' title='Actividad reciente' %}
 
 {% with act=filtros_monitoreo.activos.act %}
-<div class="mt-4 rounded-lg bg-blanco-tarjeta p-4 shadow-sm
+<div class="lg:mt-2 rounded-lg bg-blanco-tarjeta p-4 shadow-sm
     {% include 'monitoreo/components/borde-filtro.html' with curso=act.curso nivel=None %}"
 >
     <div class="flex items-center gap-2">

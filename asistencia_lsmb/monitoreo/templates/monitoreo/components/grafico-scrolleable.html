@@ -1,0 +1,39 @@
+﻿<div class="relative h-full" x-data="graficoScrollable">
+    <div x-ref="scroller" data-scroller @scroll.passive="alDesplazar()"
+        class="grafico-scroll h-full overflow-x-auto overflow-y-hidden overscroll-x-contain"
+        :class="hayOverflow ? (arrastrando ? 'cursor-grabbing select-none' : 'cursor-grab') : ''">
+        <div x-ref="lienzo" data-lienzo class="relative h-full w-full">
+            <canvas id="{{ canvas_id }}"></canvas>
+        </div>
+    </div>
+
+    <!-- Eje Y fijo -->
+    <canvas id="{{ canvas_id }}-eje" aria-hidden="true" width="1" height="1"
+        class="pointer-events-none absolute left-0 top-0 bg-blanco-tarjeta"></canvas>
+
+    <!-- Degradados -->
+    <div x-show="puedeIzquierda" x-cloak x-transition.opacity aria-hidden="true"
+        class="pointer-events-none absolute top-0 w-6 bg-gradient-to-r from-blanco-tarjeta to-transparent"
+        style="left: var(--eje-ancho, 0px); bottom: 10px;"></div>
+    <div x-show="puedeDerecha" x-cloak x-transition.opacity aria-hidden="true"
+        class="pointer-events-none absolute right-0 top-0 w-8 bg-gradient-to-l from-blanco-tarjeta to-transparent"
+        style="bottom: 10px;"></div>
+
+    <!-- Flechas (solo desktop, en mobile se desliza) -->
+    <button type="button" x-show="puedeIzquierda" x-cloak @click="mover(-1)" aria-label="Ver datos anteriores"
+        class="absolute top-1/2 hidden h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full border border-gris-claro bg-blanco-tarjeta text-azul shadow-sm transition-colors hover:bg-azul-fondo lg:flex"
+        style="left: calc(var(--eje-ancho, 0px) + 4px);">
+        <i data-lucide="chevron-left" class="h-4 w-4"></i>
+    </button>
+    <button type="button" x-show="puedeDerecha" x-cloak @click="mover(1)" aria-label="Ver más datos"
+        class="absolute right-1 top-1/2 hidden h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full border border-gris-claro bg-blanco-tarjeta text-azul shadow-sm transition-colors hover:bg-azul-fondo lg:flex">
+        <i data-lucide="chevron-right" class="h-4 w-4"></i>
+    </button>
+
+    <!-- Pista -->
+    <div x-show="hayOverflow && !seMovio" x-cloak x-transition.opacity.duration.300ms aria-hidden="true"
+        class="pointer-events-none absolute right-1 top-0 flex items-center gap-1 rounded-full bg-azul-fondo/90 px-2 py-0.5 text-[10px] font-medium text-azul-profundo">
+        <i data-lucide="move-horizontal" class="h-3 w-3"></i>
+        <span x-text="textoPista"></span>
+    </div>
+</div>

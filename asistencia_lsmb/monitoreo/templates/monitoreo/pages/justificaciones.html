@@ -1,7 +1,7 @@
 {% include 'monitoreo/components/section-title.html' with icon='square-pen' title='Justificaciones' %}
 
 {% with just=filtros_monitoreo.activos.just %}
-<div class="mt-4 flex flex-col gap-4 lg:grid lg:grid-cols-12 lg:auto-rows-[180px] lg:grid-flow-dense lg:gap-4">
+<div class="lg:mt-2 flex flex-col gap-4 lg:grid lg:grid-cols-12 lg:auto-rows-[180px] lg:grid-flow-dense lg:gap-4">
  
     <!-- Pendientes / Tiempo promedio de resolución -->
     <div class="flex flex-col justify-between bg-blanco-tarjeta p-4 shadow-sm lg:col-span-4 lg:row-span-2 lg:h-[376px]
@@ -68,7 +68,7 @@
         </div>
 
         <!-- Lista justificaciones pendientes -->
-        <ul class="mt-3 space-y-2 border rounded-lg border-gris-ultraclaro p-1.5 lg:flex-1 lg:overflow-y-auto lg:pr-1">
+        <ul class="mt-3 flex min-h-[8rem] flex-col space-y-2 border rounded-lg border-gris-ultraclaro p-1.5 lg:min-h-0 lg:flex-1 lg:overflow-y-auto lg:pr-1">
             {% for justificacion in justificaciones_pendientes %}
                 <li>
                     <a href="{{ justificacion.url }}"
@@ -96,13 +96,13 @@
                     </a>
                 </li>
             {% empty %}
-                <div class="flex flex-col justify-center items-center py-6 text-center">
-                    <span class="flex h-10 w-10 items-center justify-center rounded-full bg-verde-claro text-verde-oscuro mb-2">
+                <li class="flex flex-1 flex-col items-center justify-center py-6 text-center">
+                    <span class="mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-verde-claro text-verde-oscuro">
                         <i data-lucide="check-circle-2" class="h-5 w-5"></i>
                     </span>
                     <p class="text-sm font-medium text-negro-texto">Al día</p>
                     <p class="text-xs text-gris-texto">No hay justificaciones pendientes por revisar.</p>
-                </div>
+                </li>
             {% endfor %}
         </ul>
     </div>

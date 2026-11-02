@@ -5,6 +5,16 @@
 
 {% block content %}
 
+<style>
+    /* Barra de scroll fina para los gráficos con desplazamiento horizontal */
+    .grafico-scroll { scrollbar-width: thin; scrollbar-color: #B3D9FF transparent; }
+    .grafico-scroll::-webkit-scrollbar { height: 6px; }
+    .grafico-scroll::-webkit-scrollbar-track { background: transparent; }
+    .grafico-scroll::-webkit-scrollbar-thumb { background: #B3D9FF; border-radius: 9999px; }
+    .grafico-scroll::-webkit-scrollbar-thumb:hover { background: #5B9BD9; }
+</style>
+ 
+<script src="{% static 'monitoreo/js/monitoreo-config.js' %}"></script>
 <script src="{% static 'monitoreo/js/monitoreo-filtros.js' %}"></script>
 
 {{ filtros_monitoreo|json_script:"datos-filtros-monitoreo" }}
