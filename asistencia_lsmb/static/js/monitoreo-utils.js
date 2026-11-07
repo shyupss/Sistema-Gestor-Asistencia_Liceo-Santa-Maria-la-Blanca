@@ -106,7 +106,7 @@ function crearBarras(canvasId, labels, valores, opciones = {}) {
     if (typeof opciones === 'string') opciones = { color: opciones };
     const {
         color = PALETA.azulPrimario,
-        colorHover = `${color}CC`,
+        colorHover = null,
         max = 100,
         sufijo = '%',
         minPx = null,
@@ -115,6 +115,7 @@ function crearBarras(canvasId, labels, valores, opciones = {}) {
         titulos = null,
         pie = null,
         onClickIndice = null,
+        colorPorUmbral = false,
     } = opciones;
 
     const canvas = document.getElementById(canvasId);
@@ -122,9 +123,23 @@ function crearBarras(canvasId, labels, valores, opciones = {}) {
 
     const scroll = minPx ? _prepararScroll(canvasId, labels.length, minPx) : null;
 
+    // Colores por barra según umbral de asistencia o color fijo
+    const colorFinal = colorPorUmbral
+        ? valores.map((v) => (typeof nivelAsistencia === 'function' ? nivelAsistencia(v).hex : color))
+        : color;
+
+    const hoverFinal = colorHover
+        || (Array.isArray(colorFinal)
+            ? colorFinal.map((c) => `${c}CC`)
+            : `${colorFinal}CC`);
+
     const callbacksTooltip = {
         title: (items) => (titulos ? titulos[items[0].dataIndex] : items[0].label),
-        label: (ctx) => `${ctx.parsed.y}${sufijo}`,
+        label: (ctx) => {
+            const v = ctx.parsed.y;
+            if (v === null || v === undefined || isNaN(v)) return 'Sin registros';
+            return `${v}${sufijo}`;
+        },
     };
     if (pie) callbacksTooltip.footer = () => pie;
 
@@ -134,8 +149,8 @@ function crearBarras(canvasId, labels, valores, opciones = {}) {
             labels,
             datasets: [{
                 data: valores,
-                backgroundColor: color,
-                hoverBackgroundColor: colorHover,
+                backgroundColor: colorFinal,
+                hoverBackgroundColor: hoverFinal,
                 borderRadius: 4,
                 maxBarThickness: 36,
             }],

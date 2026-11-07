@@ -4,10 +4,10 @@
 */
 
 const UMBRALES_ASISTENCIA = [
-    { id: 'optimo',   etiqueta: 'Óptimo',   desde: 95, hex: PALETA.verde,        fondo: 'bg-verde-fondo',    texto: 'text-verde-oscuro' },
-    { id: 'adecuado', etiqueta: 'Adecuado', desde: 85, hex: PALETA.azulPrimario, fondo: 'bg-azul-fondo',     texto: 'text-azul-profundo' },
-    { id: 'atencion', etiqueta: 'Atención', desde: 75, hex: PALETA.amarillo,     fondo: 'bg-amarillo-fondo', texto: 'text-amarillo-oscuro' },
-    { id: 'critico',  etiqueta: 'Crítico',  desde: 0,  hex: PALETA.rojo,         fondo: 'bg-rojo-fondo',     texto: 'text-rojo-oscuro' },
+    { id: 'optimo', etiqueta: 'Óptimo', desde: 95, hex: PALETA.verde, fondo: 'bg-verde-fondo', texto: 'text-verde-oscuro' },
+    { id: 'adecuado', etiqueta: 'Adecuado', desde: 85, hex: PALETA.azulPrimario, fondo: 'bg-azul-fondo', texto: 'text-azul-profundo' },
+    { id: 'atencion', etiqueta: 'Atención', desde: 75, hex: PALETA.amarillo, fondo: 'bg-amarillo-fondo', texto: 'text-amarillo-oscuro' },
+    { id: 'critico',  etiqueta: 'Crítico', desde: 0, hex: PALETA.rojo, fondo: 'bg-rojo-fondo', texto: 'text-rojo-oscuro' },
 ];
 
 // Estado visual cuando no hay datos que clasificar (curso sin registros)
