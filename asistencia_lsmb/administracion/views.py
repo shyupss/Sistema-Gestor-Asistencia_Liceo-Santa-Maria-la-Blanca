@@ -1,9 +1,10 @@
 import re
+from io import BytesIO
 
 from django.contrib import messages
 from django.core.exceptions import MultipleObjectsReturned
 from django.db import transaction
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_POST
@@ -25,6 +26,7 @@ from alertas.models import Cargo, Funcionario
 from .catalogos import cargar_catalogos_asistencia
 from .services.carga_archivos import (
     ArchivoCargaError,
+    REQUIRED_HEADER_LABELS,
     limpiar_datos_cargas,
     validar_archivo_carga,
 )
@@ -215,8 +217,77 @@ def pagina_administracion(request):
             "carga_archivo": carga_archivo,
             "carga_error": carga_error,
             "tipo_carga": tipo_carga,
+            "cabeceras_carga": REQUIRED_HEADER_LABELS,
         },
     )
+
+
+def descargar_plantilla_carga(request, tipo):
+    """Genera una plantilla XLSX con las columnas aceptadas por la carga masiva."""
+    configuraciones = {
+        "matriculas": (
+            "Matrículas",
+            [
+                "RUT",
+                "Nombre",
+                "Curso",
+                "Fecha matrícula",
+                "RUT apoderado",
+                "Apoderado",
+                "Teléfono apoderado",
+                "Email apoderado",
+                "Tipo relación",
+            ],
+            ["12.345.678-9", "Nombre Apellido", "1º A", "01/03/2026",
+             "98.765.432-1", "Nombre Apoderado", "+56 9 1234 5678",
+             "apoderado@ejemplo.cl", "Apoderado"],
+        ),
+        "asistencia": (
+            "Asistencia",
+            ["RUT", "Nombre", "2026-03-02", "2026-03-03"],
+            ["12.345.678-9", "Nombre Apellido", "P", "A"],
+        ),
+    }
+    try:
+        nombre, encabezados, ejemplo = configuraciones[tipo]
+    except KeyError:
+        return JsonResponse({"error": "Tipo de plantilla inválido."}, status=404)
+
+    from openpyxl import Workbook
+
+    workbook = Workbook()
+    worksheet = workbook.active
+    worksheet.title = nombre
+    worksheet.append(encabezados)
+    worksheet.append(ejemplo)
+    worksheet.freeze_panes = "A2"
+    if tipo == "matriculas":
+        from openpyxl.comments import Comment
+
+        for cell in worksheet[1]:
+            if cell.value in {
+                "RUT",
+                "Nombre",
+                "Curso",
+                "Fecha matrícula",
+                "RUT apoderado",
+                "Apoderado",
+            }:
+                cell.comment = Comment("Campo obligatorio.", "Sistema")
+            else:
+                cell.comment = Comment("Campo opcional.", "Sistema")
+    for column in worksheet.columns:
+        width = max(len(str(cell.value or "")) for cell in column) + 2
+        worksheet.column_dimensions[column[0].column_letter].width = min(width, 30)
+
+    output = BytesIO()
+    workbook.save(output)
+    response = HttpResponse(
+        output.getvalue(),
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    )
+    response["Content-Disposition"] = f'attachment; filename="plantilla_{tipo}.xlsx"'
+    return response
 
 
 def estado_carga_datos(request, carga_id):

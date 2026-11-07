@@ -4,6 +4,7 @@ from django.core.paginator import Paginator
 from django.urls import reverse
 from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
+from datetime import date, timedelta
 
 from academico.models import Alumno, Curso, Matricula
 from academico.queries.academico_queries import (
@@ -20,8 +21,100 @@ from asistencia.models import Asistencia_Alumnos, Justificaciones, Paso_Lista
 from asistencia.queries.asistencia_queries import obtener_alumnos_curso
 
 
+def _fecha_filtro(request, fecha_hoy, default_vista="dia"):
+    vista = request.GET.get("vista", default_vista)
+    if vista not in {"dia", "semana", "mes"}:
+        vista = "dia"
+    mes = request.GET.get("mes", f"{fecha_hoy.year}-{fecha_hoy.month:02d}")
+    try:
+        inicio_mes = date.fromisoformat(f"{mes}-01")
+        if inicio_mes.year != fecha_hoy.year:
+            raise ValueError
+    except ValueError:
+        inicio_mes = date(fecha_hoy.year, fecha_hoy.month, 1)
+        mes = inicio_mes.strftime("%Y-%m")
+    semana_texto = request.GET.get("semana", fecha_hoy.isoformat())
+    try:
+        semana = date.fromisoformat(semana_texto)
+        if semana.year != fecha_hoy.year:
+            raise ValueError
+    except ValueError:
+        semana = fecha_hoy
+        semana_texto = semana.isoformat()
+    inicio_semana = semana - timedelta(days=semana.weekday())
+    fin_semana = inicio_semana + timedelta(days=6)
+    if vista == "mes":
+        siguiente_mes = (
+            date(inicio_mes.year + (inicio_mes.month == 12), inicio_mes.month % 12 + 1, 1)
+        )
+        fin_periodo = siguiente_mes - timedelta(days=1)
+        inicio_periodo = inicio_mes
+    elif vista == "semana":
+        inicio_periodo, fin_periodo = inicio_semana, fin_semana
+    else:
+        inicio_periodo = fin_periodo = fecha_hoy
+    return {
+        "vista": vista,
+        "mes": mes,
+        "semana": semana_texto,
+        "inicio_periodo": inicio_periodo,
+        "fin_periodo": fin_periodo,
+    }
+
+
+def _semanas_del_mes(inicio_mes):
+    siguiente_mes = date(
+        inicio_mes.year + (inicio_mes.month == 12),
+        inicio_mes.month % 12 + 1,
+        1,
+    )
+    ultimo_dia = siguiente_mes - timedelta(days=1)
+    inicio = inicio_mes - timedelta(days=inicio_mes.weekday())
+    semanas = []
+    while inicio <= ultimo_dia:
+        fin = inicio + timedelta(days=6)
+        semanas.append({
+            "numero": len(semanas) + 1,
+            "inicio": max(inicio, inicio_mes),
+            "fin": min(fin, ultimo_dia),
+        })
+        inicio = fin + timedelta(days=1)
+    return semanas
+
+
+def _resumen_asistencia(registros, inicio, fin):
+    registros = [
+        registro for registro in registros
+        if inicio <= registro.paso_lista.fecha <= fin
+    ]
+    dias = {registro.paso_lista.fecha for registro in registros}
+    ausentes = sum(
+        registro.tipo_asistencia.cuenta_como_ausencia
+        and not (
+            registro.justificacion
+            and registro.justificacion.estado_solicitud.cubre_ausencia
+        )
+        for registro in registros
+    )
+    total_registros = len(registros)
+    return {
+        "dias": len(dias),
+        "asistidos": total_registros - ausentes,
+        "ausentes": ausentes,
+        "justificados": sum(
+            bool(registro.justificacion and registro.justificacion.estado_solicitud.cubre_ausencia)
+            for registro in registros
+        ),
+        "porcentaje": (
+            round((total_registros - ausentes) * 100 / total_registros)
+            if total_registros else None
+        ),
+    }
+
+
 def perfil_curso(request, curso_id):
     fecha_hoy = timezone.localdate()
+    filtro_asistencia = _fecha_filtro(request, fecha_hoy, default_vista="mes")
     tab = request.GET.get("tab", "informacion")
     tabs_validas = {
         "informacion",
@@ -51,6 +144,8 @@ def perfil_curso(request, curso_id):
         paso_lista__in=pasos_lista,
         alumno__matriculas__curso=curso,
         alumno__matriculas__periodo=curso.periodo,
+    ).select_related(
+        "tipo_asistencia", "paso_lista", "justificacion__estado_solicitud"
     ).distinct()
     asistencias_alumnos = obtener_asistencia_alumnos_curso(
         curso,
@@ -123,6 +218,132 @@ def perfil_curso(request, curso_id):
     resumen_diario_page = Paginator(
         resumen_diario, 10
     ).get_page(request.GET.get("asistencia_page"))
+    resumen_periodo = _resumen_asistencia(
+        list(asistencias.select_related(
+            "tipo_asistencia", "paso_lista", "justificacion__estado_solicitud"
+        )),
+        filtro_asistencia["inicio_periodo"],
+        filtro_asistencia["fin_periodo"],
+    )
+    nombres_meses = (
+        "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+        "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre",
+    )
+    meses_planilla = []
+    for mes in range(1, 13):
+        dias_trabajados = {
+            registro.paso_lista.fecha
+            for registro in asistencias
+            if registro.paso_lista.fecha.month == mes
+        }
+        meses_planilla.append({
+            "numero": mes,
+            "nombre": nombres_meses[mes - 1],
+            "dias_trabajados": len(dias_trabajados),
+        })
+    meses_semanas_planilla = []
+    semanas_planilla = []
+    for mes in meses_planilla:
+        inicio_mes = date(fecha_hoy.year, mes["numero"], 1)
+        semanas_mes = _semanas_del_mes(inicio_mes)
+        for semana in semanas_mes:
+            semana["mes_nombre"] = mes["nombre"]
+        meses_semanas_planilla.append({
+            "nombre": mes["nombre"],
+            "semanas": semanas_mes,
+            "columnas": len(semanas_mes) * 3,
+        })
+        semanas_planilla.extend(semanas_mes)
+    registros_por_alumno_mes = {}
+    for registro in asistencias.select_related(
+        "tipo_asistencia", "paso_lista", "justificacion__estado_solicitud"
+    ):
+        clave = (registro.alumno_id, registro.paso_lista.fecha.month)
+        registros_por_alumno_mes.setdefault(clave, []).append(registro)
+    planilla_estudiantes = []
+    for matricula in matriculas:
+        meses = []
+        for mes in meses_planilla:
+            registros_mes = registros_por_alumno_mes.get(
+                (matricula.alumno_id, mes["numero"]), []
+            )
+            ausencias = [
+                registro for registro in registros_mes
+                if registro.tipo_asistencia.cuenta_como_ausencia
+                and not (
+                    registro.justificacion
+                    and registro.justificacion.estado_solicitud.cubre_ausencia
+                )
+            ]
+            justificados = sum(
+                bool(
+                    registro.justificacion
+                    and registro.justificacion.estado_solicitud.cubre_ausencia
+                )
+                for registro in registros_mes
+            )
+            asistidos = len(registros_mes) - len(ausencias)
+            meses.append({
+                "dias_trabajados": mes["dias_trabajados"],
+                "asistidos": asistidos,
+                "justificados": justificados,
+                "porcentaje": (
+                    round(asistidos * 100 / mes["dias_trabajados"])
+                    if mes["dias_trabajados"] else None
+                ),
+            })
+        planilla_estudiantes.append({
+            "nombre": matricula.alumno.nombre,
+            "meses": meses,
+        })
+    planilla_semanas = []
+    for semana in semanas_planilla:
+        estudiantes = []
+        dias_trabajados = {
+            registro.paso_lista.fecha
+            for registro in asistencias
+            if semana["inicio"] <= registro.paso_lista.fecha <= semana["fin"]
+        }
+        for matricula in matriculas:
+            registros_semana = [
+                registro for registro in registros_por_alumno_mes.get(
+                    (matricula.alumno_id, semana["inicio"].month), []
+                )
+                if semana["inicio"] <= registro.paso_lista.fecha <= semana["fin"]
+            ]
+            ausencias = [
+                registro for registro in registros_semana
+                if registro.tipo_asistencia.cuenta_como_ausencia
+                and not (
+                    registro.justificacion
+                    and registro.justificacion.estado_solicitud.cubre_ausencia
+                )
+            ]
+            asistidos = len(registros_semana) - len(ausencias)
+            justificados = sum(
+                bool(
+                    registro.justificacion
+                    and registro.justificacion.estado_solicitud.cubre_ausencia
+                )
+                for registro in registros_semana
+            )
+            estudiantes.append({
+                "asistidos": asistidos,
+                "justificados": justificados,
+                "porcentaje": (
+                    round(asistidos * 100 / len(dias_trabajados))
+                    if dias_trabajados else None
+                ),
+            })
+        planilla_semanas.append({
+            **semana,
+            "dias_trabajados": len(dias_trabajados),
+            "estudiantes": estudiantes,
+        })
+    for indice, estudiante in enumerate(planilla_estudiantes):
+        estudiante["semanas"] = [
+            semana["estudiantes"][indice] for semana in planilla_semanas
+        ]
     solicitudes_aceptadas = Justificaciones.objects.filter(
         alumno_id=OuterRef("alumno_id"),
         estado_solicitud__nombre__iexact="aceptada",
@@ -202,6 +423,14 @@ def perfil_curso(request, curso_id):
         "matriculas_paginadas": matriculas_paginadas,
         "asistencias": asistencias,
         "resumen_diario": resumen_diario_page,
+        "resumen_periodo": resumen_periodo,
+        "meses_planilla": meses_planilla,
+        "planilla_estudiantes": planilla_estudiantes,
+        "semanas_planilla": planilla_semanas,
+        "meses_semanas_planilla": meses_semanas_planilla,
+        "asistencia_vista": filtro_asistencia["vista"],
+        "periodo_mes": filtro_asistencia["mes"],
+        "periodo_semana": filtro_asistencia["semana"],
         "total_estudiantes": len(matriculas),
         "total_dias_clase": total_dias_clase,
         "total_registros": total_registros,
@@ -246,6 +475,7 @@ def perfil_curso(request, curso_id):
 
 def perfil_alumno(request, alumno_id):
     fecha_hoy = timezone.localdate()
+    filtro_asistencia = _fecha_filtro(request, fecha_hoy)
     tab = request.GET.get("tab", "informacion")
     tabs_validas = {"informacion", "asistencia", "justificaciones", "alertas", "historial"}
     if tab not in tabs_validas:
@@ -263,12 +493,53 @@ def perfil_alumno(request, alumno_id):
             alumno=alumno,
             paso_lista__fecha__year=fecha_hoy.year,
         )
-        .select_related("tipo_asistencia", "paso_lista", "justificacion")
+        .select_related(
+            "tipo_asistencia",
+            "paso_lista",
+            "justificacion",
+            "justificacion__estado_solicitud",
+        )
         .order_by("-paso_lista__fecha")
     )
+    registros_asistencia_lista = list(registros_asistencia)
     registros_asistencia_page = Paginator(
         registros_asistencia, 10
     ).get_page(request.GET.get("asistencia_page"))
+    resumen_periodo = _resumen_asistencia(
+        registros_asistencia_lista,
+        filtro_asistencia["inicio_periodo"],
+        filtro_asistencia["fin_periodo"],
+    )
+    nombres_meses = (
+        "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+        "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre",
+    )
+    resumen_mensual = []
+    for numero_mes, nombre_mes in enumerate(nombres_meses, start=1):
+        resumen_mensual.append({
+            "nombre": nombre_mes,
+            **_resumen_asistencia(
+                registros_asistencia_lista,
+                date(fecha_hoy.year, numero_mes, 1),
+                date(
+                    fecha_hoy.year + (numero_mes == 12),
+                    numero_mes % 12 + 1,
+                    1,
+                ) - timedelta(days=1),
+            ),
+        })
+    inicio_mes_semanas = date.fromisoformat(f"{filtro_asistencia['mes']}-01")
+    resumen_semanal = []
+    for semana in _semanas_del_mes(inicio_mes_semanas):
+        resumen_semanal.append({
+            "nombre": f"Semana {semana['numero']}",
+            "rango": f"{semana['inicio']:%d/%m} - {semana['fin']:%d/%m}",
+            **_resumen_asistencia(
+                registros_asistencia_lista,
+                semana["inicio"],
+                semana["fin"],
+            ),
+        })
     ausencia_no_cubierta = (
         Q(tipo_asistencia__cuenta_como_ausencia=True)
         & (
@@ -347,6 +618,12 @@ def perfil_alumno(request, alumno_id):
         "estado_actual": estado_actual,
         "registros_asistencia": registros_asistencia,
         "registros_asistencia_page": registros_asistencia_page,
+        "resumen_periodo": resumen_periodo,
+        "resumen_mensual": resumen_mensual,
+        "resumen_semanal": resumen_semanal,
+        "asistencia_vista": filtro_asistencia["vista"],
+        "periodo_mes": filtro_asistencia["mes"],
+        "periodo_semana": filtro_asistencia["semana"],
         "justificaciones": justificaciones,
         "total_solicitudes": total_solicitudes,
         "solicitudes_pendientes": solicitudes_pendientes,

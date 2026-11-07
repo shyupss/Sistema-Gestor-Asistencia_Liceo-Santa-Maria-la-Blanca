@@ -6,6 +6,31 @@
     </div>
     <span class="text-xs text-gris-texto">{{ total_registros }} registros · {{ total_dias_clase }} días</span>
 </div>
+<div class="mb-5 flex flex-wrap items-end gap-2 rounded-lg bg-gris-ultraclaro p-3">
+    <div class="flex rounded-lg border border-gris-claro bg-white p-1 text-xs font-semibold">
+        <a href="?tab=asistencia&vista=dia" class="rounded-md px-3 py-1.5 {% if asistencia_vista == 'dia' %}bg-azul text-white{% else %}text-gris-texto hover:bg-azul-fondo{% endif %}">Día</a>
+        <a href="?tab=asistencia&vista=semana&mes={{ periodo_mes }}" class="rounded-md px-3 py-1.5 {% if asistencia_vista == 'semana' %}bg-azul text-white{% else %}text-gris-texto hover:bg-azul-fondo{% endif %}">Semana</a>
+        <a href="?tab=asistencia&vista=mes&mes={{ periodo_mes }}" class="rounded-md px-3 py-1.5 {% if asistencia_vista == 'mes' %}bg-azul text-white{% else %}text-gris-texto hover:bg-azul-fondo{% endif %}">Mes</a>
+    </div>
+    {% if asistencia_vista == "mes" %}
+    <label class="text-xs font-semibold text-gris-texto">Mes
+        <input type="month" name="mes" value="{{ periodo_mes }}"
+            onchange="this.form.submit()" form="filtro-asistencia-curso"
+            class="ml-1 rounded-md border border-gris-claro bg-white px-2 py-1.5 text-xs">
+    </label>
+    {% elif asistencia_vista == "semana" %}
+    <label class="text-xs font-semibold text-gris-texto">Mes de semanas
+        <input type="month" name="mes" value="{{ periodo_mes }}"
+            onchange="this.form.submit()" form="filtro-asistencia-curso"
+            class="ml-1 rounded-md border border-gris-claro bg-white px-2 py-1.5 text-xs">
+    </label>
+    {% endif %}
+    <form id="filtro-asistencia-curso" method="get">
+        <input type="hidden" name="tab" value="asistencia">
+        <input type="hidden" name="vista" value="{{ asistencia_vista }}">
+    </form>
+</div>
+{% if asistencia_vista == "dia" %}
 <div class="divide-y divide-gris-claro border-y border-gris-claro">
     {% for dia in resumen_diario %}
     <div class="flex flex-wrap items-center justify-between gap-3 py-4">
@@ -48,4 +73,128 @@
     <span></span>
     {% endif %}
 </nav>
+{% endif %}
+{% else %}
+{% if asistencia_vista == "mes" or asistencia_vista == "semana" %}
+<div data-planilla-scroll-top class="mb-1 h-4 overflow-x-auto rounded-t-lg border border-b-0 border-gris-claro" aria-label="Desplazamiento horizontal de la planilla">
+    <div data-planilla-scroll-width class="h-1"></div>
+</div>
+<div data-planilla-scroll class="overflow-x-auto rounded-b-lg border border-gris-claro">
+    <table class="min-w-[1180px] w-full border-collapse text-xs">
+        <thead>
+            <tr class="bg-verde-fondo text-verde-oscuro">
+                <th rowspan="{% if asistencia_vista == 'semana' %}4{% else %}3{% endif %}"
+                    class="sticky left-0 z-10 min-w-[16rem] border-b border-r border-gris-claro bg-verde-fondo px-3 py-2 text-left font-bold">
+                    Nombre alumno
+                </th>
+                {% if asistencia_vista == "mes" %}
+                    {% for mes in meses_planilla %}
+                    <th colspan="3" class="border-b border-l border-gris-claro px-2 py-2 text-center font-bold">{{ mes.nombre }}</th>
+                    {% endfor %}
+                {% else %}
+                    {% for mes in meses_semanas_planilla %}
+                    <th colspan="{{ mes.columnas }}" class="border-b border-l border-gris-claro px-2 py-2 text-center font-bold">{{ mes.nombre }}</th>
+                    {% endfor %}
+                {% endif %}
+            </tr>
+            {% if asistencia_vista == "semana" %}
+            <tr class="bg-azul-fondo text-[10px] text-azul-profundo">
+                {% for semana in semanas_planilla %}
+                <th colspan="3" class="border-l border-gris-claro px-2 py-1 text-center font-semibold">Semana {{ semana.numero }}</th>
+                {% endfor %}
+            </tr>
+            <tr class="bg-azul-fondo/50 text-[10px] text-gris-texto">
+                {% for semana in semanas_planilla %}
+                <th colspan="3" class="border-l border-gris-claro px-2 py-1 text-center font-semibold">Días trabajados: {{ semana.dias_trabajados }}</th>
+                {% endfor %}
+            </tr>
+            <tr class="bg-azul-fondo/50 text-[10px] text-azul-profundo">
+                {% for semana in semanas_planilla %}
+                <th class="border-l border-gris-claro px-2 py-2 font-semibold">Asist.</th>
+                <th class="px-2 py-2 font-semibold">Justif.</th>
+                <th class="px-2 py-2 font-semibold">%</th>
+                {% endfor %}
+            </tr>
+            {% else %}
+            <tr class="bg-azul-fondo/50 text-[10px] text-gris-texto">
+                {% for mes in meses_planilla %}
+                <th colspan="3" class="border-l border-gris-claro px-2 py-1 text-center font-semibold">Días trabajados: {{ mes.dias_trabajados }}</th>
+                {% endfor %}
+            </tr>
+            <tr class="bg-azul-fondo/50 text-[10px] text-azul-profundo">
+                {% for mes in meses_planilla %}
+                <th class="border-l border-gris-claro px-2 py-2 font-semibold">Asist.</th>
+                <th class="px-2 py-2 font-semibold">Justif.</th>
+                <th class="px-2 py-2 font-semibold">%</th>
+                {% endfor %}
+            </tr>
+            {% endif %}
+        </thead>
+        <tbody class="divide-y divide-gris-claro">
+            {% for estudiante in planilla_estudiantes %}
+            {% if asistencia_vista == "mes" %}
+            <tr class="hover:bg-gris-ultraclaro">
+                <td class="sticky left-0 z-[1] border-r border-gris-claro bg-white px-3 py-2 font-medium text-negro-texto">{{ estudiante.nombre }}</td>
+                {% for mes in estudiante.meses %}
+                <td class="border-l border-gris-claro px-2 py-2 text-center font-medium text-verde-oscuro">{{ mes.asistidos }}</td>
+                <td class="px-2 py-2 text-center text-amarillo-oscuro">{{ mes.justificados }}</td>
+                <td class="px-2 py-2 text-center font-semibold text-azul-profundo">{% if mes.porcentaje is not None %}{{ mes.porcentaje }}%{% else %}—{% endif %}</td>
+                {% endfor %}
+            </tr>
+            {% endif %}
+            {% empty %}
+            <tr><td colspan="49" class="px-3 py-8 text-center text-gris-texto">No hay estudiantes matriculados en este curso.</td></tr>
+            {% endfor %}
+            {% if asistencia_vista == "semana" %}
+            {% for estudiante in planilla_estudiantes %}
+            <tr class="hover:bg-gris-ultraclaro">
+                <td class="sticky left-0 z-[1] border-r border-gris-claro bg-white px-3 py-2 font-medium text-negro-texto">{{ estudiante.nombre }}</td>
+                {% for datos in estudiante.semanas %}
+                <td class="border-l border-gris-claro px-2 py-2 text-center font-medium text-verde-oscuro">{{ datos.asistidos }}</td>
+                <td class="px-2 py-2 text-center text-amarillo-oscuro">{{ datos.justificados }}</td>
+                <td class="px-2 py-2 text-center font-semibold text-azul-profundo">{% if datos.porcentaje is not None %}{{ datos.porcentaje }}%{% else %}—{% endif %}</td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+<p class="mt-2 text-xs text-gris-texto">Asist. = días asistidos · Justif. = días justificados · % = porcentaje del período.</p>
+<script>
+    (() => {
+        const top = document.querySelector("[data-planilla-scroll-top]");
+        const table = document.querySelector("[data-planilla-scroll]");
+        const width = document.querySelector("[data-planilla-scroll-width]");
+        if (!top || !table || !width) return;
+        const actualizarAncho = () => {
+            width.style.width = `${table.scrollWidth}px`;
+            top.scrollLeft = table.scrollLeft;
+        };
+        let sincronizando = false;
+        top.addEventListener("scroll", () => {
+            if (sincronizando) return;
+            sincronizando = true;
+            table.scrollLeft = top.scrollLeft;
+            requestAnimationFrame(() => { sincronizando = false; });
+        });
+        table.addEventListener("scroll", () => {
+            if (sincronizando) return;
+            sincronizando = true;
+            top.scrollLeft = table.scrollLeft;
+            requestAnimationFrame(() => { sincronizando = false; });
+        });
+        actualizarAncho();
+        window.addEventListener("resize", actualizarAncho);
+    })();
+</script>
+{% else %}
+<div class="grid gap-3 sm:grid-cols-5">
+    <div class="rounded-lg bg-azul-fondo p-4"><span class="text-xs text-gris-texto">Días de clase</span><strong class="mt-1 block text-2xl text-azul-profundo">{{ resumen_periodo.dias }}</strong></div>
+    <div class="rounded-lg bg-verde-fondo p-4"><span class="text-xs text-gris-texto">Asistidos</span><strong class="mt-1 block text-2xl text-verde-oscuro">{{ resumen_periodo.asistidos }}</strong></div>
+    <div class="rounded-lg bg-rojo-fondo p-4"><span class="text-xs text-gris-texto">Ausentes</span><strong class="mt-1 block text-2xl text-rojo-oscuro">{{ resumen_periodo.ausentes }}</strong></div>
+    <div class="rounded-lg bg-amarillo-fondo p-4"><span class="text-xs text-gris-texto">Justificados</span><strong class="mt-1 block text-2xl text-amarillo-oscuro">{{ resumen_periodo.justificados }}</strong></div>
+    <div class="rounded-lg bg-azul-fondo p-4"><span class="text-xs text-gris-texto">% asistencia</span><strong class="mt-1 block text-2xl text-azul-profundo">{% if resumen_periodo.porcentaje is not None %}{{ resumen_periodo.porcentaje }}%{% else %}—{% endif %}</strong></div>
+</div>
+{% endif %}
 {% endif %}

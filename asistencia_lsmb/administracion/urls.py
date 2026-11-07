@@ -7,6 +7,7 @@ urlpatterns = [
     path("cargas/limpiar/", views.limpiar_datos_cargas_view, name="limpiar_datos_cargas"),
     path("cargas/<uuid:carga_id>/estado/", views.estado_carga_datos, name="estado_carga_datos"),
     path("cargas/<uuid:carga_id>/resultado/", views.resultado_carga_datos, name="resultado_carga_datos"),
+    path("cargas/plantilla/<str:tipo>/", views.descargar_plantilla_carga, name="descargar_plantilla_carga"),
     path("alumnos/eliminar/", views.eliminar_alumnos, name="eliminar_alumnos"),
     path("matricular/", views.matricular_alumno, name="matricular_alumno"),
     path("matricula/<int:matricula_id>/editar/", views.editar_matricula, name="editar_matricula"),

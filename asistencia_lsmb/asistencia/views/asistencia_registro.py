@@ -21,6 +21,7 @@ from asistencia.services.asistencia_service import (
     obtener_justificacion_aplicable,
     recalcular_estado_alumno,
 )
+from asistencia.services.feriados import FeriadosError, validar_dia_asistencia
 
 
 def pagina_registrar_asistencia(request):
@@ -63,9 +64,19 @@ def pagina_registrar_asistencia(request):
             tipo_atrasado = tipos.get("atrasado")
             presentes = set(request.POST.getlist("presentes"))
             error = None
-            if not tipo_presente or not tipo_ausente:
+            try:
+                validar_dia_asistencia(fecha)
+            except FeriadosError as exc:
+                error = str(exc)
+            if not error and (not tipo_presente or not tipo_ausente):
                 error = "Carga los tipos presente y ausente desde Administración."
-            elif tipo_presente.cuenta_como_ausencia or not tipo_ausente.cuenta_como_ausencia:
+            elif (
+                not error
+                and (
+                    tipo_presente.cuenta_como_ausencia
+                    or not tipo_ausente.cuenta_como_ausencia
+                )
+            ):
                 error = "Revisa las reglas de presente y ausente desde Administración."
 
             # Solo se admiten las dos opciones del paso de lista, incluso por POST.

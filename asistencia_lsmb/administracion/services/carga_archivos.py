@@ -27,6 +27,7 @@ from asistencia.services.asistencia_service import (
     obtener_justificacion_aplicable,
     recalcular_estado_alumno,
 )
+from asistencia.services.feriados import FeriadosError, validar_dia_asistencia
 
 
 MAX_FILE_SIZE = 10 * 1024 * 1024
@@ -53,6 +54,34 @@ REQUIRED_HEADERS = {
         "rut": {"rut", "rut alumno", "run", "run alumno"},
         "nombre": {"nombre", "nombre alumno", "nombre completo", "nombre_completo"},
     },
+}
+
+REQUIRED_MATRICULA_KEYS = {
+    "rut",
+    "nombre",
+    "curso",
+    "fecha_matricula",
+    "apoderado_rut",
+    "apoderado_nombre",
+}
+
+REQUIRED_HEADER_LABELS = {
+    "Matrículas": [
+        "RUT",
+        "Nombre",
+        "Curso",
+        "Fecha matrícula",
+        "RUT apoderado",
+        "Apoderado",
+        "Teléfono apoderado",
+        "Email apoderado",
+        "Tipo relación",
+    ],
+    "Asistencia": [
+        "RUT",
+        "Nombre",
+        "Fecha (una columna por cada día)",
+    ],
 }
 
 
@@ -157,10 +186,14 @@ def validar_archivo_carga(uploaded_file: UploadedFile, tipo):
     if not any(headers):
         raise ArchivoCargaError("No se encontró una fila de encabezados.")
 
+    required_keys = (
+        REQUIRED_MATRICULA_KEYS if tipo == "Matrículas"
+        else set(REQUIRED_HEADERS[tipo])
+    )
     missing = [
-        label
-        for label, accepted in REQUIRED_HEADERS[tipo].items()
-        if not any(header in accepted for header in headers)
+        key
+        for key in required_keys
+        if not any(header in REQUIRED_HEADERS[tipo][key] for header in headers)
     ]
     if missing:
         labels = ", ".join(missing).replace("_", " ")
@@ -190,12 +223,15 @@ def validar_archivo_carga(uploaded_file: UploadedFile, tipo):
         indices = {
             key: next(index for index, header in enumerate(headers) if header in accepted)
             for key, accepted in REQUIRED_HEADERS[tipo].items()
+            if any(header in accepted for header in headers)
         }
         registros = []
         errores = []
         for numero, row in enumerate(data_rows, start=2):
             # Cada fila se valida completa; si falla, se informa su número de Excel.
-            get = lambda key: row[indices[key]] if indices[key] < len(row) else ""
+            get = lambda key: (
+                row[indices[key]] if key in indices and indices[key] < len(row) else ""
+            )
             fecha = _valor_fecha(get("fecha_matricula"))
             curso = _normalizar_curso(get("curso"))
             rut = normalizar_rut(get("rut"))
@@ -430,10 +466,22 @@ def cargar_asistencia(registros, progress_callback=None):
         for alumno in Alumno.objects.filter(rut__in=alumno_ids)
     }
     errores_por_alumno = {}
+    errores_por_feriado = {}
     matriculas = {}
     registros_omitidos_sin_matricula = 0
     for numero, registro in enumerate(registros, start=1):
         fecha = date.fromisoformat(registro["fecha"])
+        try:
+            validar_dia_asistencia(fecha)
+        except FeriadosError as exc:
+            errores_por_feriado.setdefault(str(exc), set()).add(fecha)
+            if progress_callback:
+                progress_callback(
+                    "validando",
+                    "Validando feriados y matrículas...",
+                    numero,
+                )
+            continue
         alumno = alumnos.get(registro["rut"])
         if not alumno:
             errores_por_alumno.setdefault(
@@ -485,8 +533,13 @@ def cargar_asistencia(registros, progress_callback=None):
                 "Validando alumnos y matrículas...",
                 numero,
             )
-    if errores_por_alumno:
+    if errores_por_alumno or errores_por_feriado:
         errores = []
+        for mensaje, fechas in errores_por_feriado.items():
+            fechas_texto = ", ".join(
+                sorted(fecha.strftime("%d/%m/%Y") for fecha in fechas)
+            )
+            errores.append(f"{mensaje} Fechas: {fechas_texto}.")
         for (tipo, fila, rut), fechas in errores_por_alumno.items():
             fechas_texto = ", ".join(sorted(fecha.strftime("%d/%m/%Y") for fecha in fechas))
             if tipo == "no existe":
