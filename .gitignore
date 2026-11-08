@@ -4,3 +4,5 @@
 .env.server
 .vscode
 asistencia_lsmb/staticfiles/
+LOCAL_*.py
+*/LOCAL_*.py
