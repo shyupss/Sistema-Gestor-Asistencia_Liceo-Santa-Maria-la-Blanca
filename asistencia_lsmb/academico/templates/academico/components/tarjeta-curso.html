@@ -119,7 +119,8 @@
         <!-- Botón registrar asistencia -->
         {% if curso.registrada_hoy %}
             <a href="{% url 'registrar_asistencia' %}?curso={{ curso.id }}&fecha={{ fecha_hoy|date:'Y-m-d' }}" 
-            class="flex items-center justify-center space-x-1.5 py-3 bg-gris-ultraclaro text-gris-texto font-medium text-xs hover:bg-gris-claro border-r border-gris-claro">
+            class="flex items-center justify-center space-x-1.5 py-3 font-medium text-xs
+            bg-verde-fondo text-verde-oscuro hover:bg-gris-claro hover:text-gris-texto border-r border-gris-claro transition-colors">
                 <i data-lucide="check-square" class="w-4 h-4"></i>
                 <span>Modificar asistencia</span>
             </a>
@@ -133,7 +134,9 @@
 
         <!-- Botón ver ficha -->
         <a href="{% url 'perfil_curso' curso.id %}?next=/cursos/"
-           class="group flex items-center justify-center space-x-1 py-3 text-xs font-semibold text-azul-primario hover:text-azul-profundo hover:bg-gris-ultraclaro/50 transition-colors">
+           class="group flex items-center justify-center space-x-1 py-3 text-xs font-semibold text-azul-primario
+           hover:text-blanco hover:bg-azul hover:border-l hover:border-l-celeste-claro
+           transition-colors">
             <span>Ver ficha</span>
             <i data-lucide="arrow-right" class="w-4 h-4 transition-transform duration-200 ease-out group-hover:scale-110 origin-center active:scale-95"></i>
         </a>

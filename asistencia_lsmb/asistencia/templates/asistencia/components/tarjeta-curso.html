@@ -69,7 +69,7 @@
             </a>
         {% else %}
             <a href="{% url 'registrar_asistencia' %}?curso={{ curso.id }}&fecha={{ fecha_hoy|date:'Y-m-d' }}"
-                class="group flex items-center justify-center space-x-1.5 py-2.5 bg-blanco-tarjeta hover:bg-gris-ultraclaro text-azul-profundo font-semibold text-sm transition-colors">
+                class="group flex items-center justify-center space-x-1.5 py-2.5 bg-azul hover:bg-azul-profundo text-blanco font-semibold text-sm transition-colors">
                 <i data-lucide="check-square" class="w-4 h-4 transition-transform duration-200 ease-out group-hover:scale-110 origin-center active:scale-95"></i>
                 <span>Registrar asistencia de hoy</span>
             </a>
