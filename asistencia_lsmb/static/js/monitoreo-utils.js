@@ -33,9 +33,10 @@ function _pluginEjeFijo(eje) {
         afterRender(chart) {
             const area = chart.chartArea;
             if (!area || !eje) return;
+            if (!chart.canvas.width || !chart.canvas.height) return;
             const dpr = chart.currentDevicePixelRatio || window.devicePixelRatio || 1;
             const ancho = Math.ceil(area.left);
-            const anchoPx = Math.max(1, Math.round(ancho * dpr));
+            const anchoPx = Math.min(chart.canvas.width, Math.max(1, Math.round(ancho * dpr)));
             const altoPx = chart.canvas.height;
 
             eje.width = anchoPx;
@@ -159,6 +160,7 @@ function crearBarras(canvasId, labels, valores, opciones = {}) {
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            ...(onClickIndice && { interaction: { mode: 'index', intersect: false } }),
 
             onHover: (evento, elementos) => {
                 if (evento.native) evento.native.target.style.cursor = onClickIndice && elementos.length ? 'pointer' : '';

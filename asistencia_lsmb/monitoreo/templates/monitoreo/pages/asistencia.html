@@ -28,16 +28,43 @@
     {{ asistencia_general|json_script:"datos-asistencia-general" }}
  
     <!-- Evolución de asistencia -->
-    <div class="bg-blanco-tarjeta p-4 shadow-sm lg:col-span-8 lg:h-[190px]
+    <div class="flex flex-col bg-blanco-tarjeta p-4 shadow-sm lg:col-span-8 lg:h-[190px]
         {% include 'monitoreo/components/borde-filtro.html' with curso=evo.curso nivel=evo.nivel %}"
     >
-        <p class="text-base font-semibold text-azul">
-            Evolución de asistencia
-            <span x-text="$store.filtros.tituloFiltrado('evo')"></span>
-        </p>
+        <div class="flex shrink-0 items-start justify-between gap-2">
+            <div class="min-w-0">
+                <p class="text-base font-semibold text-azul">
+                    Evolución de asistencia
+                    <span x-text="$store.filtros.tituloFiltrado('evo')"></span>
+                </p>
+                <p class="flex items-center gap-1 text-xs text-gris-texto">
+                    {# TODO backend: exponer periodo.anio en evolucion_asistencia; mientras tanto se usa el año de hoy #}
+                    Período académico {{ fecha_hoy.year }}
+                    {% if evolucion_asistencia.detalle_mes %}
+                        <i data-lucide="chevron-right" class="h-3 w-3"></i>
+                        <span class="font-medium text-azul">{{ evolucion_asistencia.detalle_mes.mes_nombre }}</span>
+                    {% endif %}
+                </p>
+            </div>
+
+            {% if evolucion_asistencia.detalle_mes %}
+                <!-- Vista por días: botón para volver a la vista mensual -->
+                <button type="button" @click="$store.filtros.volverEvolucion()"
+                    class="inline-flex shrink-0 items-center gap-1 rounded-full border border-azul-medio bg-celeste-claro px-2.5 py-1 text-xs font-medium text-azul-primario transition-colors hover:bg-azul-fondo">
+                    <i data-lucide="arrow-left" class="h-3 w-3"></i>
+                    Vista mensual
+                </button>
+            {% else %}
+                <!-- Vista mensual: pista de que las barras son clicables -->
+                <span class="hidden shrink-0 items-center gap-1 text-xs text-gris-texto sm:flex">
+                    <i data-lucide="mouse-pointer-click" class="h-3 w-3"></i>
+                    Haz clic en un mes para ver sus días
+                </span>
+            {% endif %}
+        </div>
 
         <!-- Gráfico de barras -->
-        <div class="relative mt-1 mb-6 h-28 lg:h-[calc(100%-3rem)]">
+        <div class="relative mt-1 mb-6 h-28 lg:h-auto lg:min-h-0 lg:flex-1">
             {% include 'monitoreo/components/grafico-scrolleable.html' with canvas_id='grafico-evolucion-asistencia' %}
         </div>
     </div>
@@ -122,10 +149,30 @@
         crearDonut('grafico-asistencia-general', datosAsistenciaGeneral.porcentaje, nivelAsistencia(datosAsistenciaGeneral.porcentaje).hex);
  
         const datosEvolucion = JSON.parse(document.getElementById('datos-evolucion-asistencia').textContent);
-        crearBarras('grafico-evolucion-asistencia', datosEvolucion.labels, datosEvolucion.valores, {
-            minPx: GRAFICOS_SCROLL.barrasMes,
-            scrollInicial: 'fin', // Se inicializa el gráfico mostrando lo más reciente
-            colorPorUmbral: true,
-        });
+        const detalle = datosEvolucion.detalle_mes;
+
+        if (detalle) {
+            // Vista "zoom": un punto por día calendario del mes (null = sin registros ese día)
+            const ultimoDiaConDatos = detalle.valores.map((v) => v !== null).lastIndexOf(true);
+            crearBarras('grafico-evolucion-asistencia', detalle.labels, detalle.valores, {
+                minPx: GRAFICOS_SCROLL.barrasDia,
+                ticksX: (etiqueta) => etiqueta.split(' ')[0], // "06 Sep" -> "06"
+                scrollInicial: ultimoDiaConDatos >= 0 ? ultimoDiaConDatos : 'inicio',
+                colorPorUmbral: true,
+            });
+        } else {
+            // Vista mensual: cada barra es clicable y hace zoom a ese mes
+            crearBarras('grafico-evolucion-asistencia', datosEvolucion.labels, datosEvolucion.valores, {
+                minPx: GRAFICOS_SCROLL.barrasMes,
+                scrollInicial: 'fin', // Se inicializa el gráfico mostrando lo más reciente
+                colorPorUmbral: true,
+                pie: 'Clic para ver el detalle por día',
+                onClickIndice: (indice) => {
+                    const filtros = Alpine.store('filtros');
+                    const mes = filtros.mesPorAbreviatura(datosEvolucion.labels[indice]);
+                    if (mes) filtros.zoomEvolucion(mes);
+                },
+            });
+        }
     });
 </script>

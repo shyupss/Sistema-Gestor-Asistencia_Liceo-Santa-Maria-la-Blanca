@@ -68,6 +68,23 @@ document.addEventListener(
 
                 return '';
             },
+            
+            mesPorAbreviatura(abreviatura) {
+                const mes = this.catalogo.meses.find(m => m.abreviatura === abreviatura);
+                return mes ? mes.valor : null;
+            },
+
+            zoomEvolucion(mes) {
+                const params = this.leerParams();
+                params.set('evo_mes', mes);
+                this.navegar(params);
+            },
+
+            volverEvolucion() {
+                const params = this.leerParams();
+                params.delete('evo_mes');
+                this.navegar(params);
+            },
 
             leerParams() { return new URLSearchParams(window.location.search); },
             navegar(params) {
