@@ -1,8 +1,9 @@
 <div class="bg-blanco-tarjeta rounded-xl border border-gris-claro border-l-8 shadow-sm flex flex-col h-full overflow-hidden
     {% if curso.estado_asistencia == 'Óptimo' or curso.estado_asistencia == 'Optimo' %}border-l-verde
     {% elif curso.estado_asistencia == 'Crítico' or curso.estado_asistencia == 'Critico' %}border-l-rojo
-    {% elif curso.estado_asistencia == 'Adecuado' %}border-l-azul-primario
-    {% else %}border-l-amarillo{% endif %}">
+    {% elif curso.estado_asistencia == 'Adecuado' %}border-l-azul-claro
+    {% elif curso.estado_asistencia == 'Atencion' or curso.estado_asistencia == 'Atención' %}border-l-amarillo
+    {% else %}border-l-gris-iconos{% endif %}">
     <!-- Contenido de la tarjeta -->
     <div class="p-3 flex-grow space-y-3">
         

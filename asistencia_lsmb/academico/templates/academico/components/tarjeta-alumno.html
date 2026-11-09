@@ -1,9 +1,9 @@
 <div
     class="bg-blanco-tarjeta rounded-xl border border-gris-claro border-l-[6px]
-        {% if alumno.estado_asistencia == 'Optimo' %}border-l-green-500
-        {% elif alumno.estado_asistencia == 'Adecuado' %}border-l-blue-500
-        {% elif alumno.estado_asistencia == 'Atención' or alumno.estado_asistencia == 'Alerta' %}border-l-yellow-500
-        {% elif alumno.estado_asistencia == 'Crítico' or alumno.estado_asistencia == 'Critico' %}border-l-red-500
+        {% if alumno.estado_asistencia == 'Optimo' %}border-l-verde
+        {% elif alumno.estado_asistencia == 'Adecuado' %}border-l-azul-claro
+        {% elif alumno.estado_asistencia == 'Atención' or alumno.estado_asistencia == 'Alerta' %}border-l-amarillo
+        {% elif alumno.estado_asistencia == 'Crítico' or alumno.estado_asistencia == 'Critico' %}border-l-rojo
         {% else %}border-l-gray-400{% endif %}
         shadow-sm flex flex-col h-full overflow-hidden">
     <div class="p-4 flex gap-4 flex-grow items-start">
