@@ -55,7 +55,40 @@ tailwind.config = {
                     fondo: "#FFDCDA",
                     contraste: "#FFC7C7",
                     claro: "#FCEBEB",
-                }
+                },
+                violeta: {
+                    oscuro: "#4C1D75",
+                    DEFAULT: "#7C3AED",
+                    suave: "#9B75D7",
+                    fondo: "#F0E6FF",
+                    contraste: "#E4D2FF",
+                    claro: "#F8F4FF",
+                },
+                naranja: {
+                    oscuro: "#78350F",
+                    DEFAULT: "#C45116",
+                    suave: "#D97745",
+                    fondo: "#FCE8DC",
+                    contraste: "#FBD2BE",
+                    claro: "#FFF6F0",
+                },
+                turquesa: {
+                    oscuro: "#115E59",
+                    DEFAULT: "#0F8B83",
+                    suave: "#62B6AE",
+                    fondo: "#D9F5F1",
+                    contraste: "#B8E8E1",
+                    claro: "#EFFAF8",
+                },
+                rosa: {
+                    oscuro: "#831843",
+                    DEFAULT: "#D9468B",
+                    suave: "#DF78A8",
+                    fondo: "#FCE1ED",
+                    contraste: "#F8C8DD",
+                    claro: "#FFF4F8",
+                },
+
             }
         }
     }
