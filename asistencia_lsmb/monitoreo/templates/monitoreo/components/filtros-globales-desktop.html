@@ -76,22 +76,7 @@
             </p>
         {% endif %}
     </div>
-
-    <!-- Periodo -->
-    <div class="space-y-1.5">
-        <label for="{{ tipo }}-filtro-periodo"
-            class="flex items-center gap-1.5 text-xs text-gris-texto"
-        >
-            <i data-lucide="calendar" class="h-3.5 w-3.5"></i>
-            Periodo
-        </label>
-
-        <select id="{{ tipo }}-filtro-periodo" disabled
-            class="w-full rounded-lg px-2 py-1.5 text-gris-texto text-xs 
-            cursor-not-allowed border border-gris-claro bg-blanco"
-        >
-            <option value="">Actual · 2026</option>
-        </select>
-    </div>
+    <!-- Espacio para mobile -->
+    <div class="space-y-1.5 lg:hidden"></div>
 </div>
 {% endwith %}
