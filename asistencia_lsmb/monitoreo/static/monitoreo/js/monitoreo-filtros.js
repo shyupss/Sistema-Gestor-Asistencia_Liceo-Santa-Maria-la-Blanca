@@ -19,11 +19,25 @@
 const NIVELES_ROMANOS = { 1: 'I', 2: 'II', 3: 'III', 4: 'IV' };
 const CLAVE_ESTADO_SESION = 'monitoreo:estado';
 
+const PARAMS_ACTIVIDAD = {
+    actor: ['act_actor', 'actor'],
+    tipo: ['act_tipo', 'tipo'],
+};
+
+const ETIQUETAS_TIPO_ACTIVIDAD = {
+    asistencia: 'Asistencia',
+    justificacion: 'Justificación',
+    retiro: 'Retiro',
+    alerta: 'Alerta',
+};
+
+
 function _borrarClaves(params, grupos) {
     grupos.flat().forEach(clave => {
         params.delete(clave);
     });
 }
+
 
 function construirParamsGlobales(paramsActuales, tipo, valor) {
     const params = new URLSearchParams(paramsActuales);
@@ -37,19 +51,38 @@ function construirParamsGlobales(paramsActuales, tipo, valor) {
 }
 
 
+function construirParamsActividad(paramsActuales, actor, tipos) {
+    const params = new URLSearchParams(paramsActuales);
+
+    _borrarClaves(params, [PARAMS_ACTIVIDAD.actor, PARAMS_ACTIVIDAD.tipo]);
+    if (actor) params.set(PARAMS_ACTIVIDAD.actor[0], actor);
+    (tipos || []).forEach(tipo => params.append(PARAMS_ACTIVIDAD.tipo[0], tipo));
+
+    return params;
+}
+
+
 document.addEventListener(
     'alpine:init', () => {
         Alpine.store('filtros', {
             catalogo: { cursos: [], niveles: [], meses: [], tipos_actividad: [], actores_actividad: [], activos: [] },
             sheetAbierto: false, // Mobile
+            popActividadAbierto: false,
+            borradorActor: '',
+            borradorTipos: [],
             init() {
                 const nodo = document.getElementById('datos-filtros-monitoreo');
                 if (nodo) this.catalogo = JSON.parse(nodo.textContent);
+                this.reiniciarBorradorActividad();
             },
 
             get activos() { return this.catalogo.activos || {}; },
             get cursoGlobal() { return (this.activos.ag || {}).curso ?? null },
             get nivelGlobal() { return (this.activos.ag || {}).nivel ?? null },
+            get cantidadActividad() {
+                const act = this.activos.act || {};
+                return (act.actor ? 1 : 0) + (act.tipos || []).length;
+            },
             get cantidadGlobal() { return this.cursoGlobal !== null || this.nivelGlobal !== null ? 1 : 0 },
 
             etiquetaCurso(id) {
@@ -68,7 +101,8 @@ document.addEventListener(
 
                 return '';
             },
-            
+
+            // --------- Evolución de asistencia
             mesPorAbreviatura(abreviatura) {
                 const mes = this.catalogo.meses.find(m => m.abreviatura === abreviatura);
                 return mes ? mes.valor : null;
@@ -84,6 +118,48 @@ document.addEventListener(
                 const params = this.leerParams();
                 params.delete('evo_mes');
                 this.navegar(params);
+            },
+
+            // --------- Actividad reciente
+            etiquetaTipo(tipo) {
+                return ETIQUETAS_TIPO_ACTIVIDAD[tipo.valor] || tipo.nombre;
+            },
+
+            
+            clasePill(activo) {
+                return 'rounded-full border px-2.5 py-0.5 text-xs transition-colors ' + (activo
+                    ? 'border-azul-primario bg-celeste-claro font-semibold text-azul-primario'
+                    : 'border-gris-claro text-gris-texto hover:border-azul-medio hover:text-azul');
+            },
+
+            reiniciarBorradorActividad() {
+                const act = this.activos.act || {};
+                this.borradorActor = act.actor || '';
+                this.borradorTipos = [...(act.tipos || [])];
+            },
+
+            abrirActividad() {
+                this.reiniciarBorradorActividad();
+                this.popActividadAbierto = true;
+            },
+
+            cerrarActividad() { this.popActividadAbierto = false; },
+
+            alternarTipo(tipo) {
+                const i = this.borradorTipos.indexOf(tipo);
+                if (i >= 0) this.borradorTipos.splice(i, 1);
+                else this.borradorTipos.push(tipo);
+            },
+
+            aplicarActividad() {
+                this.popActividadAbierto = false;
+                this.navegar(construirParamsActividad(this.leerParams(), this.borradorActor, this.borradorTipos));
+            },
+
+            limpiarActividad() {
+                this.borradorActor = '';
+                this.borradorTipos = [];
+                this.aplicarActividad();
             },
 
             leerParams() { return new URLSearchParams(window.location.search); },
@@ -110,6 +186,7 @@ document.addEventListener(
                 this.navegar(construirParamsGlobales(this.leerParams(), 'curso', ''));
             }
         });
+        
 
         Alpine.data('graficoScrollable', () => ({
             hayOverflow: false, puedeIzquierda: false, puedeDerecha: false, seMovio: false, arrastrando: false, textoPista: 'Desliza para ver más', _listo: false,

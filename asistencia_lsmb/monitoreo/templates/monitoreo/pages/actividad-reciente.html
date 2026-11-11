@@ -4,14 +4,106 @@
 <div class="lg:mt-2 rounded-lg bg-blanco-tarjeta p-4 shadow-sm
     {% include 'monitoreo/components/borde-filtro.html' with curso=act.curso nivel=None %}"
 >
-    <div class="flex items-center gap-2">
-        <p class="text-base font-semibold text-azul">
-            Actividad reciente
-            <span x-text="$store.filtros.tituloFiltrado('act')"></span>
-        </p>
-        <span class="rounded-full bg-azul-fondo px-2 py-0.5 text-xs font-semibold text-azul-profundo">
-            {{ actividad_reciente|length|default:0 }}
-        </span>
+    <div class="flex items-center justify-between gap-2">
+        <div class="flex items-center gap-2">
+            <p class="text-base font-semibold text-azul">
+                Actividad reciente
+                <span x-text="$store.filtros.tituloFiltrado('act')"></span>
+            </p>
+            <span class="rounded-full bg-azul-fondo px-2 py-0.5 text-xs font-semibold text-azul-profundo">
+                {{ actividad_reciente|length|default:0 }}
+            </span>
+        </div>
+
+        <!-- Botón de filtros -->
+        <div class="relative" x-data @keydown.escape.window="$store.filtros.cerrarActividad()">
+            <button type="button" @click="$store.filtros.abrirActividad()"
+                aria-haspopup="dialog" :aria-expanded="$store.filtros.popActividadAbierto"
+                class="inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors"
+                :class="$store.filtros.cantidadActividad ? 'border-azul-primario bg-celeste-claro text-azul-primario' : 'border-gris-claro bg-blanco-tarjeta text-gris-texto hover:border-azul-medio hover:text-azul'"
+            >
+                <i data-lucide="filter" class="h-3.5 w-3.5"
+                ></i>
+                Filtrar
+                <span x-show="$store.filtros.cantidadActividad" x-text="$store.filtros.cantidadActividad" x-cloak
+                    class="flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-azul-fondo px-1 text-[10px] font-semibold text-azul-profundo"
+                ></span>
+            </button>
+
+            <!-- Cierra al hacer clic fuera del componente -->
+            <div x-show="$store.filtros.popActividadAbierto" x-cloak x-transition.opacity.duration.150ms
+                @click="$store.filtros.cerrarActividad()"
+                class="fixed inset-0 z-[60] bg-negro-texto/30 lg:bg-transparent"
+            ></div>
+
+            <!-- Menú: mobile = centrado en pantalla; desktop = bajo el botón, alineado a la derecha -->
+            <div x-show="$store.filtros.popActividadAbierto" x-cloak x-transition.opacity.duration.150ms
+                role="dialog" aria-label="Filtrar actividad reciente"
+                class="fixed left-1/2 top-1/2 z-[61] w-[calc(100vw-2rem)] max-w-sm -translate-x-1/2 -translate-y-1/2 rounded-xl border border-gris-claro bg-blanco-tarjeta p-4 shadow-lg
+                    lg:absolute lg:left-auto lg:right-0 lg:top-full lg:mt-2 lg:w-80 lg:max-w-none lg:translate-x-0 lg:translate-y-0"
+            >
+
+                <!-- Filtro por actor -->
+                <div class="flex items-center justify-between">
+                    <p class="text-xs font-semibold text-negro-texto">Actor</p>
+                    <button type="button" x-show="$store.filtros.borradorActor" x-cloak
+                        @click="$store.filtros.borradorActor = ''"
+                        class="text-xs font-medium text-azul transition-colors hover:text-azul-claro"
+                    >
+                        Limpiar
+                    </button>
+                </div>
+                <div class="mt-2 flex flex-wrap gap-1.5">
+                    <button type="button" @click="$store.filtros.borradorActor = ''"
+                        :aria-pressed="$store.filtros.borradorActor === ''"
+                        :class="$store.filtros.clasePill($store.filtros.borradorActor === '')"
+                    >
+                        Todos
+                    </button>
+                    <template x-for="actor in $store.filtros.catalogo.actores_actividad" :key="actor.valor">
+                        <button type="button" @click="$store.filtros.borradorActor = actor.valor"
+                            :aria-pressed="$store.filtros.borradorActor === actor.valor"
+                            :class="$store.filtros.clasePill($store.filtros.borradorActor === actor.valor)"
+                            x-text="actor.nombre"
+                        ></button>
+                    </template>
+                </div>
+
+                <!-- Filtro por tipo de actividad -->
+                <div class="mt-4 flex items-center justify-between">
+                    <p class="text-xs font-semibold text-negro-texto">Tipo de actividad</p>
+                    <button type="button" x-show="$store.filtros.borradorTipos.length" x-cloak
+                        @click="$store.filtros.borradorTipos = []"
+                        class="text-xs font-medium text-azul transition-colors hover:text-azul-claro"
+                    >
+                        Limpiar
+                    </button>
+                </div>
+                <div class="mt-2 flex flex-wrap gap-1.5">
+                    <template x-for="tipo in $store.filtros.catalogo.tipos_actividad" :key="tipo.valor">
+                        <button type="button" @click="$store.filtros.alternarTipo(tipo.valor)"
+                            :aria-pressed="$store.filtros.borradorTipos.includes(tipo.valor)"
+                            :class="$store.filtros.clasePill($store.filtros.borradorTipos.includes(tipo.valor))"
+                            x-text="$store.filtros.etiquetaTipo(tipo)"
+                        ></button>
+                    </template>
+                </div>
+
+                <!-- Acciones -->
+                <div class="mt-4 flex gap-2 border-t border-gris-claro pt-3">
+                    <button type="button" @click="$store.filtros.limpiarActividad()"
+                        class="flex-1 rounded-lg border border-gris-claro px-3 py-1.5 text-xs font-medium text-gris-texto transition-colors hover:bg-blanco-fondo"  
+                    >
+                        Limpiar
+                    </button>
+                    <button type="button" @click="$store.filtros.aplicarActividad()"
+                        class="flex-1 rounded-lg bg-azul-primario px-3 py-1.5 text-xs font-medium text-blanco transition-colors hover:bg-azul-profundo"
+                    >
+                        Aplicar
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <ul class="mt-3 space-y-2 border rounded-lg border-gris-ultraclaro p-1.5 lg:flex-1 lg:overflow-y-auto lg:pr-1">
