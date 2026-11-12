@@ -476,17 +476,17 @@ def calcular_actividad_reciente(periodo, fecha, filtros_act):
     ahora = timezone.now()
 
     # 1. ALERTAS EMITIDAS
-    incluir_alertas = (not tipos or "alerta" in tipos) and (actor != "sistema")
+    incluir_alertas = (not tipos or "alerta" in tipos) and (actor != "funcionario")
     if incluir_alertas:
-        qs_alertas = Alerta.objects.filter(fecha__date__lte=fecha).select_related(
-            "alumno", "estado", "funcionario", "funcionario__cargo", "periodo"
+        qs_alertas = Alerta.objects.filter(fecha_creacion__date__lte=fecha).select_related(
+            "alumno", "estado", "periodo"
         )
         if periodo:
             qs_alertas = qs_alertas.filter(periodo_id=periodo.pk)
         if alumno_ids_curso is not None:
             qs_alertas = qs_alertas.filter(alumno_id__in=alumno_ids_curso)
 
-        for alerta in qs_alertas.order_by("-fecha", "-id")[:20]:
+        for alerta in qs_alertas.order_by("-fecha_creacion", "-id")[:20]:
             matricula = _curso_alumno(alerta.alumno, alerta.periodo_id, fecha)
             curso = matricula.curso if matricula else None
 
@@ -494,16 +494,16 @@ def calcular_actividad_reciente(periodo, fecha, filtros_act):
             if curso_id and (not curso or curso.pk != curso_id):
                 continue
             eventos.append({
-                "fecha": alerta.fecha,
+                "fecha": alerta.fecha_creacion,
                 "tipo": "alerta.emitida",
                 "tipo_categoria": "alerta",
                 "nivel": alerta.estado.nombre.lower() if alerta.estado else "alerta",
                 "alumno": alerta.alumno.nombre,
                 "curso": f"{curso.nivel_romano}° Medio {curso.grupo}" if curso else "Sin curso",
                 "motivo": "bajo porcentaje de asistencia",
-                "autor": alerta.funcionario.nombre if alerta.funcionario else "Funcionario",
-                "rol_autor": alerta.funcionario.cargo.nombre if alerta.funcionario and alerta.funcionario.cargo else "Inspectoría",
-                "tiempo": _tiempo_transcurrido(alerta.fecha, ahora),
+                "autor": "Sistema",
+                "rol_autor": "Sistema",
+                "tiempo": _tiempo_transcurrido(alerta.fecha_creacion, ahora),
             })
 
     # 2. JUSTIFICACIONES Y RETIROS

@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Q
 
 
 class Cargo(models.Model):
@@ -61,10 +62,34 @@ class Alerta(models.Model):
         'academico.PeriodoAcademico', on_delete=models.CASCADE, related_name='alertas'
     )
     estado = models.ForeignKey(Estado, on_delete=models.PROTECT, related_name='alertas')
-    funcionario = models.ForeignKey(Funcionario, on_delete=models.PROTECT, related_name='alertas')
-    fecha = models.DateTimeField(auto_now_add=True)
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+    fecha_cierre = models.DateTimeField(null=True, blank=True)  # null = vigente
+    MOTIVOS_CIERRE = [
+        ('recuperado', 'Recuperado'),
+        ('cambio_estado', 'Cambio de estado'),
+        ('fin_matricula', 'Fin de matrícula'),
+        ('fin_periodo', 'Fin de período'),
+    ]
+    motivo_cierre = models.CharField(max_length=20, null=True, blank=True, choices=MOTIVOS_CIERRE)
     revisada = models.BooleanField(default=False)
+    funcionario_revisa = models.ForeignKey(
+        Funcionario,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name='alertas_revisadas',
+    )
     fecha_revision = models.DateTimeField(null=True, blank=True)
+    nota = models.TextField(null=True, blank=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['alumno', 'periodo'],
+                condition=Q(fecha_cierre__isnull=True),
+                name='uq_alerta_vigente_alumno_periodo',
+            )
+        ]
 
 
 class EstadoAlumno(models.Model):

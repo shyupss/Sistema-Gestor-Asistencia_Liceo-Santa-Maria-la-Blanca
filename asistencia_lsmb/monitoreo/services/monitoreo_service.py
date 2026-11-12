@@ -102,15 +102,15 @@ def preparar_actividad_reciente(fecha):
         matricula = _curso_alumno(alerta.alumno, alerta.periodo_id)
         curso = matricula.curso if matricula else None
         eventos.append({
-            "fecha": alerta.fecha,
+            "fecha": alerta.fecha_creacion,
             "tipo": "alerta.emitida",
             "nivel": alerta.estado.nombre.lower(),
             "alumno": alerta.alumno.nombre,
             "curso": f"{curso.nivel_romano}° Medio {curso.grupo}" if curso else "Sin curso",
             "motivo": "bajo porcentaje de asistencia",
-            "autor": alerta.funcionario.nombre,
-            "rol_autor": alerta.funcionario.cargo.nombre,
-            "tiempo": _tiempo_transcurrido(alerta.fecha, ahora),
+            "autor": "Sistema",
+            "rol_autor": "Sistema",
+            "tiempo": _tiempo_transcurrido(alerta.fecha_creacion, ahora),
         })
 
     for justificacion in obtener_justificaciones_recientes(fecha):
@@ -281,7 +281,7 @@ def _datos_alertas(periodo, cursos, fecha):
             alertas_recientes.append({
                 "alumno": alerta.alumno.nombre,
                 "curso": f"{curso.nivel_romano}° Medio {curso.grupo}",
-                "hace": alerta.fecha.strftime("%d/%m/%Y"),
+                "hace": alerta.fecha_creacion.strftime("%d/%m/%Y"),
                 "nivel": nivel_alerta(alerta.estado, umbral),
             })
 

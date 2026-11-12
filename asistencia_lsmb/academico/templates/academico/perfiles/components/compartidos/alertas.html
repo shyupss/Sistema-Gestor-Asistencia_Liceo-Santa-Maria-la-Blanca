@@ -4,10 +4,10 @@
     <article class="rounded-lg border border-gris-claro p-4">
         <div class="flex items-center justify-between gap-2">
             <p class="font-semibold text-negro-texto">{{ alerta.estado.nombre }}</p>
-            <span class="text-xs text-gris-texto">{{ alerta.fecha|date:'d/m/Y H:i' }}</span>
+            <span class="text-xs text-gris-texto">{{ alerta.fecha_creacion|date:'d/m/Y H:i' }}</span>
         </div>
         <p class="mt-1 text-sm text-gris-texto">
-            {% if alerta.revisada %}Revisada{% else %}Pendiente de revisión{% endif %} · {{ alerta.funcionario.nombre }}</p>
+            {% if alerta.revisada %}Revisada{% else %}Pendiente de revisión{% endif %} · Sistema</p>
     </article>
     {% empty %}
     <p class="text-sm text-gris-texto">No hay alertas registradas.</p>

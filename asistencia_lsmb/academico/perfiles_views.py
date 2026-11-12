@@ -368,7 +368,7 @@ def perfil_curso(request, curso_id):
         alumno__matriculas__curso=curso,
         alumno__matriculas__periodo=curso.periodo,
         periodo=curso.periodo,
-    ).select_related("alumno", "estado", "funcionario").distinct().order_by("-fecha")
+    ).select_related("alumno", "estado").distinct().order_by("-fecha_creacion")
     historial_estados = HistorialEstadoAlumno.objects.filter(
         alumno__matriculas__curso=curso,
         alumno__matriculas__periodo=curso.periodo,
@@ -597,8 +597,8 @@ def perfil_alumno(request, alumno_id):
         estado_solicitud__nombre__iexact="pendiente"
     ).count()
     alertas = Alerta.objects.filter(alumno=alumno).select_related(
-        "estado", "funcionario", "periodo"
-    ).order_by("-fecha")
+        "estado", "periodo"
+    ).order_by("-fecha_creacion")
     estado_actual = (
         EstadoAlumno.objects.filter(alumno=alumno, periodo__anio=fecha_hoy.year)
         .select_related("estado", "periodo")

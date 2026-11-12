@@ -54,10 +54,10 @@ def obtener_historial_alertas(periodo_id, fecha_fin):
 def obtener_alertas(periodo_id, fecha_fin):
     return Alerta.objects.filter(
         periodo_id=periodo_id,
-        fecha__date__lte=fecha_fin,
+        fecha_creacion__date__lte=fecha_fin,
     ).select_related(
         "alumno", "estado", "periodo"
-    ).order_by("-fecha")
+    ).order_by("-fecha_creacion")
 
 
 def contar_asistencias(queryset):
@@ -109,7 +109,7 @@ def obtener_pasos_recientes(fecha):
 
 def obtener_alertas_recientes(fecha):
     return Alerta.objects.filter(
-        fecha__date__lte=fecha,
+        fecha_creacion__date__lte=fecha,
     ).select_related(
-        "alumno", "estado", "funcionario", "funcionario__cargo", "periodo"
-    ).order_by("-fecha", "-id")[:10]
+        "alumno", "estado", "periodo"
+    ).order_by("-fecha_creacion", "-id")[:10]

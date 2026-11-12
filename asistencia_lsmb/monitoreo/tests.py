@@ -99,7 +99,6 @@ class MonitoreoOperativoTests(TestCase):
 			alumno=self.alumno,
 			periodo=self.periodo,
 			estado=self.estado_alerta,
-			funcionario=self.funcionario,
 		)
 
 		eventos = preparar_actividad_reciente(self.fecha)

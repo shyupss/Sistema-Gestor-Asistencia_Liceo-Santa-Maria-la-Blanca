@@ -356,14 +356,14 @@ class FiltrosDashboardTests(TestCase):
 
     def test_actividad_actor_sistema_muestra_solo_registros_automaticos(self):
         """
-        Actor=sistema debe mostrar solo justificaciones/retiros nuevos registrados automáticamente,
-        no eventos de funcionarios (alertas ni pases de lista).
+        Actor=sistema debe mostrar solo justificaciones/retiros nuevos y alertas (registros automáticos),
+        no eventos de funcionarios (pases de lista). Las alertas son del sistema.
         """
         self._crear_paso_lista(self.curso_1a, self.func_1)
         self._crear_justificacion(self.alumno_1, self.estado_pendiente)
         Alerta.objects.create(
             alumno=self.alumno_1, periodo=self.periodo,
-            estado=self.estado_critico, funcionario=self.func_1,
+            estado=self.estado_critico,
         )
 
         from django.http import QueryDict
@@ -374,7 +374,7 @@ class FiltrosDashboardTests(TestCase):
 
         tipos = {e["tipo_categoria"] for e in eventos}
         self.assertNotIn("asistencia", tipos)
-        self.assertNotIn("alerta", tipos)
+        self.assertIn("alerta", tipos)
         # Las justificaciones nuevas son eventos de sistema
         self.assertIn("justificacion", tipos)
 
