@@ -3,36 +3,33 @@ from django.core.management.base import BaseCommand
 from alertas.models import Estado
 
 NIVELES = [
-    # codigo, nombre, umbral_minimo, es_no_ideal, color (tailwind.config.js)
-    ("optimo", "Óptimo", 95, False, "#2F9E58"),
-    ("adecuado", "Adecuado", 85, False, "#1B5FA8"),
-    ("atencion", "Atención", 75, True, "#E3A72E"),
-    ("critico", "Crítico", 0, True, "#D9453D"),
+    # nombre, umbral_minimo, es_no_ideal, color (familia de Tailwind)
+    ("Óptimo", 95, False, "verde"),
+    ("Adecuado", 85, False, "azul"),
+    ("Atención", 75, True, "amarillo"),
+    ("Crítico", 0, True, "rojo"),
 ]
 
 
 class Command(BaseCommand):
-    help = "Crea los niveles de Estado que falten (por codigo). No modifica los existentes."
+    help = (
+        "Crea los 4 niveles de Estado por defecto solo si la tabla Estado está vacía. "
+        "Si existe al menos un Estado, no crea ni modifica nada."
+    )
 
     def handle(self, *args, **options):
-        creados = 0
-        for codigo, nombre, umbral, es_no_ideal, color in NIVELES:
-            if Estado.objects.filter(codigo=codigo).exists():
-                continue
-            if Estado.objects.filter(nombre=nombre).exists():
-                self.stdout.write(
-                    self.style.WARNING(
-                        f"Se omite '{nombre}': existe un estado con ese nombre pero sin codigo '{codigo}'."
-                    )
-                )
-                continue
+        if Estado.objects.exists():
+            self.stdout.write(
+                "Ya existen estados: no se crea ni modifica nada. Estados creados: 0"
+            )
+            return
+
+        for nombre, umbral, es_no_ideal, color in NIVELES:
             Estado.objects.create(
-                codigo=codigo,
                 nombre=nombre,
                 umbral_minimo=umbral,
                 es_no_ideal=es_no_ideal,
                 genera_alerta=es_no_ideal,
                 color=color,
             )
-            creados += 1
-        self.stdout.write(f"Estados creados: {creados}")
+        self.stdout.write(f"Estados creados: {len(NIVELES)}")

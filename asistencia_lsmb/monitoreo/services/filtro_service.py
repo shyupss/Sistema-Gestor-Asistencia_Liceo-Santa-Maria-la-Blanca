@@ -7,7 +7,7 @@ from django.utils import timezone
 from academico.models import Curso, PeriodoAcademico
 from alertas.models import Alerta, Funcionario
 from asistencia.models import Justificaciones, Paso_Lista
-from monitoreo.services.niveles import nivel_alerta
+from monitoreo.services.niveles import nivel_alerta, umbral_critico
 from monitoreo.queries.filtro_queries import (
     contar_asistencias,
     filtrar_asistencias,
@@ -370,8 +370,9 @@ def calcular_alertas_por_nivel(periodo, fecha, filtros_apn):
     ))
 
     estados_alerta = [e for e in estados if e.estado and e.estado.es_no_ideal]
-    atencion = sum(nivel_alerta(e.estado) == "atencion" for e in estados_alerta)
-    critico = sum(nivel_alerta(e.estado) == "critico" for e in estados_alerta)
+    umbral = umbral_critico()
+    atencion = sum(nivel_alerta(e.estado, umbral) == "atencion" for e in estados_alerta)
+    critico = sum(nivel_alerta(e.estado, umbral) == "critico" for e in estados_alerta)
     total = atencion + critico
 
     return {

@@ -2,20 +2,13 @@ import unicodedata
 
 from django.db import migrations
 
-CODIGOS = {
-    "optimo": "optimo",
-    "adecuado": "adecuado",
-    "atencion": "atencion",
-    "alerta": "atencion",
-    "critico": "critico",
-}
-
-# Tono principal (DEFAULT) de static/js/tailwind.config.js
+# Familia de color (paleta de Tailwind) según el nombre normalizado del estado.
 COLORES = {
-    "optimo": "#2F9E58",    # verde
-    "adecuado": "#1B5FA8",  # azul
-    "atencion": "#E3A72E",  # amarillo
-    "critico": "#D9453D",   # rojo
+    "optimo": "verde",
+    "adecuado": "azul",
+    "atencion": "amarillo",
+    "alerta": "amarillo",
+    "critico": "rojo",
 }
 
 
@@ -29,17 +22,11 @@ def poblar_campos(apps, schema_editor):
 
     for estado in Estado.objects.all():
         estado.es_no_ideal = estado.genera_alerta
-        codigo = CODIGOS.get(_normalizar(estado.nombre))
-        # codigo es único: si otro estado ya lo tiene, este queda null.
-        if codigo and (
-            estado.codigo == codigo
-            or not Estado.objects.filter(codigo=codigo).exclude(pk=estado.pk).exists()
-        ):
-            estado.codigo = codigo
-            # Solo se asigna color si sigue el valor por defecto.
-            if estado.color == "#9E9E9E":
-                estado.color = COLORES[codigo]
-        estado.save(update_fields=["es_no_ideal", "codigo", "color"])
+        color = COLORES.get(_normalizar(estado.nombre))
+        # Solo se asigna color si sigue el valor por defecto.
+        if color and estado.color == "gris":
+            estado.color = color
+        estado.save(update_fields=["es_no_ideal", "color"])
 
 
 class Migration(migrations.Migration):

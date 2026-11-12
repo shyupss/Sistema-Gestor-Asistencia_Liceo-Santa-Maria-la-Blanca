@@ -4,7 +4,7 @@ from datetime import date
 from django.utils import timezone
 from django.urls import reverse
 
-from monitoreo.services.niveles import nivel_alerta
+from monitoreo.services.niveles import nivel_alerta, umbral_critico
 from monitoreo.queries.monitoreo_queries import (
     contar_asistencias,
     contar_matriculas_activas,
@@ -213,8 +213,9 @@ def _datos_asistencia(periodo, cursos, fecha):
 def _datos_alertas(periodo, cursos, fecha):
     estados = list(obtener_estados_alumnos(periodo.pk))
     estados_alerta = [estado for estado in estados if estado.estado.es_no_ideal]
-    atencion = sum(nivel_alerta(estado.estado) == "atencion" for estado in estados_alerta)
-    critico = sum(nivel_alerta(estado.estado) == "critico" for estado in estados_alerta)
+    umbral = umbral_critico()
+    atencion = sum(nivel_alerta(estado.estado, umbral) == "atencion" for estado in estados_alerta)
+    critico = sum(nivel_alerta(estado.estado, umbral) == "critico" for estado in estados_alerta)
     total = atencion + critico
 
     ranking = []
@@ -227,12 +228,12 @@ def _datos_alertas(periodo, cursos, fecha):
         })
     for estado in sorted(
         estados_alerta,
-        key=lambda item: (nivel_alerta(item.estado) != "critico", item.porcentaje_asistencia),
+        key=lambda item: (nivel_alerta(item.estado, umbral) != "critico", item.porcentaje_asistencia),
     )[:5]:
         curso = matriculas.get(estado.alumno_id)
         if not curso:
             continue
-        nivel = nivel_alerta(estado.estado)
+        nivel = nivel_alerta(estado.estado, umbral)
         ranking.append({
             "posicion": len(ranking) + 1,
             "alumno": estado.alumno.nombre,
@@ -281,7 +282,7 @@ def _datos_alertas(periodo, cursos, fecha):
                 "alumno": alerta.alumno.nombre,
                 "curso": f"{curso.nivel_romano}° Medio {curso.grupo}",
                 "hace": alerta.fecha.strftime("%d/%m/%Y"),
-                "nivel": nivel_alerta(alerta.estado),
+                "nivel": nivel_alerta(alerta.estado, umbral),
             })
 
     return {
