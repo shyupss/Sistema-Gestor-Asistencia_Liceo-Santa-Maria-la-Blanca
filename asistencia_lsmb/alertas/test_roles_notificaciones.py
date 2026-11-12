@@ -38,7 +38,7 @@ class UnicidadesTests(TestCase):
             anio=2026, fecha_inicio=datetime.date(2026, 3, 1), fecha_fin=datetime.date(2026, 12, 31)
         )
         self.curso = Curso.objects.create(periodo=periodo, nivel=1, grupo="A")
-        self.rol = Rol.objects.create(nombre="Inspector")
+        self.rol = Rol.objects.create(nombre="Rol de prueba")
         self.permiso = Permiso.objects.get_or_create(
             codigo="revisar_alertas", defaults={"nombre": "Revisar alertas"}
         )[0]
@@ -66,6 +66,7 @@ class UnicidadesTests(TestCase):
         self._duplicado(NotificacionCurso, notificacion=notificacion, curso=self.curso)
 
     def test_rol_nombre_unico(self):
+        Rol.objects.get_or_create(nombre="Inspector")
         with self.assertRaises(IntegrityError):
             with transaction.atomic():
                 Rol.objects.create(nombre="Inspector")
@@ -189,12 +190,13 @@ class DatosInicialesTests(TestCase):
         modulo = importlib.import_module("alertas.migrations.0006_datos_iniciales_roles_notificaciones")
         Permiso.objects.filter(codigo="revisar_alertas").delete()
         ConfigNotificaciones.objects.all().delete()
+        roles_antes = Rol.objects.count()
         modulo.crear_datos_iniciales(apps_reales, None)
         modulo.crear_datos_iniciales(apps_reales, None)
         self.assertEqual(Permiso.objects.filter(codigo="revisar_alertas").count(), 1)
         self.assertEqual(ConfigNotificaciones.objects.count(), 1)
         self.assertEqual(ConfigNotificaciones.objects.get().pk, 1)
-        self.assertEqual(Rol.objects.count(), 0)  # no crea roles
+        self.assertEqual(Rol.objects.count(), roles_antes)  # esta migración no crea roles
 
     def test_no_pisa_valores_existentes(self):
         modulo = importlib.import_module("alertas.migrations.0006_datos_iniciales_roles_notificaciones")

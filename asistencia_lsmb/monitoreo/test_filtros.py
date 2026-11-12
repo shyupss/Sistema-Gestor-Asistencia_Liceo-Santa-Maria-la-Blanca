@@ -87,10 +87,10 @@ class FiltrosDashboardTests(TestCase):
         )
 
         # Estados de solicitud para justificaciones
-        self.estado_pendiente = Estados_Solicitud.objects.create(nombre="pendiente")
-        self.estado_aceptada = Estados_Solicitud.objects.create(
-            nombre="aceptada", es_estado_final=True, cubre_ausencia=True
-        )
+        self.estado_pendiente = Estados_Solicitud.objects.get_or_create(nombre="pendiente")[0]
+        self.estado_aceptada = Estados_Solicitud.objects.get_or_create(
+            nombre="aceptada", defaults={"es_estado_final": True, "cubre_ausencia": True}
+        )[0]
 
     # =========================================================
     # EVOLUCIÓN DE ASISTENCIA

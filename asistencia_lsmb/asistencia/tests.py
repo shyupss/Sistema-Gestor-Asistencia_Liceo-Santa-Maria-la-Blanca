@@ -39,8 +39,13 @@ class ModificarAsistenciaTests(TestCase):
 			email="inspector@example.com",
 		)
 		Estado.objects.create(nombre="Crítico", umbral_minimo=0, genera_alerta=True, es_no_ideal=True)
-		presente = Tipos_Asistencia.objects.create(nombre="Presente", cuenta_como_ausencia=False)
-		ausente = Tipos_Asistencia.objects.create(nombre="Ausente", cuenta_como_ausencia=True)
+		# Los tipos pueden venir sembrados por migración: se reutilizan sin distinguir mayúsculas.
+		presente = Tipos_Asistencia.objects.get_or_create(
+			nombre__iexact="presente", defaults={"nombre": "Presente", "cuenta_como_ausencia": False},
+		)[0]
+		ausente = Tipos_Asistencia.objects.get_or_create(
+			nombre__iexact="ausente", defaults={"nombre": "Ausente", "cuenta_como_ausencia": True},
+		)[0]
 
 		self.curso = curso
 		self.alumno = alumno

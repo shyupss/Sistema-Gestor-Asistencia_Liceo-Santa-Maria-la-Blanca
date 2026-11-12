@@ -44,16 +44,15 @@ class MonitoreoOperativoTests(TestCase):
 			genera_alerta=True,
 			es_no_ideal=True,
 		)
-		self.estado_pendiente = Estados_Solicitud.objects.create(nombre="pendiente")
-		self.estado_aceptada = Estados_Solicitud.objects.create(
+		self.estado_pendiente = Estados_Solicitud.objects.get_or_create(nombre="pendiente")[0]
+		self.estado_aceptada = Estados_Solicitud.objects.get_or_create(
 			nombre="aceptada",
-			es_estado_final=True,
-			cubre_ausencia=True,
-		)
-		self.estado_rechazada = Estados_Solicitud.objects.create(
+			defaults={"es_estado_final": True, "cubre_ausencia": True},
+		)[0]
+		self.estado_rechazada = Estados_Solicitud.objects.get_or_create(
 			nombre="rechazada",
-			es_estado_final=True,
-		)
+			defaults={"es_estado_final": True},
+		)[0]
 
 	def test_muestra_pendientes_y_promedio_de_resolucion(self):
 		ahora = timezone.now()
