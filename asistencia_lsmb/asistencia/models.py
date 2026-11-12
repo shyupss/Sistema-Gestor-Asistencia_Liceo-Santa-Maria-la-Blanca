@@ -24,15 +24,14 @@ class Paso_Lista(models.Model):
     funcionario = models.ForeignKey(
         'alertas.Funcionario', on_delete=models.PROTECT, related_name='pasos_lista'
     )
-    jornada = models.CharField(max_length=20, default='unica')
     fecha = models.DateField()
     hora_registro = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=['curso', 'fecha', 'jornada'],
-                name='uq_paso_lista_curso_fecha_jornada',
+                fields=['curso', 'fecha'],
+                name='uq_paso_lista_curso_fecha',
             )
         ]
 

@@ -578,7 +578,6 @@ def cargar_asistencia(registros, progress_callback=None):
         paso, creado = Paso_Lista.objects.update_or_create(
             curso_id=curso_id,
             fecha=fecha,
-            jornada="unica",
             defaults={"funcionario": funcionario},
         )
         conteo["pasos_creados" if creado else "pasos_actualizados"] += 1

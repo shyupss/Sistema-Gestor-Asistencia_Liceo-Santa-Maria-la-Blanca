@@ -31,7 +31,6 @@ def pagina_registrar_asistencia(request):
     except ValueError:
         fecha = timezone.localdate()
     curso_id = request.GET.get("curso") or request.POST.get("curso")
-    jornada = request.GET.get("jornada") or request.POST.get("jornada") or "unica"
 
     cursos = Curso.objects.filter(
         periodo__anio=fecha.year,
@@ -47,7 +46,7 @@ def pagina_registrar_asistencia(request):
     if curso_id:
         curso = get_object_or_404(cursos, pk=curso_id)
         alumnos = list(obtener_alumnos_curso(curso, fecha))
-        paso_lista = obtener_paso_lista(curso, fecha, jornada)
+        paso_lista = obtener_paso_lista(curso, fecha)
 
     if request.method == "POST":
         funcionario_id = request.POST.get("funcionario")
@@ -119,7 +118,6 @@ def pagina_registrar_asistencia(request):
                     paso_lista, _ = Paso_Lista.objects.update_or_create(
                         curso=curso,
                         fecha=fecha,
-                        jornada=jornada,
                         defaults={"funcionario": funcionario},
                     )
                     for matricula in alumnos:
@@ -148,7 +146,6 @@ def pagina_registrar_asistencia(request):
                 query = urlencode({
                     "curso": curso.pk,
                     "fecha": fecha.isoformat(),
-                    "jornada": jornada,
                     "guardado": 1,
                 })
                 return redirect(f"{reverse('registrar_asistencia')}?{query}")
@@ -206,7 +203,6 @@ def pagina_registrar_asistencia(request):
             "tipos_asistencia": tipos_asistencia,
             "funcionarios": funcionarios,
             "fecha": fecha,
-            "jornada": jornada,
             "asistencias_guardadas": asistencias_guardadas,
             "total_alumnos": total_alumnos,
             "asistencias_registradas": len(asistencias_guardadas),

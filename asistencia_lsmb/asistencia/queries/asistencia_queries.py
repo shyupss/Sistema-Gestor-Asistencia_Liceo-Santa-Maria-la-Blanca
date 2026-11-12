@@ -85,9 +85,8 @@ def obtener_asistencias(paso_lista):
     )
 
 
-def obtener_paso_lista(curso, fecha, jornada):
+def obtener_paso_lista(curso, fecha):
     return Paso_Lista.objects.filter(
         curso=curso,
         fecha=fecha,
-        jornada=jornada,
     ).first()
