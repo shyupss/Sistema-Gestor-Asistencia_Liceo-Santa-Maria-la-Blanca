@@ -52,7 +52,7 @@ def obtener_alumnos(fecha):
             estado_actual.values("estado__nombre")[:1]
         ),
         estado_alumno_alerta=Subquery(
-            estado_actual.values("estado__genera_alerta")[:1]
+            estado_actual.values("estado__es_no_ideal")[:1]
         ),
         total_asistencias=Count(
             "asistencia_alumnos",

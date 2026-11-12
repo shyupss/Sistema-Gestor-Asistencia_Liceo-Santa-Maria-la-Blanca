@@ -8,6 +8,7 @@ from asistencia.models import Asistencia_Alumnos, Justificaciones
 
 
 def clasificar_asistencia(porcentaje, estados):
+    estados = sorted(estados, key=lambda e: e.umbral_minimo, reverse=True)
     return next(
         (
             estado
@@ -36,7 +37,7 @@ def preparar_cursos(cursos):
 
         if estado and curso.total_registros:
             curso.estado_asistencia = estado.nombre
-            curso.genera_alerta = estado.genera_alerta
+            curso.genera_alerta = estado.es_no_ideal
         else:
             curso.estado_asistencia = "Sin datos"
             curso.genera_alerta = False

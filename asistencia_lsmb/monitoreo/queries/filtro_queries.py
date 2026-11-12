@@ -142,7 +142,7 @@ def obtener_historial_alertas_filtrado(periodo_id, fecha_fin, curso_id=None, niv
     qs = HistorialEstadoAlumno.objects.filter(
         periodo_id=periodo_id,
         fecha_cambio__date__lte=fecha_fin,
-        estado_nuevo__genera_alerta=True,
+        estado_nuevo__es_no_ideal=True,
     ).select_related("alumno", "estado_nuevo")
 
     alumno_ids = obtener_alumnos_ids_por_filtro(periodo_id, fecha_fin, curso_id=curso_id, nivel=nivel)

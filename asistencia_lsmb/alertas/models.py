@@ -23,6 +23,10 @@ class Estado(models.Model):
     nombre = models.CharField(max_length=20, unique=True)
     umbral_minimo = models.DecimalField(max_digits=5, decimal_places=2)
     genera_alerta = models.BooleanField(default=False)
+    es_no_ideal = models.BooleanField(default=False)
+    color = models.CharField(max_length=7, default="#9E9E9E")  # hexadecimal con '#'
+    # Identificador estable: optimo, adecuado, alerta, critico
+    codigo = models.CharField(max_length=20, unique=True, null=True, blank=True)
 
     def __str__(self):
         return self.nombre

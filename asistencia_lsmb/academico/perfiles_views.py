@@ -441,7 +441,7 @@ def perfil_curso(request, curso_id):
         "estudiantes_meta": estudiantes_meta,
         "estudiantes_bajo_meta": estudiantes_bajo_meta,
         "estado_asistencia": estado_curso.nombre if estado_curso else "Sin datos",
-        "estado_genera_alerta": estado_curso.genera_alerta if estado_curso else False,
+        "estado_genera_alerta": estado_curso.es_no_ideal if estado_curso else False,
         "total_justificadas": total_justificadas,
         "total_sin_justificar": max(total_ausencias - total_justificadas, 0),
         "porcentaje_justificaciones": (

@@ -8,6 +8,8 @@ set -e
 if [ "${RUN_DJANGO_INIT:-1}" = "1" ]; then
   # Aplicamos las migraciones pendientes antes de levantar el servidor
   uv run manage.py migrate
+  # Crea los niveles de Estado que falten (idempotente, no modifica los existentes)
+  uv run manage.py sembrar_estados
   # Crea el superusuario solo si no existe; si ya existe, continúa sin error
   uv run manage.py createsuperuser --noinput --username admin --email admin@gmail.com || true
 fi

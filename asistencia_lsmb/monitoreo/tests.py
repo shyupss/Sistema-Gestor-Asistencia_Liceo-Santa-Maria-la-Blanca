@@ -40,8 +40,10 @@ class MonitoreoOperativoTests(TestCase):
 		)
 		self.estado_alerta = Estado.objects.create(
 			nombre="Crítico",
+			codigo="critico",
 			umbral_minimo=0,
 			genera_alerta=True,
+			es_no_ideal=True,
 		)
 		self.estado_pendiente = Estados_Solicitud.objects.create(nombre="pendiente")
 		self.estado_aceptada = Estados_Solicitud.objects.create(

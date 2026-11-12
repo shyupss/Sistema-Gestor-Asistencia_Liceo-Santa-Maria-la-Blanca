@@ -38,7 +38,7 @@ class ModificarAsistenciaTests(TestCase):
 			nombre="Inspector de Prueba",
 			email="inspector@example.com",
 		)
-		Estado.objects.create(nombre="Crítico", umbral_minimo=0, genera_alerta=True)
+		Estado.objects.create(nombre="Crítico", umbral_minimo=0, genera_alerta=True, es_no_ideal=True)
 		presente = Tipos_Asistencia.objects.create(nombre="Presente", cuenta_como_ausencia=False)
 		ausente = Tipos_Asistencia.objects.create(nombre="Ausente", cuenta_como_ausencia=True)
 

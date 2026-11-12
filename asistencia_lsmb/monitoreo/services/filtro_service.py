@@ -7,6 +7,7 @@ from django.utils import timezone
 from academico.models import Curso, PeriodoAcademico
 from alertas.models import Alerta, Funcionario
 from asistencia.models import Justificaciones, Paso_Lista
+from monitoreo.services.niveles import nivel_alerta
 from monitoreo.queries.filtro_queries import (
     contar_asistencias,
     filtrar_asistencias,
@@ -88,14 +89,6 @@ def _parse_mes(valor):
 
     val_limpio = str(valor).strip().lower()
     return MAPA_MESES.get(val_limpio, None)
-
-
-def _nivel_alerta(nombre):
-    """Clasifica el nombre de un estado en 'atencion' o 'critico'."""
-    nombre = (nombre or "").lower()
-    if "atenc" in nombre or "alerta" in nombre:
-        return "atencion"
-    return "critico"
 
 
 def _tiempo_transcurrido(fecha_hora, ahora):
@@ -376,9 +369,9 @@ def calcular_alertas_por_nivel(periodo, fecha, filtros_apn):
         nivel=filtros_apn.get("nivel"),
     ))
 
-    estados_alerta = [e for e in estados if e.estado and e.estado.genera_alerta]
-    atencion = sum(_nivel_alerta(e.estado.nombre) == "atencion" for e in estados_alerta)
-    critico = sum(_nivel_alerta(e.estado.nombre) == "critico" for e in estados_alerta)
+    estados_alerta = [e for e in estados if e.estado and e.estado.es_no_ideal]
+    atencion = sum(nivel_alerta(e.estado) == "atencion" for e in estados_alerta)
+    critico = sum(nivel_alerta(e.estado) == "critico" for e in estados_alerta)
     total = atencion + critico
 
     return {

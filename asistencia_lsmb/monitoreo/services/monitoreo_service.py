@@ -4,6 +4,7 @@ from datetime import date
 from django.utils import timezone
 from django.urls import reverse
 
+from monitoreo.services.niveles import nivel_alerta
 from monitoreo.queries.monitoreo_queries import (
     contar_asistencias,
     contar_matriculas_activas,
@@ -35,15 +36,6 @@ def _nombre_normalizado(valor):
         for caracter in unicodedata.normalize("NFD", valor.lower())
         if unicodedata.category(caracter) != "Mn"
     )
-
-
-def _nivel_alerta(nombre):
-    nombre = _nombre_normalizado(nombre)
-    if "critico" in nombre:
-        return "critico"
-    if "atencion" in nombre or "alerta" in nombre:
-        return "atencion"
-    return "atencion"
 
 
 def _rango_periodo(periodo, fecha):
@@ -220,9 +212,9 @@ def _datos_asistencia(periodo, cursos, fecha):
 
 def _datos_alertas(periodo, cursos, fecha):
     estados = list(obtener_estados_alumnos(periodo.pk))
-    estados_alerta = [estado for estado in estados if estado.estado.genera_alerta]
-    atencion = sum(_nivel_alerta(estado.estado.nombre) == "atencion" for estado in estados_alerta)
-    critico = sum(_nivel_alerta(estado.estado.nombre) == "critico" for estado in estados_alerta)
+    estados_alerta = [estado for estado in estados if estado.estado.es_no_ideal]
+    atencion = sum(nivel_alerta(estado.estado) == "atencion" for estado in estados_alerta)
+    critico = sum(nivel_alerta(estado.estado) == "critico" for estado in estados_alerta)
     total = atencion + critico
 
     ranking = []
@@ -235,12 +227,12 @@ def _datos_alertas(periodo, cursos, fecha):
         })
     for estado in sorted(
         estados_alerta,
-        key=lambda item: (_nivel_alerta(item.estado.nombre) != "critico", item.porcentaje_asistencia),
+        key=lambda item: (nivel_alerta(item.estado) != "critico", item.porcentaje_asistencia),
     )[:5]:
         curso = matriculas.get(estado.alumno_id)
         if not curso:
             continue
-        nivel = _nivel_alerta(estado.estado.nombre)
+        nivel = nivel_alerta(estado.estado)
         ranking.append({
             "posicion": len(ranking) + 1,
             "alumno": estado.alumno.nombre,
@@ -289,7 +281,7 @@ def _datos_alertas(periodo, cursos, fecha):
                 "alumno": alerta.alumno.nombre,
                 "curso": f"{curso.nivel_romano}° Medio {curso.grupo}",
                 "hace": alerta.fecha.strftime("%d/%m/%Y"),
-                "nivel": _nivel_alerta(alerta.estado.nombre),
+                "nivel": nivel_alerta(alerta.estado),
             })
 
     return {

@@ -50,8 +50,8 @@ class FiltrosDashboardTests(TestCase):
             fecha_matricula=self.periodo.fecha_inicio,
         )
 
-        self.estado_critico = Estado.objects.create(nombre="Crítico", umbral_minimo=0, genera_alerta=True)
-        self.estado_atencion = Estado.objects.create(nombre="Atención", umbral_minimo=50, genera_alerta=True)
+        self.estado_critico = Estado.objects.create(nombre="Crítico", codigo="critico", umbral_minimo=0, genera_alerta=True, es_no_ideal=True)
+        self.estado_atencion = Estado.objects.create(nombre="Atención", codigo="atencion", umbral_minimo=50, genera_alerta=True, es_no_ideal=True)
 
         # alumno 1 en 1°A: Crítico; alumno 2 en 2°B: Atención
         EstadoAlumno.objects.create(

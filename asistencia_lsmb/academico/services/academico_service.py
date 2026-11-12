@@ -83,7 +83,7 @@ def preparar_cursos(cursos, fecha, estados):
         if curso.total_registros:
             estado = clasificar_asistencia(curso.asistencia, estados)
             curso.estado_asistencia = estado.nombre if estado else "Sin configurar"
-            curso.genera_alerta = estado.genera_alerta if estado else False
+            curso.genera_alerta = estado.es_no_ideal if estado else False
         else:
             curso.estado_asistencia = "Sin datos"
             curso.genera_alerta = False
