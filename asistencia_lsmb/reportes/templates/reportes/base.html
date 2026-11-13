@@ -5,12 +5,125 @@
 {% block content %}
 
 <!-- Contenedor principal del contenido -->
-<div class="mx-auto max-w-[90%] px-4 py-5 sm:px-6 sm:py-8">
-    <!-- Encabezado -->
+<section class="mx-auto max-w-[95%] px-1 py-5 sm:px-2 sm:py-8" x-data="{ reporte: 'planilla', formato: 'Excel' }">
     {% include 'components/global/page_title.html' with page_title=page_title today=fecha_hoy %}
-    
-    <!-- Contenido -->
+    <div class="rounded-xl border border-gris-claro bg-blanco-tarjeta p-4 shadow-sm sm:p-6">
+        <p class="mb-5 text-sm font-semibold text-azul-primario">Elige un reporte, ajusta los filtros y descárgalo.</p>
+        <h2 class="mb-3 text-sm font-bold text-azul-primario">1. Tipo de reporte</h2>
+        <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {% for tipo, titulo, descripcion, icono in tipos_reporte %}
+            <button type="button" @click="reporte = '{{ tipo }}'"
+                class="flex items-center gap-3 rounded-xl border-2 p-3 text-left transition"
+                :class="reporte === '{{ tipo }}' ? 'border-azul-primario bg-celeste-claro' : 'border-gris-claro hover:border-azul-medio'">
+                <i data-lucide="{{ icono }}" class="h-7 w-7 shrink-0 text-azul-primario"></i>
+                <span class="min-w-0 flex-1"><span class="block text-sm font-bold text-azul-primario">
+                    {{ titulo }}</span>
+                    <span class="block text-xs text-gris-texto">{{ descripcion }}</span>
+                </span>
+                <i data-lucide="check-circle-2" x-show="reporte === '{{ tipo }}'"
+                    class="h-5 w-5 shrink-0 fill-azul-primario text-white"></i>
+                <span x-show="reporte !== '{{ tipo }}'"
+                    class="h-5 w-5 shrink-0 rounded-full border border-gris-claro"></span>
+            </button>
+            {% endfor %}
+        </div>
 
-</div>
+        <h2 class="mb-3 mt-6 text-sm font-bold text-azul-primario">2. Filtros</h2>
+        <div class="rounded-xl border border-gris-claro p-3">
+            <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                {% for etiqueta, opciones in filtros %}
+                <label class="text-xs font-medium text-gris-texto">{{ etiqueta }}
+                    <select class="mt-1 w-full rounded-lg border border-gris-claro bg-white px-3 py-2 text-sm text-negro-texto focus:border-azul-primario focus:outline-none">
+                        {% for opcion in opciones %}
+                        <option>{{ opcion }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                {% endfor %}
+            </div>
+            <div class="mt-3 flex flex-wrap items-center gap-2 rounded-lg bg-gris-ultraclaro px-3 py-2 text-xs text-gris-texto">
+                <span>Cursos:</span>
+                <span class="rounded bg-white px-2 py-1">1A</span>
+                <span class="rounded bg-white px-2 py-1">1B</span>
+                <button type="button" class="font-semibold text-azul-primario hover:underline">+ Agregar curso</button>
+            </div>
+            <div class="mt-3 flex gap-2">
+                {% for opcion in formatos %}
+                <button type="button" @click="formato = '{{ opcion }}'"
+                    class="rounded-lg border px-5 py-2 text-sm font-semibold transition"
+                    :class="formato === '{{ opcion }}' ? 'border-azul-primario bg-celeste-claro text-azul-primario' : 'border-gris-claro text-gris-texto hover:border-azul-medio'">
+                    {{ opcion }}
+                </button>
+                {% endfor %}
+            </div>
+        </div>
+
+        <h2 class="mb-3 mt-6 text-sm font-bold text-azul-primario">3. Vista previa</h2>
+        <div class="grid grid-cols-2 gap-3 lg:grid-cols-4">
+            {% for etiqueta, valor in indicadores %}
+            <div class="rounded-lg bg-gris-ultraclaro p-3">
+                <span class="block text-xs text-gris-texto">
+                    {{ etiqueta }}</span>
+                    <strong class="text-xl text-negro-texto">{{ valor }}</strong>
+                </div>
+                {% endfor %}
+            </div>
+        <div class="mt-3 overflow-x-auto rounded-lg border border-gris-claro">
+            <table class="w-full min-w-[600px] text-left text-xs">
+                <thead class="bg-gris-ultraclaro text-gris-texto">
+                    <tr>
+                        {% for encabezado in encabezados %}
+                        <th class="px-3 py-2 font-semibold">{{ encabezado }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gris-claro text-negro-texto">
+                    {% for fila in filas %}<tr>
+                        {% for celda in fila %}
+                        <td class="px-3 py-2">{{ celda }}</td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="mt-3 flex flex-col items-center justify-between gap-3 sm:flex-row">
+            <span class="text-xs text-gris-texto">Primeras filas. El archivo traerá todos los cursos.</span>
+            <button type="button" class="rounded-full bg-azul-primario px-6 py-2 text-sm font-semibold text-white shadow hover:bg-azul-profundo"><i
+                    data-lucide="download" class="mr-1 inline h-4 w-4"></i>Generar reporte</button></div>
+
+        <h2 class="mb-3 mt-6 text-sm font-bold text-azul-primario">4. Reportes generados</h2>
+        <div class="overflow-x-auto rounded-lg border border-gris-claro">
+            <table class="w-full min-w-[520px] text-left text-xs">
+                <thead class="bg-gris-ultraclaro text-gris-texto">
+                    <tr>
+                        <th class="px-3 py-2">Reporte</th>
+                        <th class="px-3 py-2">Generado por</th>
+                        <th class="px-3 py-2">Fecha</th>
+                        <th class="px-3 py-2">Estado</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gris-claro text-negro-texto">
+                    {% for reporte_generado in reportes_generados %}
+                    <tr>
+                        <td class="px-3 py-2">{{ reporte_generado.nombre }}</td>
+                        <td class="px-3 py-2">{{ reporte_generado.usuario }}</td>
+                        <td class="px-3 py-2">{{ reporte_generado.fecha }}</td>
+                        <td class="px-3 py-2">
+                            <span class="rounded bg-verde-fondo px-2 py-1 text-verde-oscuro">
+                            {{ reporte_generado.estado }}
+                            </span>
+                        </td>
+                        <td class="px-3 py-2 text-right text-azul-primario">
+                            <i data-lucide="download" class="h-4 w-4"></i>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
 
 {% endblock %}
