@@ -38,7 +38,7 @@ class ModificarAsistenciaTests(TestCase):
 			nombre="Inspector de Prueba",
 			email="inspector@example.com",
 		)
-		Estado.objects.create(nombre="Crítico", umbral_minimo=0, genera_alerta=True, es_no_ideal=True)
+		Estado.objects.create(nombre="Crítico", umbral_minimo=0, es_no_ideal=True)
 		# Los tipos pueden venir sembrados por migración: se reutilizan sin distinguir mayúsculas.
 		presente = Tipos_Asistencia.objects.get_or_create(
 			nombre__iexact="presente", defaults={"nombre": "Presente", "cuenta_como_ausencia": False},
@@ -58,7 +58,6 @@ class ModificarAsistenciaTests(TestCase):
 		datos = {
 			"curso": self.curso.pk,
 			"fecha": self.fecha.isoformat(),
-			"jornada": "unica",
 			"funcionario": self.funcionario.pk,
 		}
 		if presentes:

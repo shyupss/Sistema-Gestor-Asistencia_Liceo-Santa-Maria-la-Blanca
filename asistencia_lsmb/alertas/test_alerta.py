@@ -33,7 +33,7 @@ class AlertaTests(TestCase):
                 estado_matricula=vigente, fecha_matricula=self.periodo.fecha_inicio,
             )
         self.estado = Estado.objects.create(
-            nombre="Crítico", umbral_minimo=0, genera_alerta=True, es_no_ideal=True,
+            nombre="Crítico", umbral_minimo=0, es_no_ideal=True,
         )
 
     def _alerta(self, alumno=None, **kwargs):

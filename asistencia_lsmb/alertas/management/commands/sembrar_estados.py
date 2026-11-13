@@ -29,7 +29,6 @@ class Command(BaseCommand):
                 nombre=nombre,
                 umbral_minimo=umbral,
                 es_no_ideal=es_no_ideal,
-                genera_alerta=es_no_ideal,
                 color=color,
             )
         self.stdout.write(f"Estados creados: {len(NIVELES)}")

@@ -47,9 +47,9 @@ class BaseServiceTests(TestCase):
         self.ausente = Tipos_Asistencia.objects.create(nombre="Ausente", cuenta_como_ausencia=True)
         self.atrasado = Tipos_Asistencia.objects.create(nombre="Atrasado", cuenta_como_ausencia=True)
 
-        self.critico = Estado.objects.create(nombre="Crítico", umbral_minimo=0, genera_alerta=True, es_no_ideal=True)
-        self.atencion = Estado.objects.create(nombre="Atención", umbral_minimo=75, genera_alerta=True, es_no_ideal=True)
-        self.normal = Estado.objects.create(nombre="Normal", umbral_minimo=90, genera_alerta=False, es_no_ideal=False)
+        self.critico = Estado.objects.create(nombre="Crítico", umbral_minimo=0, es_no_ideal=True)
+        self.atencion = Estado.objects.create(nombre="Atención", umbral_minimo=75, es_no_ideal=True)
+        self.normal = Estado.objects.create(nombre="Normal", umbral_minimo=90, es_no_ideal=False)
 
         self.aprobada = Estados_Solicitud.objects.create(nombre="Aprobada", cubre_ausencia=True)
         self.pendiente = Estados_Solicitud.objects.create(nombre="Pendiente", cubre_ausencia=False)

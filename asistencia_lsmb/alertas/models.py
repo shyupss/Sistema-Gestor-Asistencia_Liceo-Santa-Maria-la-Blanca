@@ -34,7 +34,6 @@ class Funcionario(models.Model):
 class Estado(models.Model):
     nombre = models.CharField(max_length=20, unique=True)
     umbral_minimo = models.DecimalField(max_digits=5, decimal_places=2)
-    genera_alerta = models.BooleanField(default=False)
     es_no_ideal = models.BooleanField(default=False)
     # Nombre de la familia de color de la paleta de Tailwind (tailwind.config.js)
     COLORES = [
@@ -52,19 +51,6 @@ class Estado(models.Model):
 
     def __str__(self):
         return self.nombre
-
-
-class ConfiguracionAlerta(models.Model):
-    estado = models.ForeignKey(Estado, on_delete=models.CASCADE, related_name='configuraciones')
-    cargo = models.ForeignKey(Cargo, on_delete=models.CASCADE, related_name='configuraciones_alerta')
-
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=['estado', 'cargo'],
-                name='uq_config_alerta_estado_cargo',
-            )
-        ]
 
 
 class Alerta(models.Model):

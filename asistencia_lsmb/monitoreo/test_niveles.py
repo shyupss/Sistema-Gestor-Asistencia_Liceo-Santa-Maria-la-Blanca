@@ -9,7 +9,7 @@ from monitoreo.services.niveles import nivel_alerta, umbral_critico
 def _estado(nombre, umbral, es_no_ideal=True):
     return Estado.objects.create(
         nombre=nombre, umbral_minimo=umbral,
-        es_no_ideal=es_no_ideal, genera_alerta=es_no_ideal,
+        es_no_ideal=es_no_ideal,
     )
 
 

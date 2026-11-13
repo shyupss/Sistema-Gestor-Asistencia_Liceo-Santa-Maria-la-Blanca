@@ -18,16 +18,16 @@ class SembrarEstadosTests(TestCase):
     def test_crea_los_cuatro_niveles_en_bd_vacia(self):
         sembrar()
         datos = {
-            e.nombre: (e.umbral_minimo, e.es_no_ideal, e.genera_alerta, e.color)
+            e.nombre: (e.umbral_minimo, e.es_no_ideal, e.color)
             for e in Estado.objects.all()
         }
         self.assertEqual(
             datos,
             {
-                "Óptimo": (Decimal("95"), False, False, "verde"),
-                "Adecuado": (Decimal("85"), False, False, "azul"),
-                "Atención": (Decimal("75"), True, True, "amarillo"),
-                "Crítico": (Decimal("0"), True, True, "rojo"),
+                "Óptimo": (Decimal("95"), False, "verde"),
+                "Adecuado": (Decimal("85"), False, "azul"),
+                "Atención": (Decimal("75"), True, "amarillo"),
+                "Crítico": (Decimal("0"), True, "rojo"),
             },
         )
 
@@ -39,7 +39,7 @@ class SembrarEstadosTests(TestCase):
 
     def test_con_cualquier_estado_existente_no_crea_ni_modifica_nada(self):
         Estado.objects.create(
-            nombre="Personalizado", umbral_minimo=40, genera_alerta=False,
+            nombre="Personalizado", umbral_minimo=40,
             es_no_ideal=False, color="rojo",
         )
         salida = sembrar()
