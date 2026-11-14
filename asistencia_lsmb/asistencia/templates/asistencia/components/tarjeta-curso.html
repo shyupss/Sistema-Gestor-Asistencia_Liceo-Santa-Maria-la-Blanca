@@ -1,7 +1,7 @@
 <div class="bg-blanco-tarjeta rounded-xl border border-gris-claro border-l-8 shadow-sm flex flex-col h-full overflow-hidden
     {% if curso.estado_asistencia == 'Óptimo' or curso.estado_asistencia == 'Optimo' %}border-l-verde
     {% elif curso.estado_asistencia == 'Crítico' or curso.estado_asistencia == 'Critico' %}border-l-rojo
-    {% elif curso.estado_asistencia == 'Adecuado' %}border-l-azul-claro
+    {% elif curso.estado_asistencia == 'Adecuado' %}border-l-azul-brillante
     {% elif curso.estado_asistencia == 'Atencion' or curso.estado_asistencia == 'Atención' %}border-l-amarillo
     {% else %}border-l-gris-iconos{% endif %}">
     <!-- Contenido de la tarjeta -->
@@ -11,7 +11,7 @@
         <div class="flex items-start justify-between">
             <div class="flex items-center space-x-3">
                 <!-- Ícono  -->
-                <div class="w-10 h-10 rounded-lg bg-celeste-claro flex items-center justify-center text-azul-primario shrink-0">
+                <div class="w-10 h-10 rounded-lg bg-azul-claro flex items-center justify-center text-azul shrink-0">
                     <i data-lucide="book" class="w-5 h-5"></i>
                 </div>
                 <!-- Nombre y Periodo -->
@@ -26,7 +26,7 @@
                     {% if curso.estado_asistencia == 'Óptimo' or curso.estado_asistencia == 'Optimo' %}bg-verde-fondo text-verde-oscuro
                     {% elif curso.estado_asistencia == 'Sin datos' %}bg-gris-ultraclaro text-gris-texto
                     {% elif curso.estado_asistencia == 'Sin configurar' %}bg-gris-ultraclaro text-gris-texto
-                    {% elif curso.estado_asistencia == 'Adecuado' %}bg-azul-fondo text-azul-profundo
+                    {% elif curso.estado_asistencia == 'Adecuado' %}bg-azul-fondo text-azul-oscuro
                     {% elif curso.estado_asistencia == 'Atención' or curso.estado_asistencia == 'Alerta' %}bg-amarillo-fondo text-amarillo-oscuro
                     {% elif curso.estado_asistencia == 'Crítico' or curso.estado_asistencia == 'Critico' %}bg-rojo-fondo text-rojo-oscuro
                     {% else %}bg-amarillo-fondo text-amarillo-oscuro{% endif %}">
@@ -64,13 +64,13 @@
         <!-- Botón registrar asistencia -->
         {% if curso.registrada_hoy %}
             <a href="{% url 'registrar_asistencia' %}?curso={{ curso.id }}&fecha={{ fecha_hoy|date:'Y-m-d' }}"
-                class="group flex items-center justify-center space-x-1.5 py-2.5 bg-gris-ultraclaro hover:bg-gris-claro text-azul-profundo font-semibold text-sm transition-colors">
+                class="group flex items-center justify-center space-x-1.5 py-2.5 bg-gris-ultraclaro hover:bg-gris-claro text-azul-oscuro font-semibold text-sm transition-colors">
                 <i data-lucide="check-square" class="w-4 h-4"></i>
                 <span>Modificar asistencia de hoy</span>
             </a>
         {% else %}
             <a href="{% url 'registrar_asistencia' %}?curso={{ curso.id }}&fecha={{ fecha_hoy|date:'Y-m-d' }}"
-                class="group flex items-center justify-center space-x-1.5 py-2.5 bg-azul hover:bg-azul-profundo text-blanco font-semibold text-sm transition-colors">
+                class="group flex items-center justify-center space-x-1.5 py-2.5 bg-azul hover:bg-azul-oscuro text-blanco font-semibold text-sm transition-colors">
                 <i data-lucide="check-square" class="w-4 h-4 transition-transform duration-200 ease-out group-hover:scale-110 origin-center active:scale-95"></i>
                 <span>Registrar asistencia de hoy</span>
             </a>

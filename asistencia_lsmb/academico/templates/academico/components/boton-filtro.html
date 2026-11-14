@@ -5,7 +5,7 @@
     {% if nivel == 'Óptimo' or nivel == 'Optimo' %}
         border-verde-fondo bg-verde-fondo text-verde-oscuro hover:border-verde-oscuro
     {% elif nivel == 'Adecuado' %}
-        border-azul-fondo bg-azul-fondo text-azul-profundo hover:border-azul-profundo
+        border-azul-fondo bg-azul-fondo text-azul-oscuro hover:border-azul-oscuro
     {% elif nivel == 'Atención' or nivel == 'Atencion' %}
         border-amarillo-fondo bg-amarillo-fondo text-amarillo-oscuro hover:border-amarillo-oscuro
     {% elif nivel == 'Crítico' or nivel == 'Critico' %}
@@ -13,10 +13,10 @@
     {% elif nivel == 'Sin datos' or nivel == 'Sin configurar' %}
         border-gris-claro bg-gris-claro text-gris-texto hover:border-gris-texto
     {% else %}
-        border-azul-fondo bg-azul-fondo text-azul-profundo hover:border-azul-profundo
+        border-azul-fondo bg-azul-fondo text-azul-oscuro hover:border-azul-oscuro
     {% endif %}
     transition-transform duration-200 ease-out hover:scale-105 origin-center active:scale-95
-    {% if estado_filtro == nivel %}ring-2 ring-azul-primario ring-offset-1{% endif %}
+    {% if estado_filtro == nivel %}ring-2 ring-azul ring-offset-1{% endif %}
     ">
     
     <!-- Chevron superior derecho -->
@@ -24,7 +24,7 @@
        class="absolute top-2 right-2 w-3.5 h-3.5 opacity-70 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all">
     </i>
     {% if estado_filtro == nivel %}
-    <span class="absolute left-2 top-2 inline-flex h-4 w-4 items-center justify-center rounded-full bg-azul-primario text-white"
+    <span class="absolute left-2 top-2 inline-flex h-4 w-4 items-center justify-center rounded-full bg-azul text-white"
         aria-label="Filtro activo">
         <i data-lucide="check" class="h-3 w-3"></i>
     </span>

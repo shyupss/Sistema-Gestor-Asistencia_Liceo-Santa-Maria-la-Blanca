@@ -2,12 +2,12 @@
     <button type="button" @click="$store.filtros.sheetAbierto = true"
         aria-haspopup="dialog"
         class="inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors"
-        :class="$store.filtros.cantidadGlobal ? 'border-azul-primario bg-celeste-claro text-azul-primario' : 'border-gris-claro bg-blanco-tarjeta text-gris-texto'"
+        :class="$store.filtros.cantidadGlobal ? 'border-azul bg-azul-claro text-azul' : 'border-gris-claro bg-blanco-tarjeta text-gris-texto'"
     >
         <i data-lucide="sliders-horizontal" class="h-3.5 w-3.5"></i>
         Filtros
         <span x-show="$store.filtros.cantidadGlobal" x-text="$store.filtros.cantidadGlobal" x-cloak
-            class="flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-azul-primario px-1 text-[10px] font-semibold text-blanco"
+            class="flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-azul px-1 text-[10px] font-semibold text-blanco"
         ></span>
     </button>
 </div>

@@ -25,7 +25,7 @@
             </div>
             <div class="rounded-lg bg-azul-fondo px-5 py-4">
                 <p class="text-sm text-gris-texto">Pases actualizados</p>
-                <p data-format-number class="mt-1 text-2xl font-bold text-azul-profundo">{{ resultado_carga.pasos_actualizados }}</p>
+                <p data-format-number class="mt-1 text-2xl font-bold text-azul-oscuro">{{ resultado_carga.pasos_actualizados }}</p>
             </div>
             <div class="rounded-lg bg-verde-claro px-5 py-4">
                 <p class="text-sm text-gris-texto">Asistencias creadas</p>
@@ -33,7 +33,7 @@
             </div>
             <div class="rounded-lg bg-azul-fondo px-5 py-4">
                 <p class="text-sm text-gris-texto">Asistencias actualizadas</p>
-                <p data-format-number class="mt-1 text-2xl font-bold text-azul-profundo">{{ resultado_carga.asistencias_actualizadas }}</p>
+                <p data-format-number class="mt-1 text-2xl font-bold text-azul-oscuro">{{ resultado_carga.asistencias_actualizadas }}</p>
             </div>
         </div>
         {% if resultado_carga.registros_omitidos_sin_matricula %}
@@ -50,11 +50,11 @@
             </div>
             <div class="rounded-lg bg-azul-fondo px-5 py-4">
                 <p class="text-sm text-gris-texto">Matrículas actualizadas</p>
-                <p class="mt-1 text-2xl font-bold text-azul-profundo">{{ resultado_carga.matriculas_actualizadas }}</p>
+                <p class="mt-1 text-2xl font-bold text-azul-oscuro">{{ resultado_carga.matriculas_actualizadas }}</p>
             </div>
             <div class="rounded-lg bg-azul-fondo px-5 py-4">
                 <p class="text-sm text-gris-texto">Estudiantes actualizados</p>
-                <p class="mt-1 text-2xl font-bold text-azul-profundo">{{ resultado_carga.alumnos_actualizados }}</p>
+                <p class="mt-1 text-2xl font-bold text-azul-oscuro">{{ resultado_carga.alumnos_actualizados }}</p>
             </div>
             <div class="rounded-lg bg-verde-claro px-5 py-4">
                 <p class="text-sm text-gris-texto">Estudiantes nuevos</p>
@@ -68,7 +68,7 @@
         {% endif %}
         <div class="mt-8 flex justify-center">
             <a href="{% url 'administracion' %}?tab=carga_datos"
-                class="inline-flex items-center justify-center gap-2 rounded-full bg-azul px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-azul-profundo">
+                class="inline-flex items-center justify-center gap-2 rounded-full bg-azul px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-azul-oscuro">
                 Ir a Administración
             </a>
         </div>
@@ -147,11 +147,11 @@
         <div class="mt-6 grid gap-4 sm:grid-cols-2">
             <div class="rounded-lg bg-azul-fondo px-5 py-4">
                 <p class="text-sm text-gris-texto">Tipo de datos</p>
-                <p class="mt-1 text-lg font-semibold text-azul-profundo">{{ carga_archivo.tipo }}</p>
+                <p class="mt-1 text-lg font-semibold text-azul-oscuro">{{ carga_archivo.tipo }}</p>
             </div>
             <div class="rounded-lg bg-azul-fondo px-5 py-4">
                 <p class="text-sm text-gris-texto">Filas detectadas</p>
-                <p data-format-number class="mt-1 text-lg font-semibold text-azul-profundo">{{ carga_archivo.filas }}</p>
+                <p data-format-number class="mt-1 text-lg font-semibold text-azul-oscuro">{{ carga_archivo.filas }}</p>
             </div>
         </div>
 
@@ -214,7 +214,7 @@
                 <input type="hidden" name="confirmar_carga"
                     value="{% if carga_archivo.tipo == 'Matrículas' %}matriculas{% else %}asistencia{% endif %}">
                 <button type="submit"
-                    class="inline-flex items-center justify-center gap-2 rounded-full bg-azul px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-azul-profundo">
+                    class="inline-flex items-center justify-center gap-2 rounded-full bg-azul px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-azul-oscuro">
                     <i data-lucide="check" class="h-4 w-4" aria-hidden="true"></i>
                     Confirmar carga
                 </button>
@@ -229,7 +229,7 @@
             <h1 class="mt-4 text-xl font-bold text-negro-texto">No se pudo completar la carga</h1>
             <p class="mt-2 whitespace-pre-line text-sm text-rojo-oscuro">{{ carga_error }}</p>
             <a href="{% url 'administracion' %}?tab=carga_datos"
-                class="mt-6 inline-flex items-center justify-center gap-2 rounded-full bg-azul px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-azul-profundo">
+                class="mt-6 inline-flex items-center justify-center gap-2 rounded-full bg-azul px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-azul-oscuro">
                 Volver a cargar archivo
             </a>
         </div>

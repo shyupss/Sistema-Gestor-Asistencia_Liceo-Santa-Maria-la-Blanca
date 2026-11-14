@@ -8,32 +8,32 @@
 <section class="mx-auto max-w-[95%] px-1 py-5 sm:px-2 sm:py-8" x-data="{ reporte: 'planilla', formato: 'Excel' }">
     {% include 'components/global/page_title.html' with page_title=page_title today=fecha_hoy %}
     <div class="rounded-xl border border-gris-claro bg-blanco-tarjeta p-4 shadow-sm sm:p-6">
-        <p class="mb-5 text-sm font-semibold text-azul-primario">Elige un reporte, ajusta los filtros y descárgalo.</p>
-        <h2 class="mb-3 text-sm font-bold text-azul-primario">1. Tipo de reporte</h2>
+        <p class="mb-5 text-sm font-semibold text-azul">Elige un reporte, ajusta los filtros y descárgalo.</p>
+        <h2 class="mb-3 text-sm font-bold text-azul">1. Tipo de reporte</h2>
         <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {% for tipo, titulo, descripcion, icono in tipos_reporte %}
             <button type="button" @click="reporte = '{{ tipo }}'"
                 class="flex items-center gap-3 rounded-xl border-2 p-3 text-left transition"
-                :class="reporte === '{{ tipo }}' ? 'border-azul-primario bg-celeste-claro' : 'border-gris-claro hover:border-azul-medio'">
-                <i data-lucide="{{ icono }}" class="h-7 w-7 shrink-0 text-azul-primario"></i>
-                <span class="min-w-0 flex-1"><span class="block text-sm font-bold text-azul-primario">
+                :class="reporte === '{{ tipo }}' ? 'border-azul bg-azul-claro' : 'border-gris-claro hover:border-azul-suave'">
+                <i data-lucide="{{ icono }}" class="h-7 w-7 shrink-0 text-azul"></i>
+                <span class="min-w-0 flex-1"><span class="block text-sm font-bold text-azul">
                     {{ titulo }}</span>
                     <span class="block text-xs text-gris-texto">{{ descripcion }}</span>
                 </span>
                 <i data-lucide="check-circle-2" x-show="reporte === '{{ tipo }}'"
-                    class="h-5 w-5 shrink-0 fill-azul-primario text-white"></i>
+                    class="h-5 w-5 shrink-0 fill-azul text-white"></i>
                 <span x-show="reporte !== '{{ tipo }}'"
                     class="h-5 w-5 shrink-0 rounded-full border border-gris-claro"></span>
             </button>
             {% endfor %}
         </div>
 
-        <h2 class="mb-3 mt-6 text-sm font-bold text-azul-primario">2. Filtros</h2>
+        <h2 class="mb-3 mt-6 text-sm font-bold text-azul">2. Filtros</h2>
         <div class="rounded-xl border border-gris-claro p-3">
             <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                 {% for etiqueta, opciones in filtros %}
                 <label class="text-xs font-medium text-gris-texto">{{ etiqueta }}
-                    <select class="mt-1 w-full rounded-lg border border-gris-claro bg-white px-3 py-2 text-sm text-negro-texto focus:border-azul-primario focus:outline-none">
+                    <select class="mt-1 w-full rounded-lg border border-gris-claro bg-white px-3 py-2 text-sm text-negro-texto focus:border-azul focus:outline-none">
                         {% for opcion in opciones %}
                         <option>{{ opcion }}</option>
                         {% endfor %}
@@ -45,20 +45,20 @@
                 <span>Cursos:</span>
                 <span class="rounded bg-white px-2 py-1">1A</span>
                 <span class="rounded bg-white px-2 py-1">1B</span>
-                <button type="button" class="font-semibold text-azul-primario hover:underline">+ Agregar curso</button>
+                <button type="button" class="font-semibold text-azul hover:underline">+ Agregar curso</button>
             </div>
             <div class="mt-3 flex gap-2">
                 {% for opcion in formatos %}
                 <button type="button" @click="formato = '{{ opcion }}'"
                     class="rounded-lg border px-5 py-2 text-sm font-semibold transition"
-                    :class="formato === '{{ opcion }}' ? 'border-azul-primario bg-celeste-claro text-azul-primario' : 'border-gris-claro text-gris-texto hover:border-azul-medio'">
+                    :class="formato === '{{ opcion }}' ? 'border-azul bg-azul-claro text-azul' : 'border-gris-claro text-gris-texto hover:border-azul-suave'">
                     {{ opcion }}
                 </button>
                 {% endfor %}
             </div>
         </div>
 
-        <h2 class="mb-3 mt-6 text-sm font-bold text-azul-primario">3. Vista previa</h2>
+        <h2 class="mb-3 mt-6 text-sm font-bold text-azul">3. Vista previa</h2>
         <div class="grid grid-cols-2 gap-3 lg:grid-cols-4">
             {% for etiqueta, valor in indicadores %}
             <div class="rounded-lg bg-gris-ultraclaro p-3">
@@ -89,10 +89,10 @@
         </div>
         <div class="mt-3 flex flex-col items-center justify-between gap-3 sm:flex-row">
             <span class="text-xs text-gris-texto">Primeras filas. El archivo traerá todos los cursos.</span>
-            <button type="button" class="rounded-full bg-azul-primario px-6 py-2 text-sm font-semibold text-white shadow hover:bg-azul-profundo"><i
+            <button type="button" class="rounded-full bg-azul px-6 py-2 text-sm font-semibold text-white shadow hover:bg-azul-oscuro"><i
                     data-lucide="download" class="mr-1 inline h-4 w-4"></i>Generar reporte</button></div>
 
-        <h2 class="mb-3 mt-6 text-sm font-bold text-azul-primario">4. Reportes generados</h2>
+        <h2 class="mb-3 mt-6 text-sm font-bold text-azul">4. Reportes generados</h2>
         <div class="overflow-x-auto rounded-lg border border-gris-claro">
             <table class="w-full min-w-[520px] text-left text-xs">
                 <thead class="bg-gris-ultraclaro text-gris-texto">
@@ -115,7 +115,7 @@
                             {{ reporte_generado.estado }}
                             </span>
                         </td>
-                        <td class="px-3 py-2 text-right text-azul-primario">
+                        <td class="px-3 py-2 text-right text-azul">
                             <i data-lucide="download" class="h-4 w-4"></i>
                         </td>
                     </tr>

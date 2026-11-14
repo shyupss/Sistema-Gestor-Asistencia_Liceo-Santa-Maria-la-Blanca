@@ -1,7 +1,7 @@
 {% include 'academico/perfiles/components/compartidos/evolucion_asistencia.html' %}
 <div class="mb-4 flex flex-wrap items-end justify-between gap-2">
     <div>
-        <h2 class="text-lg font-bold text-azul-profundo">Registro de asistencia</h2>
+        <h2 class="text-lg font-bold text-azul-oscuro">Registro de asistencia</h2>
         <p class="mt-1 text-sm text-gris-texto">Detalle de las asistencias registradas durante el periodo {{ fecha_hoy.year }}.</p>
     </div>
     <span class="text-xs text-gris-texto">{{ registros_asistencia_page.paginator.count }} registros</span>
@@ -57,7 +57,7 @@
                 </td>
                 <td class="px-3 py-3 text-xs text-gris-texto">
                     {% if registro.justificacion %}
-                        <span class="font-medium text-azul-profundo">Con justificación</span>
+                        <span class="font-medium text-azul-oscuro">Con justificación</span>
                     {% else %}
                         Sin observaciones
                     {% endif %}
@@ -74,7 +74,7 @@
 <nav class="mt-4 flex flex-wrap items-center justify-between gap-3 text-sm" aria-label="Paginación del registro de asistencia">
     {% if registros_asistencia_page.has_previous %}
     <a href="?tab=asistencia&asistencia_page={{ registros_asistencia_page.previous_page_number }}"
-        class="rounded-lg border border-gris-claro px-3 py-2 font-medium text-azul-profundo hover:bg-gris-ultraclaro">
+        class="rounded-lg border border-gris-claro px-3 py-2 font-medium text-azul-oscuro hover:bg-gris-ultraclaro">
         Anterior
     </a>
     {% else %}
@@ -85,7 +85,7 @@
     </span>
     {% if registros_asistencia_page.has_next %}
     <a href="?tab=asistencia&asistencia_page={{ registros_asistencia_page.next_page_number }}"
-        class="rounded-lg border border-gris-claro px-3 py-2 font-medium text-azul-profundo hover:bg-gris-ultraclaro">
+        class="rounded-lg border border-gris-claro px-3 py-2 font-medium text-azul-oscuro hover:bg-gris-ultraclaro">
         Siguiente
     </a>
     {% else %}
@@ -97,7 +97,7 @@
 {% if asistencia_vista == "mes" %}
 <div class="overflow-x-auto rounded-lg border border-gris-claro">
     <table class="w-full min-w-[620px] text-sm">
-        <thead class="bg-azul-fondo text-left text-xs text-azul-profundo">
+        <thead class="bg-azul-fondo text-left text-xs text-azul-oscuro">
             <tr>
                 <th class="px-3 py-3">Mes</th>
                 <th class="px-3 py-3 text-center">Días trabajados</th>
@@ -113,7 +113,7 @@
                 <td class="px-3 py-3 text-center text-gris-texto">{{ resumen.dias }}</td>
                 <td class="px-3 py-3 text-center font-medium text-verde-oscuro">{{ resumen.asistidos }}</td>
                 <td class="px-3 py-3 text-center text-amarillo-oscuro">{{ resumen.justificados }}</td>
-                <td class="px-3 py-3 text-center font-semibold text-azul-profundo">{% if resumen.porcentaje is not None %}{{ resumen.porcentaje }}%{% else %}—{% endif %}</td>
+                <td class="px-3 py-3 text-center font-semibold text-azul-oscuro">{% if resumen.porcentaje is not None %}{{ resumen.porcentaje }}%{% else %}—{% endif %}</td>
             </tr>
             {% endfor %}
         </tbody>
@@ -122,7 +122,7 @@
 {% else %}
 <div class="overflow-x-auto rounded-lg border border-gris-claro">
     <table class="w-full min-w-[620px] text-sm">
-        <thead class="bg-azul-fondo text-left text-xs text-azul-profundo">
+        <thead class="bg-azul-fondo text-left text-xs text-azul-oscuro">
             <tr>
                 <th class="px-3 py-3">Semana</th>
                 <th class="px-3 py-3">Período</th>
@@ -140,7 +140,7 @@
                 <td class="px-3 py-3 text-center text-gris-texto">{{ resumen.dias }}</td>
                 <td class="px-3 py-3 text-center font-medium text-verde-oscuro">{{ resumen.asistidos }}</td>
                 <td class="px-3 py-3 text-center text-amarillo-oscuro">{{ resumen.justificados }}</td>
-                <td class="px-3 py-3 text-center font-semibold text-azul-profundo">{% if resumen.porcentaje is not None %}{{ resumen.porcentaje }}%{% else %}—{% endif %}</td>
+                <td class="px-3 py-3 text-center font-semibold text-azul-oscuro">{% if resumen.porcentaje is not None %}{{ resumen.porcentaje }}%{% else %}—{% endif %}</td>
             </tr>
             {% endfor %}
         </tbody>

@@ -27,7 +27,7 @@
     <button
         type="button"
         @click="detalleAbierto = !detalleAbierto"
-        class="mt-6 flex w-full items-center justify-center gap-2 border-b border-gris-claro pb-3 text-sm font-medium text-azul-primario hover:text-azul-profundo">
+        class="mt-6 flex w-full items-center justify-center gap-2 border-b border-gris-claro pb-3 text-sm font-medium text-azul hover:text-azul-oscuro">
         <span x-text="detalleAbierto ? 'Minimizar detalle' : 'Ver detalle del registro'"></span>
         <i data-lucide="chevron-down" class="h-4 w-4 transition-transform" :class="detalleAbierto ? 'rotate-180' : ''"></i>
     </button>
@@ -86,11 +86,11 @@
 
     <div class="mt-7 grid gap-3 sm:grid-cols-2">
         <a href="{% url 'registrar_asistencia' %}?curso={{ curso.id }}&fecha={{ fecha|date:'Y-m-d' }}"
-            class="block rounded-full border border-azul-medio px-5 py-3 text-center text-sm font-semibold text-azul-profundo hover:bg-azul-fondo">
+            class="block rounded-full border border-azul-suave px-5 py-3 text-center text-sm font-semibold text-azul-oscuro hover:bg-azul-fondo">
             Modificar asistencia
         </a>
         <a href="{% url 'asistencia' %}"
-            class="block rounded-full bg-azul-primario px-5 py-3 text-center text-sm font-semibold text-white hover:bg-azul-profundo">
+            class="block rounded-full bg-azul px-5 py-3 text-center text-sm font-semibold text-white hover:bg-azul-oscuro">
             Volver a asistencia
         </a>
     </div>

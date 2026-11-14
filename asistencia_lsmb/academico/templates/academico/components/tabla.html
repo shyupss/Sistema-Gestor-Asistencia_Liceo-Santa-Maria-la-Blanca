@@ -9,7 +9,7 @@
                 <i data-lucide="search" class="w-5 h-5"></i>
             </span>
             <input type="text" name="q" value="{{ search_query }}" placeholder="Buscar por nombre, curso o RUT"
-                class="w-full pl-11 pr-4 py-2.5 bg-blanco-tarjeta border border-gris-claro rounded-xl text-sm text-gris-texto placeholder-gris-text-gris-texto focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm">
+                class="w-full pl-11 pr-4 py-2.5 bg-blanco-tarjeta border border-gris-claro rounded-xl text-sm text-gris-texto placeholder-gris-text-gris-texto focus:outline-none focus:ring-2 focus:ring-azul shadow-sm">
             <input id="estado-filtro" type="hidden" name="estado" value="{{ estado_filtro }}">
         </div>
 
@@ -18,7 +18,7 @@
             <!-- Selector de Orden -->
             <div class="relative hidden md:block">
                 <select name="orden" onchange="this.form.submit()"
-                    class="appearance-none bg-blanco-tarjeta border border-gris-claro rounded-xl px-4 py-2.5 pr-10 text-sm text-gris-texto focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm">
+                    class="appearance-none bg-blanco-tarjeta border border-gris-claro rounded-xl px-4 py-2.5 pr-10 text-sm text-gris-texto focus:outline-none focus:ring-2 focus:ring-azul shadow-sm">
                     {% if page_title == "Cursos" %}
                     <option value="curso" {% if orden == 'curso' %}selected{% endif %}>
                         Ordenar: Curso
@@ -46,10 +46,10 @@
             <button type="button" onclick="document.getElementById('panel-filtro').classList.toggle('hidden')"
                 aria-label="Filtrar por nivel de asistencia" title="Filtrar por nivel de asistencia"
                 class="relative p-2.5 rounded-xl border transition-colors shadow-sm
-                {% if estado_filtro %}border-azul-primario bg-azul-fondo text-azul-profundo{% else %}bg-blanco-tarjeta border-gris-claro text-gris-icono hover:bg-gris-claro{% endif %}">
+                {% if estado_filtro %}border-azul bg-azul-fondo text-azul-oscuro{% else %}bg-blanco-tarjeta border-gris-claro text-gris-icono hover:bg-gris-claro{% endif %}">
                 <i data-lucide="funnel" class="w-5 h-5"></i>
                 {% if estado_filtro %}
-                <span class="absolute -right-1.5 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-azul-primario px-1 text-[10px] font-bold text-white"
+                <span class="absolute -right-1.5 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-azul px-1 text-[10px] font-bold text-white"
                     aria-label="Filtro activo: {{ estado_filtro }}">1</span>
                 {% endif %}
             </button>
@@ -61,7 +61,7 @@
             {% for nivel, cuenta in alertas.items %}
             {% if cuenta > 0 %}
             <button type="button" data-estado="{{ nivel }}" onclick="aplicarFiltroEstado(this.dataset.estado)"
-                class="block w-full px-3 py-2 text-left text-sm rounded-lg hover:bg-gris-ultraclaro {% if estado_filtro == nivel %}bg-azul-fondo text-azul-profundo font-semibold{% endif %}">
+                class="block w-full px-3 py-2 text-left text-sm rounded-lg hover:bg-gris-ultraclaro {% if estado_filtro == nivel %}bg-azul-fondo text-azul-oscuro font-semibold{% endif %}">
                 {{ nivel }}
             </button>
             {% endif %}
@@ -110,7 +110,7 @@
         <div class="flex items-center gap-2 md:pb-2">
             <span>Por página</span>
             <select name="per_page" form="filtro-form" onchange="document.getElementById('filtro-form').submit()"
-                class="bg-white border border-gris-claro rounded-lg px-2.5 py-1 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-500">
+                class="bg-white border border-gris-claro rounded-lg px-2.5 py-1 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-azul">
                 <option value="12" {% if is_12 %}selected{% endif %}>12</option>
                 <option value="24" {% if is_24 %}selected{% endif %}>24</option>
                 <option value="48" {% if is_48 %}selected{% endif %}>48</option>
@@ -138,7 +138,7 @@
             <!-- Números de página -->
             {% for num in page_obj.paginator.page_range %}
             {% if page_obj.number == num %}
-            <span class="px-3.5 py-1.5 border border-blue-600 bg-blue-50 text-blue-600 font-semibold rounded-lg">
+            <span class="px-3.5 py-1.5 border border-azul bg-azul-claro text-azul font-semibold rounded-lg">
                 {{ num }}
             </span>
             {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %} 

@@ -128,8 +128,8 @@ document.addEventListener(
             
             clasePill(activo) {
                 return 'rounded-full border px-2.5 py-0.5 text-xs transition-colors ' + (activo
-                    ? 'border-azul-primario bg-celeste-claro font-semibold text-azul-primario'
-                    : 'border-gris-claro text-gris-texto hover:border-azul-medio hover:text-azul');
+                    ? 'border-azul bg-azul-claro font-semibold text-azul'
+                    : 'border-gris-claro text-gris-texto hover:border-azul-suave hover:text-azul');
             },
 
             reiniciarBorradorActividad() {

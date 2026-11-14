@@ -1,6 +1,6 @@
 const PALETA = {
-    azulPrimario: '#1B5FA8',
-    azulMedio: '#5B9BD9',
+    azul: '#1B5FA8',
+    azulSuave: '#5B9BD9',
     azulFondo: '#D4EAFF',
     grisClaro: '#E5E7EB',
     grisTexto: '#6B7280',
@@ -72,7 +72,7 @@ function _scrollInicial(scroll, nPuntos, donde) {
 
 
 // Gráfico de dona
-function crearDonut(canvasId, porcentaje, color = PALETA.azulPrimario) {
+function crearDonut(canvasId, porcentaje, color = PALETA.azul) {
     const canvas = document.getElementById(canvasId);
     if (!canvas) return null;
 
@@ -106,7 +106,7 @@ function crearDonut(canvasId, porcentaje, color = PALETA.azulPrimario) {
 function crearBarras(canvasId, labels, valores, opciones = {}) {
     if (typeof opciones === 'string') opciones = { color: opciones };
     const {
-        color = PALETA.azulPrimario,
+        color = PALETA.azul,
         colorHover = null,
         max = 100,
         sufijo = '%',

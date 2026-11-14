@@ -10,11 +10,11 @@
         <header class="border-b border-gris-claro bg-blanco-tarjeta px-5 py-6 sm:px-8">
             <div class="flex items-center justify-between gap-4">
                 <div class="flex min-w-0 items-center gap-3 sm:gap-4">
-                    <div class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-white text-azul-profundo">
+                    <div class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-white text-azul-oscuro">
                         <i data-lucide="book-open" class="h-8 w-8"></i>
                     </div>
                     <div class="min-w-0">
-                        <p class="text-xs font-semibold uppercase tracking-wide text-azul-profundo">Perfil de curso</p>
+                        <p class="text-xs font-semibold uppercase tracking-wide text-azul-oscuro">Perfil de curso</p>
                         <h1 class="mt-1 truncate text-base font-bold text-negro-texto sm:text-xl">{{ curso.nivel_romano }}° Medio {{ curso.grupo }}</h1>
                         <p class="mt-1 text-xs text-gris-texto">Profesor/a jefe: {{ curso.profesor_jefe.nombre|default:'Sin asignar' }}</p>
                     </div>
@@ -22,7 +22,7 @@
                 <div class="text-right">
                     <span class="inline-flex max-w-full rounded-full px-3 py-1 text-xs font-bold
                         {% if estado_asistencia == 'Óptimo' or estado_asistencia == 'Optimo' %}bg-verde-fondo text-verde-oscuro
-                        {% elif estado_asistencia == 'Adecuado' %}bg-azul-fondo text-azul-profundo
+                        {% elif estado_asistencia == 'Adecuado' %}bg-azul-fondo text-azul-oscuro
                         {% elif estado_asistencia == 'Atención' or estado_asistencia == 'Alerta' %}bg-amarillo-fondo text-amarillo-oscuro
                         {% elif estado_asistencia == 'Crítico' or estado_asistencia == 'Critico' %}bg-rojo-fondo text-rojo-oscuro
                         {% else %}bg-gris-ultraclaro text-gris-texto{% endif %}">{{ estado_asistencia }}</span>
@@ -35,12 +35,12 @@
         <div class="grid grid-cols-2 divide-x divide-y divide-gris-claro border-b border-gris-claro sm:grid-cols-4 sm:divide-y-0">
             <div class="p-4 text-center sm:p-5">
                 <div class="flex items-center justify-center gap-1.5">
-                    <i data-lucide="users" class="h-5 w-5 text-azul-profundo"></i>
-                    <p class="text-2xl font-bold text-azul-profundo sm:text-3xl">{{ total_estudiantes }}</p>
+                    <i data-lucide="users" class="h-5 w-5 text-azul-oscuro"></i>
+                    <p class="text-2xl font-bold text-azul-oscuro sm:text-3xl">{{ total_estudiantes }}</p>
                 </div>
                 <p class="mt-1 text-xs text-gris-texto">Estudiantes</p>
             </div>
-            <div class="p-4 text-center sm:p-5"><p class="text-2xl font-bold text-azul-profundo sm:text-3xl">{% if porcentaje_asistencia is not None %}{{ porcentaje_asistencia }}%{% else %}-{% endif %}</p><p class="mt-1 text-xs text-gris-texto">Asistencia general</p></div>
+            <div class="p-4 text-center sm:p-5"><p class="text-2xl font-bold text-azul-oscuro sm:text-3xl">{% if porcentaje_asistencia is not None %}{{ porcentaje_asistencia }}%{% else %}-{% endif %}</p><p class="mt-1 text-xs text-gris-texto">Asistencia general</p></div>
             <div class="p-4 text-center sm:p-5"><p class="text-2xl font-bold text-verde-oscuro sm:text-3xl">{{ estudiantes_meta }}</p><p class="mt-1 text-xs text-gris-texto">Estudiantes ≥ {{ porcentaje_meta }}%</p></div>
             <div class="p-4 text-center sm:p-5"><p class="text-2xl font-bold text-rojo-oscuro sm:text-3xl">{{ estudiantes_bajo_meta }}</p><p class="mt-1 text-xs text-gris-texto">Bajo la meta</p></div>
         </div>
@@ -63,7 +63,7 @@
                 </span>
                 {% else %}
                 <a href="{% url 'registrar_asistencia' %}?curso={{ curso.id }}&fecha={{ fecha_hoy|date:'Y-m-d' }}"
-                    class="inline-flex items-center gap-1.5 rounded-lg bg-azul-primario px-3 py-2 text-xs font-semibold text-blanco-tarjeta transition-colors hover:bg-azul-profundo">
+                    class="inline-flex items-center gap-1.5 rounded-lg bg-azul px-3 py-2 text-xs font-semibold text-blanco-tarjeta transition-colors hover:bg-azul-oscuro">
                     <i data-lucide="check-square" class="h-4 w-4"></i>
                     Registrar asistencia
                 </a>
@@ -73,14 +73,14 @@
 
         <section class="border-b border-gris-claro px-5 py-5 sm:px-8">
             <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
-                <h2 class="font-bold text-azul-profundo">Estudiantes por nivel de asistencia</h2>
+                <h2 class="font-bold text-azul-oscuro">Estudiantes por nivel de asistencia</h2>
             </div>
             <div class="mx-auto grid max-w-4xl grid-cols-2 gap-2 sm:grid-cols-4">
                 {% for nivel, cuenta in niveles_asistencia.items %}
                 {% if nivel != 'Sin datos' and nivel != 'Sin configurar' %}
                 <div class="flex items-center justify-center rounded-lg border p-2.5
                     {% if nivel == 'Óptimo' or nivel == 'Optimo' %}border-verde-fondo bg-verde-fondo text-verde-oscuro
-                    {% elif nivel == 'Adecuado' %}border-azul-fondo bg-azul-fondo text-azul-profundo
+                    {% elif nivel == 'Adecuado' %}border-azul-fondo bg-azul-fondo text-azul-oscuro
                     {% elif nivel == 'Atención' or nivel == 'Alerta' %}border-amarillo-fondo bg-amarillo-fondo text-amarillo-oscuro
                     {% elif nivel == 'Crítico' or nivel == 'Critico' %}border-rojo-fondo bg-rojo-fondo text-rojo-oscuro
                     {% endif %}">

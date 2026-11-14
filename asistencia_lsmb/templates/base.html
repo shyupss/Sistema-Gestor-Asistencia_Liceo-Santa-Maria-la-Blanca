@@ -15,6 +15,11 @@
 
     <!-- Paleta de colores -->
     <script src="{% static 'js/tailwind.config.js' %}"></script>
+    <script>
+        // Expone la paleta azul de tailwind.config.js como variables CSS (para CSS plano, ej. flatpickr)
+        Object.entries(tailwind.config.theme.extend.colors.azul).forEach(([k, v]) =>
+            document.documentElement.style.setProperty(k === 'DEFAULT' ? '--azul' : '--azul-' + k, v));
+    </script>
 
     <!-- Funciones útiles JS -->
     <script src="{% static 'js/estilos_archivos.js' %}"></script>
@@ -38,22 +43,22 @@
         /* Estilos personalizados para Flatpickr adaptados al sistema */
         .flatpickr-calendar {
             font-family: 'Inter', sans-serif !important;
-            border: 2px solid #1B5FA8 !important; /* Borde azul primario */
+            border: 2px solid var(--azul) !important; /* Borde azul */
             border-radius: 0.75rem !important; /* rounded-xl */
-            box-shadow: 0 10px 25px -5px rgba(27, 95, 168, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
+            box-shadow: 0 10px 25px -5px color-mix(in srgb, var(--azul) 15%, transparent), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
             overflow: hidden !important;
             background: #FFFFFF !important;
         }
         .flatpickr-calendar.arrowTop:before,
         .flatpickr-calendar.arrowTop:after {
-            border-bottom-color: #1B5FA8 !important;
+            border-bottom-color: var(--azul) !important;
         }
         .flatpickr-calendar.arrowBottom:before,
         .flatpickr-calendar.arrowBottom:after {
-            border-top-color: #1B5FA8 !important;
+            border-top-color: var(--azul) !important;
         }
         .flatpickr-months {
-            background-color: #1B5FA8 !important;
+            background-color: var(--azul) !important;
             color: #FFFFFF !important;
             padding: 4px 0 !important;
         }
@@ -68,12 +73,12 @@
         }
         .flatpickr-months .flatpickr-prev-month:hover svg,
         .flatpickr-months .flatpickr-next-month:hover svg {
-            fill: #D4EAFF !important;
+            fill: var(--azul-fondo) !important;
         }
         .flatpickr-current-month .flatpickr-monthDropdown-months {
             font-weight: 600 !important;
             color: #FFFFFF !important;
-            background-color: #1B5FA8 !important;
+            background-color: var(--azul) !important;
         }
         .flatpickr-current-month input.cur-year {
             font-weight: 600 !important;
@@ -91,23 +96,23 @@
             font-weight: 500 !important;
         }
         .flatpickr-day:hover {
-            background-color: #D4EAFF !important;
-            color: #0F3A66 !important;
+            background-color: var(--azul-fondo) !important;
+            color: var(--azul-oscuro) !important;
         }
         .flatpickr-day.selected,
         .flatpickr-day.selected:hover {
-            background-color: #1B5FA8 !important;
+            background-color: var(--azul) !important;
             color: #FFFFFF !important;
-            border-color: #1B5FA8 !important;
+            border-color: var(--azul) !important;
             font-weight: 700 !important;
         }
         .flatpickr-day.today {
-            border-color: #1B5FA8 !important;
-            color: #1B5FA8 !important;
+            border-color: var(--azul) !important;
+            color: var(--azul) !important;
             font-weight: 700 !important;
         }
         .flatpickr-day.today:hover {
-            background-color: #D4EAFF !important;
+            background-color: var(--azul-fondo) !important;
         }
     </style>
 </head>

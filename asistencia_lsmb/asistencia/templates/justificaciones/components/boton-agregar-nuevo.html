@@ -18,7 +18,7 @@
         :aria-expanded="open"
         class="relative z-50 flex w-full items-center justify-center gap-1.5 rounded-lg
         bg-azul px-3 py-2.5 lg:py-1 text-sm shadow-sm font-semibold text-blanco 
-        transition-colors hover:bg-azul-profundo lg:w-auto"
+        transition-colors hover:bg-azul-oscuro lg:w-auto"
     >
         <i data-lucide="plus" 
             class="h-7 w-7 transition-transform duration-200"
@@ -42,15 +42,15 @@
         bg-blanco-tarjeta shadow-lg lg:block"
         x-cloak
     >
-        <a href="{% url 'justificaciones_formulario' %}?tipo=justificacion&next={{ request.path|urlencode }}" class="flex items-center gap-3 px-4 py-3 text-sm text-negro-texto transition-colors hover:bg-celeste-claro">
+        <a href="{% url 'justificaciones_formulario' %}?tipo=justificacion&next={{ request.path|urlencode }}" class="flex items-center gap-3 px-4 py-3 text-sm text-negro-texto transition-colors hover:bg-azul-claro">
             <span class="flex items-center justify-center bg-azul-fondo p-3 rounded-full">
-                <i data-lucide="square-pen" class="h-4 w-4 text-azul-profundo"></i>
+                <i data-lucide="square-pen" class="h-4 w-4 text-azul-oscuro"></i>
             </span>
             Nueva justificación
         </a>
-        <a href="{% url 'justificaciones_formulario' %}?tipo=retiro&next={{ request.path|urlencode }}" class="flex items-center gap-3 px-4 py-3 text-sm text-negro-texto transition-colors hover:bg-celeste-claro">
+        <a href="{% url 'justificaciones_formulario' %}?tipo=retiro&next={{ request.path|urlencode }}" class="flex items-center gap-3 px-4 py-3 text-sm text-negro-texto transition-colors hover:bg-azul-claro">
             <span class="flex items-center justify-center bg-azul-fondo p-3 rounded-full">
-                <i data-lucide="file-text" class="h-4 w-4 text-azul-profundo"></i>
+                <i data-lucide="file-text" class="h-4 w-4 text-azul-oscuro"></i>
             </span>
             Nuevo retiro de estudiante
         </a>
@@ -70,7 +70,7 @@
         >
             <a href="{% url 'justificaciones_formulario' %}?tipo=justificacion&next={{ request.path|urlencode }}" class="flex w-full items-center gap-3 rounded-lg border border-gris-claro bg-blanco px-4 py-3 text-sm font-medium text-negro-texto shadow-md">
                 <span class="flex items-center justify-center bg-azul-fondo p-3 rounded-full">
-                    <i data-lucide="square-pen" class="h-4 w-4 text-azul-profundo"></i>
+                    <i data-lucide="square-pen" class="h-4 w-4 text-azul-oscuro"></i>
                 </span>
                 Nueva justificación
             </a>
@@ -87,7 +87,7 @@
         >
             <a href="{% url 'justificaciones_formulario' %}?tipo=retiro&next={{ request.path|urlencode }}" class="flex w-full items-center gap-3 rounded-lg border border-gris-claro bg-blanco px-4 py-3 text-sm font-medium text-negro-texto shadow-md">
                 <span class="flex items-center justify-center bg-azul-fondo p-3 rounded-full">
-                    <i data-lucide="file-text" class="h-4 w-4 text-azul-profundo"></i>
+                    <i data-lucide="file-text" class="h-4 w-4 text-azul-oscuro"></i>
                 </span>
                 Nuevo retiro de estudiante
             </a>

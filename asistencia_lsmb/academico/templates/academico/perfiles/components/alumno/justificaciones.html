@@ -1,4 +1,4 @@
-<h2 class="mb-4 text-lg font-bold text-azul-profundo">Justificaciones</h2>
+<h2 class="mb-4 text-lg font-bold text-azul-oscuro">Justificaciones</h2>
 <div class="space-y-3">
     {% for item in justificaciones %}
     <article class="rounded-lg border border-gris-claro p-4">
@@ -12,7 +12,7 @@
                 </p>
             </div>
             <span class="rounded-full px-2 py-1 text-xs font-semibold
-                {% if item.estado_solicitud.nombre == 'pendiente' %}bg-azul-fondo text-azul-profundo
+                {% if item.estado_solicitud.nombre == 'pendiente' %}bg-azul-fondo text-azul-oscuro
                 {% elif item.estado_solicitud.nombre == 'aceptada' %}bg-verde-fondo text-verde-oscuro
                 {% elif item.estado_solicitud.nombre == 'rechazada' %}bg-rojo-fondo text-rojo-oscuro
                 {% else %}bg-gris-ultraclaro text-gris-texto{% endif %}">

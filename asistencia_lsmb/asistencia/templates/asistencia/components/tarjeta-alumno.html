@@ -1,12 +1,12 @@
 <label
     for="asistencia-{{ matricula.alumno_id }}"
     x-data="{ presente: {% if matricula.es_presente %}true{% else %}false{% endif %} }"
-    class="mb-2 block cursor-pointer rounded-xl border border-gris-claro bg-blanco-tarjeta transition hover:border-azul-medio"
+    class="mb-2 block cursor-pointer rounded-xl border border-gris-claro bg-blanco-tarjeta transition hover:border-azul-suave"
 >
     <div class="flex flex-grow items-center gap-3 rounded-xl p-3 transition" :class="presente ? 'bg-verde-fondo border-verde-suave' : ''">
         <!-- Icono Estudiante sin foto (por que no hay foto)-->
         <div
-            class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-azul-fondo text-azul-profundo">
+            class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-azul-fondo text-azul-oscuro">
             <i data-lucide="user" class="w-6 h-6"></i>
         </div>
         <div class="flex-grow text-left min-w-0">
@@ -28,7 +28,7 @@
                 id="asistencia-{{ matricula.alumno_id }}"
                 x-model="presente"
                 @change="$dispatch('attendance-changed')"
-                class="h-5 w-5 rounded border-gris-claro text-azul-primario focus:ring-azul-medio"
+                class="h-5 w-5 rounded border-gris-claro text-azul focus:ring-azul-suave"
                 {% if matricula.es_presente %}checked{% endif %}
             >
         </div>

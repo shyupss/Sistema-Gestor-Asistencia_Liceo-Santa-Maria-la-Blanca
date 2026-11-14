@@ -23,7 +23,7 @@
         x-transition:leave="transition ease-in duration-150"
         x-transition:leave-start="opacity-100 translate-y-0"
         x-transition:leave-end="opacity-0 translate-y-4"
-        class="relative z-50 bg-blanco-tarjeta border-t-2 border-azul-primario shadow-xl divide-y divide-gris-claro"
+        class="relative z-50 bg-blanco-tarjeta border-t-2 border-azul shadow-xl divide-y divide-gris-claro"
         style="display: none;">
 
         {% include 'components/base/navbar-mobile-secondary-button.html' with url_name='justificaciones' icon='pen-line' label='Justificaciones' %}
@@ -41,13 +41,13 @@
         <div class="absolute top-0 left-0 right-0 h-[2.5px] flex pointer-events-none overflow-hidden">
             <!-- Línea izquierda -->
             <div class="w-1/2 h-full flex justify-end">
-                <div class="h-full bg-azul-primario transition-all duration-300 ease-out"
+                <div class="h-full bg-azul transition-all duration-300 ease-out"
                     :class="open ? 'w-full' : 'w-0'">
                 </div>
             </div>
             <!-- Línea derecha -->
             <div class="w-1/2 h-full">
-                <div class="h-full bg-azul-primario transition-all duration-300 ease-out"
+                <div class="h-full bg-azul transition-all duration-300 ease-out"
                     :class="open ? 'w-full' : 'w-0'">
                 </div>
             </div>
@@ -63,7 +63,7 @@
 
                 <button
                     @click="open = !open"
-                    class="relative flex items-center justify-center bg-azul-primario text-white focus:outline-none rounded-full transition duration-300 ease-out hover:bg-azul-profundo active:scale-95 shadow-lg w-14 h-14"
+                    class="relative flex items-center justify-center bg-azul text-white focus:outline-none rounded-full transition duration-300 ease-out hover:bg-azul-oscuro active:scale-95 shadow-lg w-14 h-14"
                     aria-label="Más opciones"
                 >
                     <i data-lucide="plus"

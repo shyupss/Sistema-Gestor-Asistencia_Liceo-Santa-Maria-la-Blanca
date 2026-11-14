@@ -23,7 +23,7 @@
     {% endif %}
 
     <div class="mb-6 rounded-lg border border-gris-claro bg-blanco-tarjeta p-4">
-        <h2 class="font-semibold text-azul-profundo">Configuración de asistencia</h2>
+        <h2 class="font-semibold text-azul-oscuro">Configuración de asistencia</h2>
         <p class="mt-1 text-sm text-gris-texto">
             Carga presente, ausente, atrasado y justificado, y los estados pendiente, aceptada y rechazada.
             Ausente y atrasado cuentan como falta; presente y justificado no.
@@ -95,7 +95,7 @@
             <div class="flex items-center justify-between mb-4">
                 <h2 class="text-base font-semibold text-negro-texto">Matrículas vigentes</h2>
                 <a href="{% url 'matricular_alumno' %}"
-                    class="flex items-center gap-1.5 rounded-lg bg-azul px-4 py-2 text-sm font-semibold text-blanco transition-colors hover:bg-azul-profundo">
+                    class="flex items-center gap-1.5 rounded-lg bg-azul px-4 py-2 text-sm font-semibold text-blanco transition-colors hover:bg-azul-oscuro">
                     <i data-lucide="plus" class="h-4 w-4"></i>
                     Nueva matrícula
                 </a>
@@ -185,7 +185,7 @@
                         Nuevo período
                     </a>
                     <a href="{% url 'crear_curso_admin' %}"
-                        class="flex items-center gap-1.5 rounded-lg bg-azul px-4 py-2 text-sm font-semibold text-blanco transition-colors hover:bg-azul-profundo">
+                        class="flex items-center gap-1.5 rounded-lg bg-azul px-4 py-2 text-sm font-semibold text-blanco transition-colors hover:bg-azul-oscuro">
                         <i data-lucide="plus" class="h-4 w-4"></i>
                         Nuevo curso
                     </a>
@@ -251,7 +251,7 @@
                         Nuevo cargo
                     </a>
                     <a href="{% url 'crear_funcionario' %}"
-                        class="flex items-center gap-1.5 rounded-lg bg-azul px-4 py-2 text-sm font-semibold text-blanco transition-colors hover:bg-azul-profundo">
+                        class="flex items-center gap-1.5 rounded-lg bg-azul px-4 py-2 text-sm font-semibold text-blanco transition-colors hover:bg-azul-oscuro">
                         <i data-lucide="plus" class="h-4 w-4"></i>
                         Nuevo funcionario
                     </a>
@@ -318,7 +318,7 @@
             <div class="flex items-center justify-between mb-4">
                 <h2 class="text-base font-semibold text-negro-texto">Cargos registrados</h2>
                 <a href="{% url 'crear_cargo' %}"
-                    class="flex items-center gap-1.5 rounded-lg bg-azul px-4 py-2 text-sm font-semibold text-blanco transition-colors hover:bg-azul-profundo">
+                    class="flex items-center gap-1.5 rounded-lg bg-azul px-4 py-2 text-sm font-semibold text-blanco transition-colors hover:bg-azul-oscuro">
                     <i data-lucide="plus" class="h-4 w-4"></i>
                     Nuevo cargo
                 </a>
@@ -361,7 +361,7 @@
             <div class="flex items-center justify-between mb-4">
                 <h2 class="text-base font-semibold text-negro-texto">Períodos Académicos</h2>
                 <a href="{% url 'crear_periodo' %}"
-                    class="flex items-center gap-1.5 rounded-lg bg-azul px-4 py-2 text-sm font-semibold text-blanco transition-colors hover:bg-azul-profundo">
+                    class="flex items-center gap-1.5 rounded-lg bg-azul px-4 py-2 text-sm font-semibold text-blanco transition-colors hover:bg-azul-oscuro">
                     <i data-lucide="plus" class="h-4 w-4"></i>
                     Nuevo período
                 </a>
@@ -429,7 +429,7 @@
                     ]
                 } }">
             <section class="border border-gris-claro bg-blanco-tarjeta px-5 py-4 sm:px-5 sm:py-4">
-                <h2 class="mb-4 text-base font-bold text-azul-primario">Seleccionar datos a cargar</h2>
+                <h2 class="mb-4 text-base font-bold text-azul">Seleccionar datos a cargar</h2>
                 <p class="mb-4 text-sm text-gris-texto">
                     Primero verificaremos el formato y las columnas. Nada se guardará en la base de datos hasta que revises y confirmes la vista previa.
                 </p>
@@ -472,7 +472,7 @@
                         :aria-expanded="mostrarCabeceras"
                         class="flex w-full items-center justify-between gap-3 text-left">
                         <span>
-                            <span class="block text-sm font-bold text-azul-profundo">Cabeceras del archivo</span>
+                            <span class="block text-sm font-bold text-azul-oscuro">Cabeceras del archivo</span>
                             <span class="mt-1 block text-xs text-gris-texto">
                                 Consulta los nombres aceptados y descarga una plantilla.
                             </span>
@@ -498,7 +498,7 @@
                         </div>
                         <div class="mt-3 flex flex-wrap gap-2">
                             <template x-for="cabecera in cabeceras[tipo]" :key="cabecera.nombre">
-                                <span class="rounded-full border border-azul-fondo bg-white px-3 py-1 text-xs font-medium text-azul-profundo">
+                                <span class="rounded-full border border-azul-fondo bg-white px-3 py-1 text-xs font-medium text-azul-oscuro">
                                     <span x-text="cabecera.nombre"></span><span
                                         class="font-bold text-rojo-oscuro"
                                         x-show="cabecera.requerida"
@@ -530,7 +530,7 @@
 
                 <div class="mt-6 flex justify-end">
                     <button type="submit"
-                        class="w-full rounded-full bg-azul px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-azul-profundo sm:w-[223px]">
+                        class="w-full rounded-full bg-azul px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-azul-oscuro sm:w-[223px]">
                         Verificar archivo
                     </button>
                 </div>

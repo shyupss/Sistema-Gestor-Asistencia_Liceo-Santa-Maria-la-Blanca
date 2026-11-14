@@ -1,10 +1,10 @@
 {% url url_name as btn_url %}
 <a href="{{ btn_url|default:'#' }}"
     class="flex items-center space-x-2 px-3 py-1.5 my-0.5 rounded-xl text-sm font-semibold transition-colors whitespace-nowrap
-    {% if request.path == btn_url %}bg-celeste-claro text-azul-medio{% else %}text-gris-texto hover:bg-gris-claro{% endif %}"
+    {% if request.path == btn_url %}bg-azul-claro text-azul-suave{% else %}text-gris-texto hover:bg-gris-claro{% endif %}"
 >
     <i data-lucide="{{ icon|default:'circle-x' }}"
-    class="w-5 h-5 {% if request.path == btn_url %}text-azul-medio{% else %}text-gris-texto{% endif %}"></i>
+    class="w-5 h-5 {% if request.path == btn_url %}text-azul-suave{% else %}text-gris-texto{% endif %}"></i>
     <span>{{ label }}</span>
 
 </a>

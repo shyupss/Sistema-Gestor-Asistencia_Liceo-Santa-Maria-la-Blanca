@@ -7,11 +7,11 @@
 
 <style>
     /* Barra de scroll fina para los gráficos con desplazamiento horizontal */
-    .grafico-scroll { scrollbar-width: thin; scrollbar-color: #B3D9FF transparent; }
+    .grafico-scroll { scrollbar-width: thin; scrollbar-color: var(--azul-contraste) transparent; }
     .grafico-scroll::-webkit-scrollbar { height: 6px; }
     .grafico-scroll::-webkit-scrollbar-track { background: transparent; }
-    .grafico-scroll::-webkit-scrollbar-thumb { background: #B3D9FF; border-radius: 9999px; }
-    .grafico-scroll::-webkit-scrollbar-thumb:hover { background: #5B9BD9; }
+    .grafico-scroll::-webkit-scrollbar-thumb { background: var(--azul-contraste); border-radius: 9999px; }
+    .grafico-scroll::-webkit-scrollbar-thumb:hover { background: var(--azul-suave); }
 </style>
  
 <script src="{% static 'monitoreo/js/monitoreo-config.js' %}"></script>

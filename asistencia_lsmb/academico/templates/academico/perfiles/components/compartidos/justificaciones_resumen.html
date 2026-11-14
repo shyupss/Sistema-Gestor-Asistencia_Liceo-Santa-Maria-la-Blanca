@@ -1,16 +1,16 @@
 <section class="border-b border-gris-claro px-5 py-5 sm:px-8">
     <div class="mb-3 flex items-center justify-between">
-        <h2 class="font-bold text-azul-profundo">Justificaciones</h2>
-        <span class="rounded-full bg-azul-fondo px-3 py-1 text-xs font-bold text-azul-profundo">
+        <h2 class="font-bold text-azul-oscuro">Justificaciones</h2>
+        <span class="rounded-full bg-azul-fondo px-3 py-1 text-xs font-bold text-azul-oscuro">
             {{ total_solicitudes }} solicitud{{ total_solicitudes|pluralize:'es' }}
         </span>
     </div>
     <div class="flex h-3 overflow-hidden rounded-full bg-rojo-fondo">
-        <div class="bg-azul-profundo" data-progress="{{ porcentaje_justificaciones }}"></div>
+        <div class="bg-azul-oscuro" data-progress="{{ porcentaje_justificaciones }}"></div>
     </div>
     <div class="mt-3 flex flex-wrap gap-4 text-xs text-gris-texto">
         <span>
-            <i class="mr-1 inline-block h-3 w-3 rounded-sm bg-azul-profundo"></i>
+            <i class="mr-1 inline-block h-3 w-3 rounded-sm bg-azul-oscuro"></i>
             {{ total_justificadas }} Ausencias justificadas
         </span>
         <span>

@@ -7,15 +7,12 @@ tailwind.config = {
             },
             colors: {
                 azul: {
-                    profundo: "#0F3A66",
-                    primario: "#1B5FA8",
+                    oscuro: "#0F3A66",
                     DEFAULT: "#1B5FA8",
-                    medio: "#5B9BD9",
-                    claro: "#5EB0FF",
+                    suave: "#5B9BD9",
+                    brillante: "#5EB0FF",
                     fondo: "#D4EAFF",
                     contraste: "#B3D9FF",
-                },
-                celeste: {
                     claro: "#EAF4FC",
                 },
                 negro: {

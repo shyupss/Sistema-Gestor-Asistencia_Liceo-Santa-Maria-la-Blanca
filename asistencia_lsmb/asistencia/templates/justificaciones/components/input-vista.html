@@ -22,7 +22,7 @@ Requiere:
         @click="open = !open"
         class="relative flex w-full items-center justify-between gap-3 rounded-xl border border-gris-iconos bg-blanco
             py-2.5 pl-10 pr-3.5 text-xs md:text-sm text-negro-texto shadow-sm transition-colors
-            hover:border-azul-primario focus:border-azul-primario focus:outline-none focus:ring-1 focus:ring-azul-primario"
+            hover:border-azul focus:border-azul focus:outline-none focus:ring-1 focus:ring-azul"
     >
         <!-- Icono de calendario -->
         <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-gris-texto">
@@ -54,7 +54,7 @@ Requiere:
             <button type="button"
                 @click="selected = opcion; open = false; $nextTick(() => $root.closest('form').submit())"
                 class="flex w-full items-center px-4 py-2 text-left text-xs md:text-sm transition-colors hover:bg-gris-ultraclaro"
-                :class="selected === opcion ? 'font-medium text-azul-profundo bg-azul-fondo/30' : 'text-negro-texto'"
+                :class="selected === opcion ? 'font-medium text-azul-oscuro bg-azul-fondo/30' : 'text-negro-texto'"
                 x-text="opcion"
             >
             </button>

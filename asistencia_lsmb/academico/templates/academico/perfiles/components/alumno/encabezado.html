@@ -2,11 +2,11 @@
     <div class="grid grid-cols-[minmax(0,1fr)_5rem] items-center gap-4 sm:grid-cols-[minmax(0,1fr)_6rem]">
         <div class="flex min-w-0 items-center gap-3 sm:gap-4">
             <div
-                class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-white text-azul-profundo">
+                class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-white text-azul-oscuro">
                 <i data-lucide="user-round" class="h-8 w-8"></i>
             </div>
             <div class="min-w-0">
-                <p class="text-xs font-semibold uppercase tracking-wide text-azul-profundo">
+                <p class="text-xs font-semibold uppercase tracking-wide text-azul-oscuro">
                     Perfil de estudiante
                 </p>
                 <h1 class="mt-1 truncate text-base font-bold text-negro-texto sm:text-xl">
@@ -25,7 +25,7 @@
             <span
                 class="inline-flex max-w-full truncate rounded-full px-3 py-1 text-xs font-bold
                     {% if estado_actual.estado.nombre == 'Óptimo' or estado_actual.estado.nombre == 'Optimo' %}bg-verde-fondo text-verde-oscuro
-                    {% elif estado_actual.estado.nombre == 'Adecuado' %}bg-azul-fondo text-azul-profundo
+                    {% elif estado_actual.estado.nombre == 'Adecuado' %}bg-azul-fondo text-azul-oscuro
                     {% elif estado_actual.estado.nombre == 'Atención' or estado_actual.estado.nombre == 'Alerta' %}bg-amarillo-fondo text-amarillo-oscuro
                     {% elif estado_actual.estado.nombre == 'Crítico' or estado_actual.estado.nombre == 'Critico' %}bg-rojo-fondo text-rojo-oscuro
                     {% else %}bg-gris-ultraclaro text-gris-texto{% endif %}">

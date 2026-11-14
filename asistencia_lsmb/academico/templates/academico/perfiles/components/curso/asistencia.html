@@ -1,7 +1,7 @@
 {% include 'academico/perfiles/components/compartidos/evolucion_asistencia.html' %}
 <div class="mb-4 flex flex-wrap items-end justify-between gap-2">
     <div>
-        <h2 class="text-lg font-bold text-azul-profundo">Resumen diario</h2>
+        <h2 class="text-lg font-bold text-azul-oscuro">Resumen diario</h2>
         <p class="mt-1 text-sm text-gris-texto">Asistencia registrada por día durante el periodo {{ curso.periodo.anio }}.</p>
     </div>
     <span class="text-xs text-gris-texto">{{ total_registros }} registros · {{ total_dias_clase }} días</span>
@@ -55,7 +55,7 @@
 <nav class="mt-4 flex flex-wrap items-center justify-between gap-3 text-sm" aria-label="Paginación del resumen diario">
     {% if resumen_diario.has_previous %}
     <a href="?tab=asistencia&asistencia_page={{ resumen_diario.previous_page_number }}"
-        class="rounded-lg border border-gris-claro px-3 py-2 font-medium text-azul-profundo hover:bg-gris-ultraclaro">
+        class="rounded-lg border border-gris-claro px-3 py-2 font-medium text-azul-oscuro hover:bg-gris-ultraclaro">
         Anterior
     </a>
     {% else %}
@@ -66,7 +66,7 @@
     </span>
     {% if resumen_diario.has_next %}
     <a href="?tab=asistencia&asistencia_page={{ resumen_diario.next_page_number }}"
-        class="rounded-lg border border-gris-claro px-3 py-2 font-medium text-azul-profundo hover:bg-gris-ultraclaro">
+        class="rounded-lg border border-gris-claro px-3 py-2 font-medium text-azul-oscuro hover:bg-gris-ultraclaro">
         Siguiente
     </a>
     {% else %}
@@ -98,7 +98,7 @@
                 {% endif %}
             </tr>
             {% if asistencia_vista == "semana" %}
-            <tr class="bg-azul-fondo text-[10px] text-azul-profundo">
+            <tr class="bg-azul-fondo text-[10px] text-azul-oscuro">
                 {% for semana in semanas_planilla %}
                 <th colspan="3" class="border-l border-gris-claro px-2 py-1 text-center font-semibold">Semana {{ semana.numero }}</th>
                 {% endfor %}
@@ -108,7 +108,7 @@
                 <th colspan="3" class="border-l border-gris-claro px-2 py-1 text-center font-semibold">Días trabajados: {{ semana.dias_trabajados }}</th>
                 {% endfor %}
             </tr>
-            <tr class="bg-azul-fondo/50 text-[10px] text-azul-profundo">
+            <tr class="bg-azul-fondo/50 text-[10px] text-azul-oscuro">
                 {% for semana in semanas_planilla %}
                 <th class="border-l border-gris-claro px-2 py-2 font-semibold">Asist.</th>
                 <th class="px-2 py-2 font-semibold">Justif.</th>
@@ -121,7 +121,7 @@
                 <th colspan="3" class="border-l border-gris-claro px-2 py-1 text-center font-semibold">Días trabajados: {{ mes.dias_trabajados }}</th>
                 {% endfor %}
             </tr>
-            <tr class="bg-azul-fondo/50 text-[10px] text-azul-profundo">
+            <tr class="bg-azul-fondo/50 text-[10px] text-azul-oscuro">
                 {% for mes in meses_planilla %}
                 <th class="border-l border-gris-claro px-2 py-2 font-semibold">Asist.</th>
                 <th class="px-2 py-2 font-semibold">Justif.</th>
@@ -138,7 +138,7 @@
                 {% for mes in estudiante.meses %}
                 <td class="border-l border-gris-claro px-2 py-2 text-center font-medium text-verde-oscuro">{{ mes.asistidos }}</td>
                 <td class="px-2 py-2 text-center text-amarillo-oscuro">{{ mes.justificados }}</td>
-                <td class="px-2 py-2 text-center font-semibold text-azul-profundo">{% if mes.porcentaje is not None %}{{ mes.porcentaje }}%{% else %}—{% endif %}</td>
+                <td class="px-2 py-2 text-center font-semibold text-azul-oscuro">{% if mes.porcentaje is not None %}{{ mes.porcentaje }}%{% else %}—{% endif %}</td>
                 {% endfor %}
             </tr>
             {% endif %}
@@ -152,7 +152,7 @@
                 {% for datos in estudiante.semanas %}
                 <td class="border-l border-gris-claro px-2 py-2 text-center font-medium text-verde-oscuro">{{ datos.asistidos }}</td>
                 <td class="px-2 py-2 text-center text-amarillo-oscuro">{{ datos.justificados }}</td>
-                <td class="px-2 py-2 text-center font-semibold text-azul-profundo">{% if datos.porcentaje is not None %}{{ datos.porcentaje }}%{% else %}—{% endif %}</td>
+                <td class="px-2 py-2 text-center font-semibold text-azul-oscuro">{% if datos.porcentaje is not None %}{{ datos.porcentaje }}%{% else %}—{% endif %}</td>
                 {% endfor %}
             </tr>
             {% endfor %}
@@ -190,11 +190,11 @@
 </script>
 {% else %}
 <div class="grid gap-3 sm:grid-cols-5">
-    <div class="rounded-lg bg-azul-fondo p-4"><span class="text-xs text-gris-texto">Días de clase</span><strong class="mt-1 block text-2xl text-azul-profundo">{{ resumen_periodo.dias }}</strong></div>
+    <div class="rounded-lg bg-azul-fondo p-4"><span class="text-xs text-gris-texto">Días de clase</span><strong class="mt-1 block text-2xl text-azul-oscuro">{{ resumen_periodo.dias }}</strong></div>
     <div class="rounded-lg bg-verde-fondo p-4"><span class="text-xs text-gris-texto">Asistidos</span><strong class="mt-1 block text-2xl text-verde-oscuro">{{ resumen_periodo.asistidos }}</strong></div>
     <div class="rounded-lg bg-rojo-fondo p-4"><span class="text-xs text-gris-texto">Ausentes</span><strong class="mt-1 block text-2xl text-rojo-oscuro">{{ resumen_periodo.ausentes }}</strong></div>
     <div class="rounded-lg bg-amarillo-fondo p-4"><span class="text-xs text-gris-texto">Justificados</span><strong class="mt-1 block text-2xl text-amarillo-oscuro">{{ resumen_periodo.justificados }}</strong></div>
-    <div class="rounded-lg bg-azul-fondo p-4"><span class="text-xs text-gris-texto">% asistencia</span><strong class="mt-1 block text-2xl text-azul-profundo">{% if resumen_periodo.porcentaje is not None %}{{ resumen_periodo.porcentaje }}%{% else %}—{% endif %}</strong></div>
+    <div class="rounded-lg bg-azul-fondo p-4"><span class="text-xs text-gris-texto">% asistencia</span><strong class="mt-1 block text-2xl text-azul-oscuro">{% if resumen_periodo.porcentaje is not None %}{{ resumen_periodo.porcentaje }}%{% else %}—{% endif %}</strong></div>
 </div>
 {% endif %}
 {% endif %}

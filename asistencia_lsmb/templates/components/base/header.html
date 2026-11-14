@@ -1,5 +1,5 @@
 {% load static %}
-<header class="bg-azul-profundo text-blanco px-4 py-3 flex items-center justify-between shadow-md min-h-[15vh]">
+<header class="bg-azul-oscuro text-blanco px-4 py-3 flex items-center justify-between shadow-md min-h-[15vh]">
     <!-- Lado izquierdo -->
     <a href="{% url 'home' %}" class="block no-underline text-inherit">
         <div class="flex items-center space-x-3">
@@ -7,7 +7,7 @@
             <img 
                 src="{% static 'img/favicon.ico' %}" 
                 alt="Logo Liceo Santa María la Blanca"
-                class="w-16 h-16 md:w-20 md:h-20 object-contain rounded-full border-2 border-azul-medio"
+                class="w-16 h-16 md:w-20 md:h-20 object-contain rounded-full border-2 border-azul-suave"
             >
             <!-- Título -->
             <div class="flex flex-col">
@@ -26,7 +26,7 @@
     <!-- Lado derecho -->
     <div class="flex items-center space-x-4 md:space-x-6">
         <!-- Notificaciones -->
-        <button type="button" class="group relative p-1.5 text-blanco rounded-md hover:text-celeste-claro hover:bg-azul-primario/60 transition-colors
+        <button type="button" class="group relative p-1.5 text-blanco rounded-md hover:text-azul-claro hover:bg-azul/60 transition-colors
         transition-transform duration-200 ease-out hover:scale-105 origin-center active:scale-95" 
         aria-label="Notificaciones">
             <i data-lucide="bell" class="w-6 h-6 md:w-7 md:h-7"></i>
@@ -36,9 +36,9 @@
             </span>
         </button>
         <!-- Componente usuario -->
-        <div class="group flex items-center space-x-3 bg-azul-profundo border border-azul-primario rounded-xl px-3 py-1.5 cursor-pointer hover:border-azul-medio transition-colors">
+        <div class="group flex items-center space-x-3 bg-azul-oscuro border border-azul rounded-xl px-3 py-1.5 cursor-pointer hover:border-azul-suave transition-colors">
             <!-- Avatar -->
-            <div class="w-9 h-9 md:w-10 md:h-10 rounded-full bg-azul-primario flex items-center justify-center font-bold text-sm text-blanco shrink-0">
+            <div class="w-9 h-9 md:w-10 md:h-10 rounded-full bg-azul flex items-center justify-center font-bold text-sm text-blanco shrink-0">
                 ADM <!-- TODO: CAMBIAR POR INICIALES DEL USUARIO -->
             </div>
 
@@ -47,7 +47,7 @@
                 <span class="text-sm font-semibold leading-tight">
                     Grupo 7 <!-- TODO: REQUEST DEL NOMBRE DE USUARIO -->
                 </span>
-                <span class="text-xs font-semibold text-azul-claro leading-tight">
+                <span class="text-xs font-semibold text-azul-brillante leading-tight">
                     Administrador <!-- TODO: REQUEST DEL ROL DEL USUARIO -->
                 </span>
             </div>

@@ -8,7 +8,7 @@
         {% if ag.curso or ag.nivel %}
             <button type="button"
                 @click="$store.filtros.limpiarGlobales()"
-                class="text-xs font-medium text-azul transition-colors hover:text-azul-claro"
+                class="text-xs font-medium text-azul transition-colors hover:text-azul-brillante"
             >
                 Limpiar
             </button>
@@ -27,8 +27,8 @@
         <select id="{{ tipo }}-filtro-curso"
             @change="$store.filtros.fijarGlobal('curso', $event.target.value)"
             class="w-full rounded-lg border bg-blanco-tarjeta px-2 py-1.5 text-xs text-negro-texto 
-            focus:outline-none focus:ring-azul-primario/30 hover:border-azul transition-colors cursor-pointer
-            {% if ag.curso %}border-azul-primario{% else %}border-gris-claro{% endif %}"
+            focus:outline-none focus:ring-azul/30 hover:border-azul transition-colors cursor-pointer
+            {% if ag.curso %}border-azul{% else %}border-gris-claro{% endif %}"
         >
             <option value="">Todos</option>
             <!-- Cursos -->

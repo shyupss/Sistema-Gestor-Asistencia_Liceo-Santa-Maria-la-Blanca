@@ -10,7 +10,7 @@
                 Actividad reciente
                 <span x-text="$store.filtros.tituloFiltrado('act')"></span>
             </p>
-            <span class="rounded-full bg-azul-fondo px-2 py-0.5 text-xs font-semibold text-azul-profundo">
+            <span class="rounded-full bg-azul-fondo px-2 py-0.5 text-xs font-semibold text-azul-oscuro">
                 {{ actividad_reciente|length|default:0 }}
             </span>
         </div>
@@ -20,13 +20,13 @@
             <button type="button" @click="$store.filtros.abrirActividad()"
                 aria-haspopup="dialog" :aria-expanded="$store.filtros.popActividadAbierto"
                 class="inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors"
-                :class="$store.filtros.cantidadActividad ? 'border-azul-primario bg-celeste-claro text-azul-primario' : 'border-gris-claro bg-blanco-tarjeta text-gris-texto hover:border-azul-medio hover:text-azul'"
+                :class="$store.filtros.cantidadActividad ? 'border-azul bg-azul-claro text-azul' : 'border-gris-claro bg-blanco-tarjeta text-gris-texto hover:border-azul-suave hover:text-azul'"
             >
                 <i data-lucide="filter" class="h-3.5 w-3.5"
                 ></i>
                 Filtrar
                 <span x-show="$store.filtros.cantidadActividad" x-text="$store.filtros.cantidadActividad" x-cloak
-                    class="flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-azul-fondo px-1 text-[10px] font-semibold text-azul-profundo"
+                    class="flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-azul-fondo px-1 text-[10px] font-semibold text-azul-oscuro"
                 ></span>
             </button>
 
@@ -48,7 +48,7 @@
                     <p class="text-xs font-semibold text-negro-texto">Actor</p>
                     <button type="button" x-show="$store.filtros.borradorActor" x-cloak
                         @click="$store.filtros.borradorActor = ''"
-                        class="text-xs font-medium text-azul transition-colors hover:text-azul-claro"
+                        class="text-xs font-medium text-azul transition-colors hover:text-azul-brillante"
                     >
                         Limpiar
                     </button>
@@ -74,7 +74,7 @@
                     <p class="text-xs font-semibold text-negro-texto">Tipo de actividad</p>
                     <button type="button" x-show="$store.filtros.borradorTipos.length" x-cloak
                         @click="$store.filtros.borradorTipos = []"
-                        class="text-xs font-medium text-azul transition-colors hover:text-azul-claro"
+                        class="text-xs font-medium text-azul transition-colors hover:text-azul-brillante"
                     >
                         Limpiar
                     </button>
@@ -97,7 +97,7 @@
                         Limpiar
                     </button>
                     <button type="button" @click="$store.filtros.aplicarActividad()"
-                        class="flex-1 rounded-lg bg-azul-primario px-3 py-1.5 text-xs font-medium text-blanco transition-colors hover:bg-azul-profundo"
+                        class="flex-1 rounded-lg bg-azul px-3 py-1.5 text-xs font-medium text-blanco transition-colors hover:bg-azul-oscuro"
                     >
                         Aplicar
                     </button>
@@ -119,9 +119,9 @@
                     <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full 
                         {% if evento.tipo == 'alerta.emitida' or evento.tipo == 'justificacion.rechazada' or evento.tipo == 'retiro.rechazada' %}bg-rojo-fondo text-rojo-oscuro
                         {% elif evento.tipo == 'justificacion.aceptada' or evento.tipo == 'retiro.aceptada' %}bg-verde-fondo text-verde-oscuro
-                        {% elif evento.tipo == 'justificacion.nuevo' or evento.tipo == 'retiro.nuevo' %}bg-azul-fondo text-azul-profundo
-                        {% elif evento.tipo == 'asistencia.registrada' %}bg-azul-fondo text-azul-profundo
-                        {% else %}bg-azul-fondo text-azul-profundo
+                        {% elif evento.tipo == 'justificacion.nuevo' or evento.tipo == 'retiro.nuevo' %}bg-azul-fondo text-azul-oscuro
+                        {% elif evento.tipo == 'asistencia.registrada' %}bg-azul-fondo text-azul-oscuro
+                        {% else %}bg-azul-fondo text-azul-oscuro
                         {% endif %}
                         "
                     >
@@ -163,7 +163,7 @@
                             {% if evento.rol_autor %}{{ evento.rol_autor }}{% else %}{{ evento.autor }}{% endif %}
                         </p>
                     </span>
-                    <span class="flex shrink-0 items-center gap-1 rounded-full bg-azul-fondo/60 px-2 py-0.5 text-xs font-medium text-azul-profundo">
+                    <span class="flex shrink-0 items-center gap-1 rounded-full bg-azul-fondo/60 px-2 py-0.5 text-xs font-medium text-azul-oscuro">
                         <i data-lucide="clock" class="h-3 w-3 text-azul"></i>
                         {{ evento.tiempo }}
                     </span>
