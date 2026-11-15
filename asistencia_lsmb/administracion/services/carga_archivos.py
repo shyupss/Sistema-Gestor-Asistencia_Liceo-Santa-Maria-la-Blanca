@@ -187,7 +187,10 @@ def _normalizar_curso(value):
 def _normalizar_nombre(value):
     text = unicodedata.normalize("NFKD", str(value or ""))
     text = "".join(char for char in text if not unicodedata.combining(char))
-    text = re.sub(r"\s*\(\d{1,2}/\d{1,2}(?:/\d{2,4})?\)\s*$", "", text)
+    # Las planillas pueden agregar apodos, nombres de respaldo o fechas al final.
+    text = re.sub(r"\s*\([^)]*\)\s*$", "", text)
+    text = re.sub(r"\s+\d{1,2}[-/]\d{1,2}(?:[-/]\d{2,4})?\s*$", "", text)
+    text = re.sub(r"[^\w\s]", " ", text)
     return " ".join(text.casefold().split())
 
 
@@ -291,10 +294,13 @@ def _preparar_asistencia_xlsx(uploaded_file):
             hojas_procesadas.append(worksheet.title.strip())
             filas_activas = []
             for numero, row in enumerate(worksheet.iter_rows(min_row=5, values_only=True), start=5):
-                nombre = str(row[nombre_index] if nombre_index < len(row) else "").strip()
+                nombre_valor = row[nombre_index] if nombre_index < len(row) else None
+                if nombre_valor is None or not str(nombre_valor).strip():
+                    continue
+                nombre = str(nombre_valor).strip()
                 estado_valor = row[estado_index] if estado_index < len(row) else ""
                 estado = "" if estado_valor in (None, "") else str(estado_valor).strip()
-                if not nombre or estado:
+                if estado:
                     continue
                 filas_activas.append((numero, row, nombre))
 
@@ -687,25 +693,60 @@ def cargar_asistencia(registros, progress_callback=None):
         )
 
     ruts_carga = {registro.get("rut") for registro in registros if registro.get("rut")}
-    nombres_carga = {
-        _normalizar_nombre(registro.get("nombre"))
-        for registro in registros
-        if registro.get("nombre")
-    }
     alumnos = {}
     alumnos_por_nombre = {}
     for alumno in Alumno.objects.all().only("id", "rut", "nombre"):
         if alumno.rut in ruts_carga:
             alumnos[alumno.rut] = alumno
         nombre_normalizado = _normalizar_nombre(alumno.nombre)
-        if nombre_normalizado in nombres_carga:
-            alumnos_por_nombre.setdefault(nombre_normalizado, []).append(alumno)
+        alumnos_por_nombre.setdefault(nombre_normalizado, []).append(alumno)
 
     def resolver_alumno(registro):
         if registro.get("rut"):
             return alumnos.get(registro["rut"])
-        candidatos = alumnos_por_nombre.get(_normalizar_nombre(registro.get("nombre")), [])
-        return candidatos[0] if len(candidatos) == 1 else None
+        nombre_normalizado = _normalizar_nombre(registro.get("nombre"))
+        candidatos = alumnos_por_nombre.get(nombre_normalizado, [])
+        if len(candidatos) == 1:
+            return candidatos[0]
+
+        tokens_carga = nombre_normalizado.split()
+        if len(tokens_carga) < 2:
+            return None
+
+        # Algunas planillas omiten segundos nombres o agregan nombres extra.
+        candidatos_aproximados = []
+        for nombre_sistema, alumnos_coincidentes in alumnos_por_nombre.items():
+            tokens_sistema = nombre_sistema.split()
+            if (
+                len(alumnos_coincidentes) == 1
+                and len(set(tokens_carga) & set(tokens_sistema)) >= 2
+                and (
+                    set(tokens_carga).issubset(tokens_sistema)
+                    or set(tokens_sistema).issubset(tokens_carga)
+                )
+            ):
+                candidatos_aproximados.extend(alumnos_coincidentes)
+        if len(candidatos_aproximados) == 1:
+            return candidatos_aproximados[0]
+
+        # A veces el primer apellido aparece abreviado; se acepta solo si
+        # el último nombre coincide y la combinación es única.
+        candidatos_abreviados = [
+            alumno
+            for nombre_sistema, alumnos_coincidentes in alumnos_por_nombre.items()
+            if len(alumnos_coincidentes) == 1
+            for alumno in alumnos_coincidentes
+            if (
+                (sistema := nombre_sistema.split())
+                and len(sistema) >= 2
+                and sistema[-1] == tokens_carga[-1]
+                and (
+                    sistema[0].startswith(tokens_carga[0])
+                    or tokens_carga[0].startswith(sistema[0])
+                )
+            )
+        ]
+        return candidatos_abreviados[0] if len(candidatos_abreviados) == 1 else None
 
     errores_por_alumno = {}
     errores_por_feriado = {}

@@ -13,6 +13,7 @@ class CargaDatos(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     tipo = models.CharField(max_length=20)
     registros = models.JSONField()
+    archivo_nombre = models.CharField(max_length=255, blank=True)
     estado = models.CharField(max_length=20, choices=ESTADOS, default="pendiente")
     total = models.PositiveIntegerField(default=0)
     progreso_actual = models.PositiveIntegerField(default=0)

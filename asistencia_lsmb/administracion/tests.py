@@ -10,7 +10,11 @@ from academico.models import Alumno, Curso, EstadoMatricula, Matricula, PeriodoA
 from alertas.models import Cargo, Funcionario
 from asistencia.models import Asistencia_Alumnos, Tipos_Asistencia
 
-from .services.carga_archivos import cargar_asistencia, validar_archivo_carga
+from .services.carga_archivos import (
+    _normalizar_nombre,
+    cargar_asistencia,
+    validar_archivo_carga,
+)
 
 
 class ValidarArchivoCargaTests(TestCase):
@@ -59,6 +63,46 @@ class ValidarArchivoCargaTests(TestCase):
                 ("Bruno Díaz", "2026-08-04", "A"),
                 ("Bruno Díaz", "2026-08-05", "P"),
             ],
+        )
+
+    def test_omite_filas_vacias_y_normaliza_anotaciones_del_nombre(self):
+        workbook = Workbook()
+        hoja = workbook.active
+        hoja.title = "1A"
+        hoja["B1"] = "Curso 1°A"
+        hoja.append([])
+        hoja.append([])
+        hoja.append(["N°", "Nombre Alumno", "Estado", 3])
+        hoja.append([1, "Alumno Ejemplo (CHARLIE)", "", "x"])
+        hoja.append([2, None, None, None])
+        hoja.append([3, "Alumno Con Fecha 26/03/26", "", None])
+
+        archivo_buffer = BytesIO()
+        workbook.save(archivo_buffer)
+        archivo = SimpleUploadedFile(
+            "ASISTENCIA AGOSTO 2026.xlsx",
+            archivo_buffer.getvalue(),
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+
+        resultado = validar_archivo_carga(archivo, "Asistencia")
+
+        self.assertEqual(resultado["errores"], [])
+        self.assertEqual(
+            {registro["nombre"] for registro in resultado["registros"]},
+            {"Alumno Ejemplo (CHARLIE)", "Alumno Con Fecha 26/03/26"},
+        )
+        self.assertEqual(
+            _normalizar_nombre("Alumno Ejemplo (CHARLIE)"),
+            "alumno ejemplo",
+        )
+        self.assertEqual(
+            _normalizar_nombre("Alumno Con Fecha 26/03/26"),
+            "alumno con fecha",
+        )
+        self.assertEqual(
+            _normalizar_nombre("Alumno Con Punto."),
+            "alumno con punto",
         )
 
     @patch("asistencia.services.feriados.obtener_feriados", return_value=set())

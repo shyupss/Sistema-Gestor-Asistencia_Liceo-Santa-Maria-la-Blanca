@@ -8,7 +8,7 @@
 <section class="mx-auto max-w-[95%] px-1 py-5 sm:px-2 sm:py-8" x-data="{ reporte: 'planilla', formato: 'Excel' }">
     {% include 'components/global/page_title.html' with page_title=page_title today=fecha_hoy %}
     <div class="rounded-xl border border-gris-claro bg-blanco-tarjeta p-4 shadow-sm sm:p-6">
-        <p class="mb-5 text-sm font-semibold text-azul">Elige un reporte, ajusta los filtros y descárgalo.</p>
+        <p class="mb-5 text-sm font-semibold text-azul">Elige un reporte, ajusta los filtros y revisa la información antes de generarlo.</p>
         <h2 class="mb-3 text-sm font-bold text-azul">1. Tipo de reporte</h2>
         <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {% for tipo, titulo, descripcion, icono in tipos_reporte %}
@@ -29,34 +29,39 @@
         </div>
 
         <h2 class="mb-3 mt-6 text-sm font-bold text-azul">2. Filtros</h2>
-        <div class="rounded-xl border border-gris-claro p-3">
+        <form method="get" class="rounded-xl border border-gris-claro p-3">
+            <input type="hidden" name="reporte" x-model="reporte">
             <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                {% for etiqueta, opciones in filtros %}
-                <label class="text-xs font-medium text-gris-texto">{{ etiqueta }}
-                    <select class="mt-1 w-full rounded-lg border border-gris-claro bg-white px-3 py-2 text-sm text-negro-texto focus:border-azul focus:outline-none">
-                        {% for opcion in opciones %}
-                        <option>{{ opcion }}</option>
-                        {% endfor %}
+                <label class="text-xs font-medium text-gris-texto">Período académico
+                    <select name="anio" class="mt-1 w-full rounded-lg border border-gris-claro bg-white px-3 py-2 text-sm text-negro-texto focus:border-azul focus:outline-none">
+                        {% for periodo in periodos %}
+                        <option value="{{ periodo.anio }}" {% if periodo == periodo_seleccionado %}selected{% endif %}>{{ periodo.anio }}</option>
+                        {% empty %}<option value="">Sin períodos</option>{% endfor %}
                     </select>
                 </label>
-                {% endfor %}
+                <label class="text-xs font-medium text-gris-texto">Rango
+                    <select name="semestre" class="mt-1 w-full rounded-lg border border-gris-claro bg-white px-3 py-2 text-sm text-negro-texto focus:border-azul focus:outline-none">
+                        <option value="1" {% if semestre_seleccionado == "1" %}selected{% endif %}>Semestre 1</option>
+                        <option value="2" {% if semestre_seleccionado == "2" %}selected{% endif %}>Semestre 2</option>
+                    </select>
+                </label>
             </div>
             <div class="mt-3 flex flex-wrap items-center gap-2 rounded-lg bg-gris-ultraclaro px-3 py-2 text-xs text-gris-texto">
-                <span>Cursos:</span>
-                <span class="rounded bg-white px-2 py-1">1A</span>
-                <span class="rounded bg-white px-2 py-1">1B</span>
-                <button type="button" class="font-semibold text-azul hover:underline">+ Agregar curso</button>
+                <span class="w-full">Cursos (sin selección se muestran todos):</span>
+                {% for curso in cursos %}
+                <label class="rounded bg-white px-2 py-1">
+                    <input type="checkbox" name="curso" value="{{ curso.pk }}" {% if curso in cursos_seleccionados %}checked{% endif %}>
+                    {{ curso.nivel_romano }}°{{ curso.grupo }}
+                </label>
+                {% empty %}<span>No hay cursos para este período.</span>{% endfor %}
             </div>
-            <div class="mt-3 flex gap-2">
-                {% for opcion in formatos %}
-                <button type="button" @click="formato = '{{ opcion }}'"
-                    class="rounded-lg border px-5 py-2 text-sm font-semibold transition"
-                    :class="formato === '{{ opcion }}' ? 'border-azul bg-azul-claro text-azul' : 'border-gris-claro text-gris-texto hover:border-azul-suave'">
-                    {{ opcion }}
-                </button>
-                {% endfor %}
+            <div class="mt-3 flex items-center justify-between gap-2">
+                <span class="text-xs text-gris-texto">
+                    {% if fecha_inicio %}Rango aplicado: {{ fecha_inicio|date:"d/m/Y" }} al {{ fecha_fin|date:"d/m/Y" }}{% endif %}
+                </span>
+                <button type="submit" class="rounded-lg bg-azul px-5 py-2 text-sm font-semibold text-white shadow hover:bg-azul-oscuro">Aplicar filtros</button>
             </div>
-        </div>
+        </form>
 
         <h2 class="mb-3 mt-6 text-sm font-bold text-azul">3. Vista previa</h2>
         <div class="grid grid-cols-2 gap-3 lg:grid-cols-4">
@@ -88,9 +93,10 @@
             </table>
         </div>
         <div class="mt-3 flex flex-col items-center justify-between gap-3 sm:flex-row">
-            <span class="text-xs text-gris-texto">Primeras filas. El archivo traerá todos los cursos.</span>
-            <button type="button" class="rounded-full bg-azul px-6 py-2 text-sm font-semibold text-white shadow hover:bg-azul-oscuro"><i
-                    data-lucide="download" class="mr-1 inline h-4 w-4"></i>Generar reporte</button></div>
+            <span class="text-xs text-gris-texto">Vista previa de los cursos incluidos según los filtros aplicados.</span>
+            <button type="button" disabled title="La generación estará disponible en una próxima etapa"
+                class="cursor-not-allowed rounded-full bg-gris-claro px-6 py-2 text-sm font-semibold text-gris-texto"><i
+                    data-lucide="download" class="mr-1 inline h-4 w-4"></i>Generar reporte (próximamente)</button></div>
 
         <h2 class="mb-3 mt-6 text-sm font-bold text-azul">4. Reportes generados</h2>
         <div class="overflow-x-auto rounded-lg border border-gris-claro">

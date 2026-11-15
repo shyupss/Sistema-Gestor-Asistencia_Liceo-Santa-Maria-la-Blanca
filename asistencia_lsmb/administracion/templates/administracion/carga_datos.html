@@ -17,6 +17,28 @@
             <h1 class="mt-3 text-xl font-bold text-negro-texto">Carga de {{ tipo_carga }} completada</h1>
             <p class="mt-1 text-sm text-gris-texto">Los datos válidos fueron guardados correctamente.</p>
         </div>
+        {% if archivo_nombre or periodos_asistencia %}
+        <div class="mt-6 grid gap-3 sm:grid-cols-2">
+            {% if archivo_nombre %}
+            <div class="rounded-lg border border-gris-claro bg-gris-ultraclaro px-4 py-3">
+                <p class="text-xs font-semibold uppercase tracking-wide text-gris-texto">Archivo cargado</p>
+                <p class="mt-1 break-all text-sm font-medium text-negro-texto">{{ archivo_nombre }}</p>
+            </div>
+            {% endif %}
+            {% if periodos_asistencia %}
+            <div class="rounded-lg border border-gris-claro bg-gris-ultraclaro px-4 py-3">
+                <p class="text-xs font-semibold uppercase tracking-wide text-gris-texto">
+                    Período de asistencia
+                </p>
+                <p class="mt-1 text-sm font-medium text-negro-texto">
+                    {% for periodo in periodos_asistencia %}
+                    {% if not forloop.first %}, {% endif %}{{ periodo }}
+                    {% endfor %}
+                </p>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
         {% if tipo_carga == "Asistencia" %}
         <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <div class="rounded-lg bg-verde-claro px-5 py-4">

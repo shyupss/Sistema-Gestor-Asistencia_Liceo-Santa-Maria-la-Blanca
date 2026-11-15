@@ -1,4 +1,5 @@
 import re
+from datetime import date
 from io import BytesIO
 
 from django.contrib import messages
@@ -98,11 +99,18 @@ def pagina_administracion(request):
         if not carga_pendiente:
             messages.error(request, "La carga pendiente expiró. Vuelve a seleccionar el archivo.")
             return redirect("administracion")
+        if isinstance(carga_pendiente, dict):
+            registros_pendientes = carga_pendiente.get("registros", [])
+            archivo_nombre = carga_pendiente.get("nombre", "")
+        else:
+            registros_pendientes = carga_pendiente
+            archivo_nombre = ""
         tipo = "Matrículas" if tipo_confirmacion == "matriculas" else "Asistencia"
         carga = CargaDatos.objects.create(
             tipo=tipo,
-            registros=carga_pendiente,
-            total=len(carga_pendiente),
+            registros=registros_pendientes,
+            archivo_nombre=archivo_nombre,
+            total=len(registros_pendientes),
         )
         try:
             tarea = procesar_carga_datos.delay(str(carga.id))
@@ -192,7 +200,10 @@ def pagina_administracion(request):
                     if tipo_carga == "Matrículas"
                     else "carga_asistencia_pendiente"
                 )
-                request.session[clave_sesion] = carga_archivo.get("registros", [])
+                request.session[clave_sesion] = {
+                    "registros": carga_archivo.get("registros", []),
+                    "nombre": carga_archivo.get("nombre", ""),
+                }
             return render(
                 request,
                 "administracion/carga_datos.html",
@@ -331,6 +342,23 @@ def estado_carga_datos(request, carga_id):
 def resultado_carga_datos(request, carga_id):
     carga = get_object_or_404(CargaDatos, pk=carga_id)
     if carga.estado == "completada":
+        periodos_asistencia = []
+        if carga.tipo == "Asistencia":
+            meses = (
+                "enero", "febrero", "marzo", "abril", "mayo", "junio",
+                "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre",
+            )
+            periodos = set()
+            for registro in carga.registros:
+                try:
+                    fecha = date.fromisoformat(registro["fecha"])
+                except (KeyError, TypeError, ValueError):
+                    continue
+                periodos.add((fecha.year, fecha.month))
+            periodos_asistencia = [
+                f"{meses[mes - 1]} {anio}"
+                for anio, mes in sorted(periodos)
+            ]
         return render(
             request,
             "administracion/carga_datos.html",
@@ -339,6 +367,8 @@ def resultado_carga_datos(request, carga_id):
                 "fecha_actual": timezone.now(),
                 "resultado_carga": carga.resultado,
                 "tipo_carga": carga.tipo,
+                "archivo_nombre": carga.archivo_nombre,
+                "periodos_asistencia": periodos_asistencia,
             },
         )
     return render(
