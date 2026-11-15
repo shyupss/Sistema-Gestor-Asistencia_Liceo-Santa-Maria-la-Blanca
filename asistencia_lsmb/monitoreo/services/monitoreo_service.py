@@ -4,6 +4,7 @@ from datetime import date
 from django.utils import timezone
 from django.urls import reverse
 
+from alertas.models import ConfigGeneral
 from monitoreo.services.niveles import nivel_alerta, umbral_critico
 from monitoreo.queries.monitoreo_queries import (
     contar_asistencias,
@@ -157,6 +158,7 @@ def preparar_actividad_reciente(fecha):
 
 
 def _datos_asistencia(periodo, cursos, fecha):
+    meta = ConfigGeneral.obtener().meta_asistencia
     inicio, fin = _rango_periodo(periodo, fecha)
     asistencias = obtener_asistencias_periodo(periodo.pk, fin).filter(
         paso_lista__fecha__gte=inicio,
@@ -194,7 +196,7 @@ def _datos_asistencia(periodo, cursos, fecha):
     return {
         "asistencia_general": {
             "porcentaje": _porcentaje(total, ausencias),
-            "meta": 75,
+            "meta": meta,
             "periodo": f"Periodo académico {periodo.anio}",
         },
         "evolucion_asistencia": {
@@ -311,7 +313,7 @@ def preparar_dashboard(fecha):
     periodo_id = obtener_periodo_actual(fecha)
     if not periodo_id:
         return {
-            "asistencia_general": {"porcentaje": 0, "meta": 75, "periodo": "Sin periodo académico"},
+            "asistencia_general": {"porcentaje": 0, "meta": ConfigGeneral.obtener().meta_asistencia, "periodo": "Sin periodo académico"},
             "evolucion_asistencia": {"labels": [], "valores": []},
             "asistencia_por_curso": [],
             "cursos_disponibles": ["Asistencia General"],

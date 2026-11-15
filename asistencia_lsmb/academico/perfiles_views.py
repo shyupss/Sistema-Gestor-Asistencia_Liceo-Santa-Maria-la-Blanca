@@ -16,7 +16,7 @@ from academico.services.academico_service import (
     promedio_asistencia,
     porcentaje_asistencia,
 )
-from alertas.models import Alerta, EstadoAlumno, HistorialEstadoAlumno
+from alertas.models import Alerta, ConfigGeneral, EstadoAlumno, HistorialEstadoAlumno
 from asistencia.models import Asistencia_Alumnos, Justificaciones, Paso_Lista
 from asistencia.queries.asistencia_queries import obtener_alumnos_curso
 
@@ -179,7 +179,7 @@ def perfil_curso(request, curso_id):
     }
     niveles_asistencia = {estado.nombre: 0 for estado in estados_asistencia}
     niveles_asistencia.update({"Sin datos": 0, "Sin configurar": 0})
-    porcentaje_meta = 75
+    porcentaje_meta = ConfigGeneral.obtener().meta_asistencia
     estudiantes_meta = 0
     estudiantes_bajo_meta = 0
     for matricula in matriculas:

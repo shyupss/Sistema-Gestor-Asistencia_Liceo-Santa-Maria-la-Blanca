@@ -5,10 +5,12 @@ from django.test import TestCase
 from django.utils import timezone
 
 from academico.models import Alumno, Curso, EstadoMatricula, Matricula, PeriodoAcademico
-from alertas.models import Alerta, Cargo, Estado, Funcionario
+from alertas.models import Alerta, Cargo, ConfigGeneral, Estado, Funcionario
 from asistencia.models import Estados_Solicitud, Justificaciones, Paso_Lista
+from monitoreo.services.filtro_service import calcular_asistencia_general
 from monitoreo.services.monitoreo_service import (
 	preparar_actividad_reciente,
+	preparar_dashboard,
 	preparar_justificaciones,
 )
 
@@ -134,3 +136,40 @@ class MonitoreoOperativoTests(TestCase):
 
 		self.assertIn("justificacion.aceptada", tipos)
 		self.assertIn("retiro.rechazada", tipos)
+
+
+class MetaAsistenciaConfigurableTests(TestCase):
+	"""La meta de asistencia sale de ConfigGeneral, no de un valor fijo."""
+
+	def setUp(self):
+		self.fecha = timezone.localdate()
+
+	def _crear_periodo_con_curso(self):
+		periodo = PeriodoAcademico.objects.create(
+			anio=self.fecha.year,
+			fecha_inicio=datetime.date(self.fecha.year, 3, 1),
+			fecha_fin=datetime.date(self.fecha.year, 12, 31),
+		)
+		Curso.objects.create(periodo=periodo, nivel=1, grupo="A")
+		return periodo
+
+	def test_dashboard_sin_periodo_usa_meta_configurada(self):
+		self.assertEqual(preparar_dashboard(self.fecha)["asistencia_general"]["meta"], 75)
+		ConfigGeneral.objects.filter(pk=1).update(meta_asistencia=80)
+		self.assertEqual(preparar_dashboard(self.fecha)["asistencia_general"]["meta"], 80)
+
+	def test_dashboard_con_periodo_usa_meta_configurada(self):
+		self._crear_periodo_con_curso()
+		ConfigGeneral.objects.filter(pk=1).update(meta_asistencia=80)
+		self.assertEqual(preparar_dashboard(self.fecha)["asistencia_general"]["meta"], 80)
+
+	def test_filtro_asistencia_general_sin_periodo(self):
+		ConfigGeneral.objects.filter(pk=1).update(meta_asistencia=80)
+		resultado = calcular_asistencia_general(None, self.fecha, {})
+		self.assertEqual(resultado["meta"], 80)
+
+	def test_filtro_asistencia_general_con_periodo(self):
+		periodo = self._crear_periodo_con_curso()
+		ConfigGeneral.objects.filter(pk=1).update(meta_asistencia=80)
+		resultado = calcular_asistencia_general(periodo, self.fecha, {})
+		self.assertEqual(resultado["meta"], 80)

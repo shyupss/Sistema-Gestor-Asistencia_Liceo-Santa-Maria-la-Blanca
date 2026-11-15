@@ -12,7 +12,7 @@ from academico.models import Curso, PeriodoAcademico
 from administracion.forms import FuncionarioForm
 from alertas.models import (
     Cargo,
-    ConfigNotificaciones,
+    ConfigGeneral,
     Cuenta,
     Estado,
     EstadoNotificaRol,
@@ -101,7 +101,7 @@ class DefaultsTests(TestCase):
         self.assertIsNotNone(cuenta.fecha_creacion)
 
     def test_config_notificaciones(self):
-        config = ConfigNotificaciones.obtener()
+        config = ConfigGeneral.obtener()
         self.assertEqual(config.pk, 1)
         self.assertTrue(config.activa)
         self.assertEqual(config.frecuencia_dias, 7)
@@ -109,37 +109,37 @@ class DefaultsTests(TestCase):
         self.assertEqual(config.hora_envio, datetime.time(16, 0))
 
 
-class ConfigNotificacionesSingletonTests(TestCase):
+class ConfigGeneralSingletonTests(TestCase):
     def test_obtener_es_idempotente_y_no_crea_mas_de_una_fila(self):
-        primera = ConfigNotificaciones.obtener()
-        segunda = ConfigNotificaciones.obtener()
+        primera = ConfigGeneral.obtener()
+        segunda = ConfigGeneral.obtener()
         self.assertEqual(primera.pk, segunda.pk)
-        self.assertEqual(ConfigNotificaciones.objects.count(), 1)
+        self.assertEqual(ConfigGeneral.objects.count(), 1)
 
     def test_la_base_de_datos_rechaza_otro_id(self):
-        ConfigNotificaciones.obtener()
+        ConfigGeneral.obtener()
         with self.assertRaises(IntegrityError):
             with transaction.atomic():
-                ConfigNotificaciones.objects.create(pk=2)
-        self.assertEqual(ConfigNotificaciones.objects.count(), 1)
+                ConfigGeneral.objects.create(pk=2)
+        self.assertEqual(ConfigGeneral.objects.count(), 1)
 
     def test_validaciones_de_dia_y_frecuencia(self):
-        config = ConfigNotificaciones.obtener()
+        config = ConfigGeneral.obtener()
         for campo, valor in (("dia_semana_envio", 0), ("dia_semana_envio", 8), ("frecuencia_dias", 0)):
             with self.subTest(campo=campo, valor=valor):
                 setattr(config, campo, valor)
                 with self.assertRaises(ValidationError):
                     config.full_clean()
-                ConfigNotificaciones.obtener().refresh_from_db()
-                config = ConfigNotificaciones.obtener()
+                ConfigGeneral.obtener().refresh_from_db()
+                config = ConfigGeneral.obtener()
         config.dia_semana_envio = 7
         config.full_clean()
 
     def test_la_base_de_datos_rechaza_dia_fuera_de_rango(self):
-        config = ConfigNotificaciones.obtener()
+        config = ConfigGeneral.obtener()
         with self.assertRaises(IntegrityError):
             with transaction.atomic():
-                ConfigNotificaciones.objects.filter(pk=config.pk).update(dia_semana_envio=8)
+                ConfigGeneral.objects.filter(pk=config.pk).update(dia_semana_envio=8)
 
 
 class EmailFuncionarioTests(TestCase):
@@ -183,28 +183,46 @@ class CuentaTests(TestCase):
             rol.delete()
 
 
+class _AppsConConfigRenombrada:
+    """`apps` mínimo para ejecutar la migración 0006 tal como fue escrita.
+
+    La 0006 hace apps.get_model('alertas', 'ConfigNotificaciones'), pero ese
+    modelo se renombró a ConfigGeneral en la 0009 y ya no existe en el registro
+    real. Como la 0006 no se edita, se resuelve el nombre antiguo al nuevo y
+    todo lo demás se delega en el registro real.
+    """
+
+    def get_model(self, app_label, model_name=None):
+        if (app_label, model_name) == ('alertas', 'ConfigNotificaciones'):
+            return ConfigGeneral
+        return apps_reales.get_model(app_label, model_name)
+
+
+apps_migracion_0006 = _AppsConConfigRenombrada()
+
+
 class DatosInicialesTests(TestCase):
     """La migración de datos crea el permiso y la configuración una sola vez."""
 
     def test_crea_una_sola_vez(self):
         modulo = importlib.import_module("alertas.migrations.0006_datos_iniciales_roles_notificaciones")
         Permiso.objects.filter(codigo="revisar_alertas").delete()
-        ConfigNotificaciones.objects.all().delete()
+        ConfigGeneral.objects.all().delete()
         roles_antes = Rol.objects.count()
-        modulo.crear_datos_iniciales(apps_reales, None)
-        modulo.crear_datos_iniciales(apps_reales, None)
+        modulo.crear_datos_iniciales(apps_migracion_0006, None)
+        modulo.crear_datos_iniciales(apps_migracion_0006, None)
         self.assertEqual(Permiso.objects.filter(codigo="revisar_alertas").count(), 1)
-        self.assertEqual(ConfigNotificaciones.objects.count(), 1)
-        self.assertEqual(ConfigNotificaciones.objects.get().pk, 1)
+        self.assertEqual(ConfigGeneral.objects.count(), 1)
+        self.assertEqual(ConfigGeneral.objects.get().pk, 1)
         self.assertEqual(Rol.objects.count(), roles_antes)  # esta migración no crea roles
 
     def test_no_pisa_valores_existentes(self):
         modulo = importlib.import_module("alertas.migrations.0006_datos_iniciales_roles_notificaciones")
-        config = ConfigNotificaciones.obtener()
+        config = ConfigGeneral.obtener()
         config.frecuencia_dias = 14
         config.save()
-        modulo.crear_datos_iniciales(apps_reales, None)
-        self.assertEqual(ConfigNotificaciones.obtener().frecuencia_dias, 14)
+        modulo.crear_datos_iniciales(apps_migracion_0006, None)
+        self.assertEqual(ConfigGeneral.obtener().frecuencia_dias, 14)
 
 
 class MigracionCorreosTests(TransactionTestCase):

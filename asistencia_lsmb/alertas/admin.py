@@ -2,7 +2,7 @@ from django.contrib import admin
 from .models import (
     Alerta,
     Cargo,
-    ConfigNotificaciones,
+    ConfigGeneral,
     Cuenta,
     Estado,
     EstadoAlumno,
@@ -33,12 +33,12 @@ admin.site.register(NotificacionCurso)
 admin.site.register(Cuenta)
 
 
-@admin.register(ConfigNotificaciones)
-class ConfigNotificacionesAdmin(admin.ModelAdmin):
+@admin.register(ConfigGeneral)
+class ConfigGeneralAdmin(admin.ModelAdmin):
     """Fila única (id=1): no se puede agregar otra ni borrarla."""
 
     def has_add_permission(self, request):
-        return not ConfigNotificaciones.objects.exists()
+        return not ConfigGeneral.objects.exists()
 
     def has_delete_permission(self, request, obj=None):
         return False

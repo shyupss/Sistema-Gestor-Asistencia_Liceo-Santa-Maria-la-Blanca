@@ -1,4 +1,5 @@
 from academico.queries.academico_queries import obtener_asistencia_curso
+from alertas.models import ConfigGeneral
 
 
 def clasificar_asistencia(porcentaje, estados):
@@ -99,7 +100,7 @@ def preparar_cursos(cursos, fecha, estados):
         (total_registros - total_ausencias) * 100 / total_registros
     ) if total_registros else 0
     total_cursos = len(cursos)
-    porcentaje_meta = 75
+    porcentaje_meta = ConfigGeneral.obtener().meta_asistencia
     cursos_sobre_meta = sum(
         curso.asistencia >= porcentaje_meta for curso in cursos
     )

@@ -216,8 +216,8 @@ class NotificacionCurso(models.Model):
         ]
 
 
-class ConfigNotificaciones(models.Model):
-    """Configuración global de notificaciones: existe una sola fila (id=1)."""
+class ConfigGeneral(models.Model):
+    """Configuración global del sistema: existe una sola fila (id=1)."""
     id = models.PositiveSmallIntegerField(primary_key=True, default=1, editable=False)
     activa = models.BooleanField(default=True)
     frecuencia_dias = models.PositiveSmallIntegerField(
@@ -228,16 +228,27 @@ class ConfigNotificaciones(models.Model):
         default=5, validators=[MinValueValidator(1), MaxValueValidator(7)]
     )
     hora_envio = models.TimeField(default=datetime.time(16, 0))
+    # Meta de asistencia (%). Entera a propósito: los servicios la devuelven en
+    # dicts que se serializan a JSON y Decimal rompería json.dumps.
+    meta_asistencia = models.PositiveSmallIntegerField(
+        default=75, validators=[MinValueValidator(0), MaxValueValidator(100)]
+    )
 
     class Meta:
+        verbose_name = 'Configuración general'
+        verbose_name_plural = 'Configuración general'
         constraints = [
-            models.CheckConstraint(condition=Q(id=1), name='ck_config_notificaciones_singleton'),
+            models.CheckConstraint(condition=Q(id=1), name='ck_config_general_singleton'),
             models.CheckConstraint(
-                condition=Q(frecuencia_dias__gte=1), name='ck_config_notificaciones_frecuencia',
+                condition=Q(frecuencia_dias__gte=1), name='ck_config_general_frecuencia',
             ),
             models.CheckConstraint(
                 condition=Q(dia_semana_envio__gte=1, dia_semana_envio__lte=7),
-                name='ck_config_notificaciones_dia_semana',
+                name='ck_config_general_dia_semana',
+            ),
+            models.CheckConstraint(
+                condition=Q(meta_asistencia__gte=0, meta_asistencia__lte=100),
+                name='ck_config_general_meta',
             ),
         ]
 
@@ -247,7 +258,7 @@ class ConfigNotificaciones(models.Model):
         return cls.objects.get_or_create(pk=1)[0]
 
     def __str__(self):
-        return 'Configuración de notificaciones'
+        return 'Configuración general'
 
 
 class Cuenta(models.Model):

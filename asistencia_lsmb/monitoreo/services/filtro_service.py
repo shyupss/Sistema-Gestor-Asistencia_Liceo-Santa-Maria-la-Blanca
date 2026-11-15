@@ -5,7 +5,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from academico.models import Curso, PeriodoAcademico
-from alertas.models import Alerta, Funcionario
+from alertas.models import Alerta, ConfigGeneral, Funcionario
 from asistencia.models import Justificaciones, Paso_Lista
 from monitoreo.services.niveles import nivel_alerta, umbral_critico
 from monitoreo.queries.filtro_queries import (
@@ -248,8 +248,9 @@ def resolver_filtros_actividad_reciente(get_params):
 # =========================================================================
 
 def calcular_asistencia_general(periodo, fecha, filtros_ag):
+    meta = ConfigGeneral.obtener().meta_asistencia
     if not periodo:
-        return {"porcentaje": 0, "meta": 75, "periodo": "Sin periodo académico"}
+        return {"porcentaje": 0, "meta": meta, "periodo": "Sin periodo académico"}
 
     inicio, fin = _rango_periodo(periodo, fecha)
     asistencias = obtener_asistencias_base(periodo.pk, fin).filter(
@@ -284,7 +285,7 @@ def calcular_asistencia_general(periodo, fecha, filtros_ag):
 
     return {
         "porcentaje": porcentaje,
-        "meta": 75,
+        "meta": meta,
         "periodo": " · ".join(partes_descripcion),
         "total_registros": total,
         "ausencias": ausencias,
