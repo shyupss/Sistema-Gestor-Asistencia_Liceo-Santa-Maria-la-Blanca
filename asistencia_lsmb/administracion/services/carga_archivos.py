@@ -84,6 +84,23 @@ REQUIRED_HEADER_LABELS = {
     ],
 }
 
+MESES_ES = {
+    "ENERO": 1,
+    "FEBRERO": 2,
+    "MARZO": 3,
+    "ABRIL": 4,
+    "MAYO": 5,
+    "JUNIO": 6,
+    "JULIO": 7,
+    "AGOSTO": 8,
+    "SEPTIEMBRE": 9,
+    "OCTUBRE": 10,
+    "NOVIEMBRE": 11,
+    "DICIEMBRE": 12,
+}
+
+MARCAS_AUSENCIA = {"x", "c", "<", "|"}
+
 
 class ArchivoCargaError(ValueError):
     """Error de validación que puede mostrarse directamente al administrador."""
@@ -167,6 +184,208 @@ def _normalizar_curso(value):
     return (nivel, match.group(2)) if nivel else None
 
 
+def _normalizar_nombre(value):
+    text = unicodedata.normalize("NFKD", str(value or ""))
+    text = "".join(char for char in text if not unicodedata.combining(char))
+    text = re.sub(r"\s*\(\d{1,2}/\d{1,2}(?:/\d{2,4})?\)\s*$", "", text)
+    return " ".join(text.casefold().split())
+
+
+def _curso_desde_titulo(value):
+    titulo = str(value or "").strip()
+    titulo = re.sub(r"^curso\s*", "", titulo, flags=re.IGNORECASE)
+    return _normalizar_curso(titulo)
+
+
+def _periodo_desde_libro(workbook, nombre_archivo):
+    texto = unicodedata.normalize("NFKD", str(nombre_archivo or "")).upper()
+    texto = "".join(char for char in texto if not unicodedata.combining(char))
+    anio_match = re.search(r"20\d{2}", texto)
+    mes = next((numero for nombre, numero in MESES_ES.items() if nombre in texto), None)
+
+    if not mes:
+        for worksheet in workbook.worksheets:
+            for value in worksheet[1]:
+                encabezado = unicodedata.normalize("NFKD", str(value.value or "")).upper()
+                encabezado = "".join(char for char in encabezado if not unicodedata.combining(char))
+                if "DIAS TRABAJADOS" in encabezado:
+                    mes = next(
+                        (numero for nombre, numero in MESES_ES.items() if nombre in encabezado),
+                        None,
+                    )
+                    if mes:
+                        break
+            if mes:
+                break
+
+    if not mes or not anio_match:
+        raise ArchivoCargaError(
+            "No se pudo determinar el mes y año del archivo. "
+            "Usa un nombre como ASISTENCIA AGOSTO 2026.xlsx."
+        )
+    return int(anio_match.group()), mes
+
+
+def _preparar_asistencia_xlsx(uploaded_file):
+    try:
+        uploaded_file.seek(0)
+        workbook = load_workbook(uploaded_file, read_only=True, data_only=True)
+    except (InvalidFileException, OSError, ValueError) as exc:
+        raise ArchivoCargaError(
+            "El archivo XLSX no se puede leer. Verifica que no esté dañado."
+        ) from exc
+
+    registros = []
+    errores = []
+    hojas_procesadas = []
+    fechas_vistas = set()
+    try:
+        anio, mes = _periodo_desde_libro(workbook, uploaded_file.name)
+        for worksheet in workbook.worksheets:
+            if "master" in worksheet.title.strip().casefold():
+                continue
+            curso = _curso_desde_titulo(worksheet["B1"].value)
+            if not curso:
+                continue
+
+            encabezados = [cell.value for cell in worksheet[4]]
+            nombre_index = next(
+                (index for index, value in enumerate(encabezados)
+                 if _normalizar_encabezado(value) == "nombre alumno"),
+                None,
+            )
+            estado_index = next(
+                (index for index, value in enumerate(encabezados)
+                 if _normalizar_encabezado(value) == "estado"),
+                None,
+            )
+            if nombre_index is None or estado_index is None:
+                errores.append({
+                    "fila": 4,
+                    "detalle": f"La hoja '{worksheet.title}' no tiene Nombre Alumno y Estado en la fila 4.",
+                })
+                continue
+
+            columnas_dias = []
+            for index, value in enumerate(encabezados):
+                if not isinstance(value, (int, float)) or isinstance(value, bool):
+                    continue
+                try:
+                    fecha = date(anio, mes, int(value))
+                except ValueError:
+                    errores.append({
+                        "fila": 4,
+                        "detalle": f"Día inválido '{value}' en la hoja '{worksheet.title}'.",
+                    })
+                    continue
+                fechas_vistas.add(fecha)
+                columnas_dias.append((index, fecha))
+
+            if not columnas_dias:
+                errores.append({
+                    "fila": 4,
+                    "detalle": f"La hoja '{worksheet.title}' no tiene días numéricos en la fila 4.",
+                })
+                continue
+
+            hojas_procesadas.append(worksheet.title.strip())
+            filas_activas = []
+            for numero, row in enumerate(worksheet.iter_rows(min_row=5, values_only=True), start=5):
+                nombre = str(row[nombre_index] if nombre_index < len(row) else "").strip()
+                estado_valor = row[estado_index] if estado_index < len(row) else ""
+                estado = "" if estado_valor in (None, "") else str(estado_valor).strip()
+                if not nombre or estado:
+                    continue
+                filas_activas.append((numero, row, nombre))
+
+            columnas_asistencia_completa = set()
+            for index, _fecha in columnas_dias:
+                valores = [
+                    str(row[index] or "").strip()
+                    for _numero, row, _nombre in filas_activas
+                    if index < len(row) and str(row[index] or "").strip()
+                ]
+                texto_columna = re.sub(
+                    r"[^A-Z0-9]", "", "".join(valores).upper()
+                )
+                if "ASISTENCIACOMPLETA" in texto_columna or "ACOMPLETA" in texto_columna:
+                    columnas_asistencia_completa.add(index)
+
+            for numero, row, nombre in filas_activas:
+                for index, fecha in columnas_dias:
+                    valor = row[index] if index < len(row) else None
+                    valor_normalizado = str(valor or "").strip().casefold()
+                    if valor_normalizado == "ret":
+                        continue
+                    ausente = (
+                        index not in columnas_asistencia_completa
+                        and valor_normalizado in MARCAS_AUSENCIA
+                    )
+                    if index in columnas_asistencia_completa:
+                        valor_normalizado = ""
+                    if valor_normalizado and not ausente:
+                        errores.append({
+                            "fila": numero,
+                            "detalle": (
+                                f"Valor '{valor}' inválido para {fecha:%d/%m/%Y} "
+                                f"en la hoja '{worksheet.title}'; usa x o deja vacío."
+                            ),
+                        })
+                        continue
+                    registros.append({
+                        "rut": "",
+                        "nombre": nombre,
+                        "fecha": fecha.isoformat(),
+                        "estado": "A" if ausente else "P",
+                        "fila": numero,
+                        "hoja": worksheet.title.strip(),
+                        "curso": curso,
+                    })
+    finally:
+        workbook.close()
+
+    if not hojas_procesadas:
+        raise ArchivoCargaError(
+            "No se encontraron hojas de cursos válidas. El curso debe estar en B1, "
+            "por ejemplo: 'Curso 1°A'."
+        )
+    if not registros:
+        errores.append({"fila": 5, "detalle": "No se encontraron estudiantes activos con días de asistencia."})
+
+    return {
+        "tipo": "Asistencia",
+        "nombre": uploaded_file.name,
+        "filas": len(registros),
+        "encabezados": ["Hoja", "Nombre Alumno", "Fecha", "Estado"],
+        "vista_previa": [
+            [registro["hoja"], registro["nombre"], registro["fecha"], registro["estado"]]
+            for registro in registros[:MAX_PREVIEW_ROWS]
+        ],
+        "filas_omitidas": max(0, len(registros) - MAX_PREVIEW_ROWS),
+        "registros": registros,
+        "errores": errores,
+        "dias_registrados": len(fechas_vistas),
+        "hojas_procesadas": hojas_procesadas,
+    }
+
+
+def _es_libro_mensual_asistencia(uploaded_file):
+    try:
+        uploaded_file.seek(0)
+        workbook = load_workbook(uploaded_file, read_only=True, data_only=True)
+    except (InvalidFileException, OSError, ValueError) as exc:
+        raise ArchivoCargaError(
+            "El archivo XLSX no se puede leer. Verifica que no esté dañado."
+        ) from exc
+    try:
+        return any(
+            _curso_desde_titulo(worksheet["B1"].value)
+            for worksheet in workbook.worksheets
+        )
+    finally:
+        workbook.close()
+
+
 def validar_archivo_carga(uploaded_file: UploadedFile, tipo):
     # Valida primero el archivo y sus columnas antes de interpretar los datos.
     if tipo not in REQUIRED_HEADERS:
@@ -175,6 +394,13 @@ def validar_archivo_carga(uploaded_file: UploadedFile, tipo):
         raise ArchivoCargaError("Selecciona un archivo antes de continuar.")
     if uploaded_file.size > MAX_FILE_SIZE:
         raise ArchivoCargaError("El archivo supera el límite de 10 MB.")
+
+    if (
+        tipo == "Asistencia"
+        and Path(uploaded_file.name or "").suffix.casefold() == ".xlsx"
+        and _es_libro_mensual_asistencia(uploaded_file)
+    ):
+        return _preparar_asistencia_xlsx(uploaded_file)
 
     # Lectura común para XLSX y CSV.
     rows = _leer_filas(uploaded_file)
@@ -460,11 +686,27 @@ def cargar_asistencia(registros, progress_callback=None):
             "Crea o activa un funcionario desde Administración."
         )
 
-    alumno_ids = {registro["rut"] for registro in registros}
-    alumnos = {
-        alumno.rut: alumno
-        for alumno in Alumno.objects.filter(rut__in=alumno_ids)
+    ruts_carga = {registro.get("rut") for registro in registros if registro.get("rut")}
+    nombres_carga = {
+        _normalizar_nombre(registro.get("nombre"))
+        for registro in registros
+        if registro.get("nombre")
     }
+    alumnos = {}
+    alumnos_por_nombre = {}
+    for alumno in Alumno.objects.all().only("id", "rut", "nombre"):
+        if alumno.rut in ruts_carga:
+            alumnos[alumno.rut] = alumno
+        nombre_normalizado = _normalizar_nombre(alumno.nombre)
+        if nombre_normalizado in nombres_carga:
+            alumnos_por_nombre.setdefault(nombre_normalizado, []).append(alumno)
+
+    def resolver_alumno(registro):
+        if registro.get("rut"):
+            return alumnos.get(registro["rut"])
+        candidatos = alumnos_por_nombre.get(_normalizar_nombre(registro.get("nombre")), [])
+        return candidatos[0] if len(candidatos) == 1 else None
+
     errores_por_alumno = {}
     errores_por_feriado = {}
     matriculas = {}
@@ -482,10 +724,15 @@ def cargar_asistencia(registros, progress_callback=None):
                     numero,
                 )
             continue
-        alumno = alumnos.get(registro["rut"])
+        alumno = resolver_alumno(registro)
         if not alumno:
             errores_por_alumno.setdefault(
-                ("no existe", registro["fila"], registro["rut"]), set()
+                (
+                    "no existe" if registro.get("rut") else "nombre no encontrado",
+                    registro["fila"],
+                    registro.get("rut") or registro.get("nombre"),
+                ),
+                set(),
             ).add(fecha)
             if progress_callback:
                 progress_callback(
@@ -494,6 +741,8 @@ def cargar_asistencia(registros, progress_callback=None):
                     numero,
                 )
             continue
+        registro["rut"] = alumno.rut
+        alumnos[alumno.rut] = alumno
         matricula = (
             Matricula.objects.filter(
                 alumno=alumno,
@@ -540,15 +789,19 @@ def cargar_asistencia(registros, progress_callback=None):
                 sorted(fecha.strftime("%d/%m/%Y") for fecha in fechas)
             )
             errores.append(f"{mensaje} Fechas: {fechas_texto}.")
-        for (tipo, fila, rut), fechas in errores_por_alumno.items():
+        for (tipo, fila, identificador), fechas in errores_por_alumno.items():
             fechas_texto = ", ".join(sorted(fecha.strftime("%d/%m/%Y") for fecha in fechas))
             if tipo == "no existe":
                 errores.append(
-                    f"Fila {fila} · RUT {rut}: el alumno no existe en el sistema."
+                    f"Fila {fila} · RUT {identificador}: el alumno no existe en el sistema."
+                )
+            elif tipo == "nombre no encontrado":
+                errores.append(
+                    f"Fila {fila} · Nombre {identificador}: no se encontró un alumno único en el sistema."
                 )
             else:
                 errores.append(
-                    f"Fila {fila} · RUT {rut}: no tiene matrícula vigente "
+                    f"Fila {fila} · Identificador {identificador}: no tiene matrícula vigente "
                     f"en las fechas: {fechas_texto}."
                 )
         raise ArchivoCargaError("\n".join(errores))

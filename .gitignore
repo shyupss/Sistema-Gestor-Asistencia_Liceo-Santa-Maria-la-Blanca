@@ -6,3 +6,4 @@
 asistencia_lsmb/staticfiles/
 LOCAL_*.py
 */LOCAL_*.py
+asistencia_lsmb/administracion/test_files/
