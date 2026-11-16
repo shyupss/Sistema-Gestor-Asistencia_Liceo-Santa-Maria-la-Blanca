@@ -22,25 +22,26 @@
     </div>
     {% endif %}
 
+    {% if permitir_ambiente_prueba %}
     <div class="mb-6 rounded-lg border border-gris-claro bg-blanco-tarjeta p-4">
-        <h2 class="font-semibold text-azul-oscuro">Configuración de asistencia</h2>
+        <h2 class="font-semibold text-azul-oscuro">Ambiente de prueba</h2>
         <p class="mt-1 text-sm text-gris-texto">
-            Carga presente, ausente, atrasado y justificado, y los estados pendiente, aceptada y rechazada.
-            Ausente y atrasado cuentan como falta; presente y justificado no.
-            Aceptada y rechazada son estados finales; solo aceptada cubre la ausencia.
+            Crea los roles (Asistente social, Rector, Inspector general e Inspector), sus cargos y
+            3 funcionarios de prueba por rol, cada uno con su cuenta.
         </p>
         <p class="mt-1 text-sm text-gris-texto">
-            Puedes repetir la carga: actualiza estas reglas en los registros existentes sin duplicarlos.
+            Puedes repetirlo: solo crea lo que falte y no modifica los datos existentes.
         </p>
-        <form method="post" action="{% url 'cargar_configuracion_asistencia' %}" class="mt-3">
+        <form method="post" action="{% url 'preparar_ambiente_prueba' %}" class="mt-3">
             {% csrf_token %}
             <button type="submit"
                 class="inline-flex items-center gap-2 rounded-lg bg-azul px-4 py-2 text-sm font-medium text-white hover:opacity-90">
                 <i data-lucide="settings" class="h-4 w-4" aria-hidden="true"></i>
-                Cargar configuración de asistencia
+                Preparar ambiente de prueba
             </button>
         </form>
     </div>
+    {% endif %}
 
     <!-- Tabs -->
     <div x-data="{ tab: '{% if request.GET.tab == 'carga_datos' or carga_archivo or carga_error %}carga_datos{% else %}matriculas{% endif %}' }">

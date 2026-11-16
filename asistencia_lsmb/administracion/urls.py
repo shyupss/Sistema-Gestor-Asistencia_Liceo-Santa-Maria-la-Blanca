@@ -3,7 +3,7 @@ from administracion import views
 
 urlpatterns = [
     path("", views.pagina_administracion, name="administracion"),
-    path("configuracion-asistencia/cargar/", views.cargar_configuracion_asistencia, name="cargar_configuracion_asistencia"),
+    path("ambiente-prueba/preparar/", views.preparar_ambiente_prueba, name="preparar_ambiente_prueba"),
     path("cargas/limpiar/", views.limpiar_datos_cargas_view, name="limpiar_datos_cargas"),
     path("cargas/<uuid:carga_id>/estado/", views.estado_carga_datos, name="estado_carga_datos"),
     path("cargas/<uuid:carga_id>/resultado/", views.resultado_carga_datos, name="resultado_carga_datos"),

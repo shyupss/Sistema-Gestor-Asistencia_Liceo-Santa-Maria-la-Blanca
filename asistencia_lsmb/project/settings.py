@@ -170,6 +170,10 @@ CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", CELERY_BROKER_URL)
 CELERY_TASK_TRACK_STARTED = True
 CELERY_RESULT_EXPIRES = 60 * 60 * 24
 
+# Habilita el botón y el comando "Preparar ambiente de prueba" (datos ficticios).
+# Apagado por defecto; las vistas de administración aún no tienen control de acceso.
+PERMITIR_AMBIENTE_PRUEBA = os.getenv("PERMITIR_AMBIENTE_PRUEBA", "").strip().lower() in {"1", "true", "yes"}
+
 FERIADOS_API_URL = os.getenv(
     "FERIADOS_API_URL",
     "https://date.nager.at/api/v3/PublicHolidays",

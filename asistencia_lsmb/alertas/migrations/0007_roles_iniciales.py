@@ -1,42 +1,16 @@
 from django.db import migrations
 
-# nombre, alcance, recibe_todos_los_cursos_marcados
-ROLES = [
-    ('Asistente social', 'todos', True),
-    ('Rector', 'todos', False),
-    ('Inspector general', 'todos', False),
-    ('Inspector', 'seleccionados', False),
-]
-
 
 def crear_roles_iniciales(apps, schema_editor):
-    """Idempotente. Crea los roles que falten y les asigna 'revisar_alertas'.
+    """No hace nada.
 
-    Un rol que ya existe no se toca (ni sus campos ni sus permisos): su alcance
-    puede haberse editado en el admin.
+    Antes sembraba los roles Asistente social, Rector, Inspector general e
+    Inspector. Los roles pasaron al ambiente de prueba (botón «Preparar ambiente
+    de prueba» del módulo de administración), así que una BD recién migrada ya
+    no los trae. Es una migración solo de datos: las BD que ya tenían los roles
+    los conservan. El archivo y su lugar en la cadena de dependencias se
+    mantienen para no romper el historial de migraciones.
     """
-    Rol = apps.get_model('alertas', 'Rol')
-    Permiso = apps.get_model('alertas', 'Permiso')
-    RolPermiso = apps.get_model('alertas', 'RolPermiso')
-
-    permiso, _ = Permiso.objects.get_or_create(
-        codigo='revisar_alertas',
-        defaults={
-            'nombre': 'Revisar alertas',
-            'descripcion': 'Permite revisar alertas y recibir notificaciones de alertas.',
-        },
-    )
-    for nombre, alcance, recibe_todos in ROLES:
-        rol, creado = Rol.objects.get_or_create(
-            nombre__iexact=nombre,
-            defaults={
-                'nombre': nombre,
-                'alcance': alcance,
-                'recibe_todos_los_cursos_marcados': recibe_todos,
-            },
-        )
-        if creado:
-            RolPermiso.objects.get_or_create(rol=rol, permiso=permiso)
 
 
 class Migration(migrations.Migration):

@@ -3,7 +3,7 @@ from datetime import date
 from io import BytesIO
 
 from django.contrib import messages
-from django.core.exceptions import MultipleObjectsReturned
+from django.conf import settings
 from django.db import transaction
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -24,7 +24,7 @@ from kombu.exceptions import OperationalError
 from redis.exceptions import RedisError
 from alertas.models import Cargo, Funcionario
 
-from .catalogos import cargar_catalogos_asistencia
+from .services import ambiente_prueba as servicio_ambiente_prueba
 from .services.carga_archivos import (
     ArchivoCargaError,
     REQUIRED_HEADER_LABELS,
@@ -230,6 +230,7 @@ def pagina_administracion(request):
             "carga_error": carga_error,
             "tipo_carga": tipo_carga,
             "cabeceras_carga": REQUIRED_HEADER_LABELS,
+            "permitir_ambiente_prueba": settings.PERMITIR_AMBIENTE_PRUEBA,
         },
     )
 
@@ -400,21 +401,28 @@ def limpiar_datos_cargas_view(request):
 
 
 @require_POST
-def cargar_configuracion_asistencia(request):
-    try:
-        creados, actualizados = cargar_catalogos_asistencia()
-    except MultipleObjectsReturned:
+def preparar_ambiente_prueba(request):
+    if not settings.PERMITIR_AMBIENTE_PRUEBA:
         messages.error(
             request,
-            "Hay estados o tipos repetidos que solo se diferencian por mayúsculas. "
-            "Revisa esos registros antes de cargar la configuración; no se guardaron cambios.",
+            "El ambiente de prueba está deshabilitado. "
+            "Define PERMITIR_AMBIENTE_PRUEBA=1 en el entorno para usarlo.",
         )
+        return redirect("administracion")
+    try:
+        creados = servicio_ambiente_prueba.preparar_ambiente_prueba()
+    except servicio_ambiente_prueba.AmbientePruebaError as exc:
+        messages.error(request, str(exc))
     else:
-        messages.success(
-            request,
-            f"Configuración de asistencia lista: {creados} registros creados y "
-            f"{actualizados} actualizados.",
-        )
+        if any(creados.values()):
+            messages.success(
+                request,
+                "Ambiente de prueba listo: "
+                f"{creados['roles']} roles, {creados['cargos']} cargos, "
+                f"{creados['funcionarios']} funcionarios y {creados['cuentas']} cuentas creados.",
+            )
+        else:
+            messages.success(request, "El ambiente de prueba ya estaba preparado; no se creó nada.")
     return redirect("administracion")
 
 

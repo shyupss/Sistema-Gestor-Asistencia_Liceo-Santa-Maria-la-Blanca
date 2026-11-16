@@ -676,7 +676,8 @@ def cargar_asistencia(registros, progress_callback=None):
     tipo_ausente = tipos.get(TIPO_AUSENTE)
     if not tipo_presente or not tipo_ausente:
         raise ArchivoCargaError(
-            "Debes cargar la configuración de asistencia con los tipos Presente y Ausente."
+            "Faltan los tipos de asistencia Presente y Ausente. "
+            "Aplica las migraciones (manage.py migrate) y vuelve a intentar."
         )
 
     # La carga aún no tiene autenticación enlazada a Funcionario. Se prefiere
