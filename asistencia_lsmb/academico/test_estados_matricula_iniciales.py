@@ -60,10 +60,18 @@ class EstadosMatriculaInicialesTests(TestCase):
         self.assertEqual(EstadoMatricula.objects.count(), 3)
 
     def test_coincide_con_las_constantes_de_academico(self):
-        self.assertEqual(migracion.ESTADOS_MATRICULA, ESTADOS_MATRICULA)
+        # La 0006 está congelada en 3 estados. Cada uno sigue en las constantes con
+        # el mismo valor; los estados que agregan migraciones posteriores (0007) no
+        # están aquí. La comparación con el catálogo completo (0006 + 0007) está en
+        # test_estado_matricula_cambio_curso.py.
+        self.assertEqual(set(migracion.ESTADOS_MATRICULA), {"vigente", "retirado", "egresado"})
+        for nombre, descripcion in migracion.ESTADOS_MATRICULA.items():
+            with self.subTest(nombre=nombre):
+                self.assertEqual(ESTADOS_MATRICULA.get(nombre), descripcion)
         _sembrar()
         self.assertEqual(
-            dict(EstadoMatricula.objects.values_list("nombre", "descripcion")), ESTADOS_MATRICULA,
+            dict(EstadoMatricula.objects.values_list("nombre", "descripcion")),
+            migracion.ESTADOS_MATRICULA,
         )
 
     def test_migracion_no_importa_las_constantes_de_la_app(self):

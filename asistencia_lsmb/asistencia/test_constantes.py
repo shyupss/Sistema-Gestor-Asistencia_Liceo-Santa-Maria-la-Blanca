@@ -7,6 +7,7 @@ from django.test import RequestFactory, TestCase
 from django.urls import reverse
 
 from academico.constantes import (
+    ESTADO_MATRICULA_CAMBIO_CURSO,
     ESTADO_MATRICULA_EGRESADO,
     ESTADO_MATRICULA_RETIRADO,
     ESTADO_MATRICULA_VIGENTE,
@@ -57,13 +58,19 @@ class ConstantesCoincidenConMigracionTests(TestCase):
     def test_estados_matricula(self):
         self.assertEqual(ESTADOS_MATRICULA, {
             ESTADO_MATRICULA_VIGENTE: "Alumno con matrícula vigente",
+            ESTADO_MATRICULA_CAMBIO_CURSO: "Matrícula cerrada porque el alumno pasó a otro curso del liceo",
             ESTADO_MATRICULA_RETIRADO: "Alumno que se retiró del liceo",
             ESTADO_MATRICULA_EGRESADO: "Alumno que egresó del liceo",
         })
         self.assertEqual(
-            (ESTADO_MATRICULA_VIGENTE, ESTADO_MATRICULA_RETIRADO, ESTADO_MATRICULA_EGRESADO),
-            ("vigente", "retirado", "egresado"),
+            (
+                ESTADO_MATRICULA_VIGENTE, ESTADO_MATRICULA_CAMBIO_CURSO,
+                ESTADO_MATRICULA_RETIRADO, ESTADO_MATRICULA_EGRESADO,
+            ),
+            ("vigente", "cambio_curso", "retirado", "egresado"),
         )
+        # "fin_matricula" es un motivo de cierre de alertas, no un estado de matrícula.
+        self.assertNotIn("fin_matricula", ESTADOS_MATRICULA)
 
     # --- Demuestran que la comparación detecta desfases -------------------
 
