@@ -51,14 +51,16 @@ class BaseAlumnoTestCase(TestCase):
             nivel=1,
             grupo="B",
         )
-        self.estado_vigente = EstadoMatricula.objects.create(
+        # Los estados los siembra la migración 0006; get_or_create también sirve
+        # cuando un TransactionTestCase previo vació la tabla.
+        self.estado_vigente = EstadoMatricula.objects.get_or_create(
             nombre="vigente",
-            descripcion="Alumno con matrícula vigente",
-        )
-        self.estado_retirado = EstadoMatricula.objects.create(
+            defaults={"descripcion": "Alumno con matrícula vigente"},
+        )[0]
+        self.estado_retirado = EstadoMatricula.objects.get_or_create(
             nombre="retirado",
-            descripcion="Alumno retirado del colegio",
-        )
+            defaults={"descripcion": "Alumno que se retiró del liceo"},
+        )[0]
 
 
 # ---------------------------------------------------------------------------

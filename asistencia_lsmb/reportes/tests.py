@@ -17,7 +17,7 @@ class VistaPreviaReportesTests(TestCase):
         )
         self.curso_a = Curso.objects.create(periodo=self.periodo, nivel=1, grupo="A")
         self.curso_b = Curso.objects.create(periodo=self.periodo, nivel=1, grupo="B")
-        estado = EstadoMatricula.objects.create(nombre="vigente")
+        estado = EstadoMatricula.objects.get_or_create(nombre="vigente")[0]
         alumno = Alumno.objects.create(nombre="Estudiante", rut="11111111-1")
         Matricula.objects.create(
             alumno=alumno,

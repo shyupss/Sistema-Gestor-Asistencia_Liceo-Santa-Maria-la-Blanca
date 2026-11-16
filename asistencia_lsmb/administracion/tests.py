@@ -113,7 +113,7 @@ class ValidarArchivoCargaTests(TestCase):
             fecha_fin=date(2026, 12, 31),
         )
         curso = Curso.objects.create(periodo=periodo, nivel=1, grupo="A")
-        estado_matricula = EstadoMatricula.objects.create(nombre="vigente")
+        estado_matricula = EstadoMatricula.objects.get_or_create(nombre="vigente")[0]
         alumno = Alumno.objects.create(nombre="Ana Pérez", rut="12.345.678-9")
         Matricula.objects.create(
             alumno=alumno,

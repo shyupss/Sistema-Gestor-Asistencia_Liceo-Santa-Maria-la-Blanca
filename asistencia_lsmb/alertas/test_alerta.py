@@ -24,7 +24,7 @@ class AlertaTests(TestCase):
             fecha_fin=datetime.date(self.fecha.year, 12, 31),
         )
         self.curso = Curso.objects.create(periodo=self.periodo, nivel=1, grupo="A")
-        vigente = EstadoMatricula.objects.create(nombre="vigente")
+        vigente = EstadoMatricula.objects.get_or_create(nombre="vigente")[0]
         self.alumno = Alumno.objects.create(nombre="Alumno Uno", rut="11111111-1")
         self.otro = Alumno.objects.create(nombre="Alumno Dos", rut="22222222-2")
         for alumno in (self.alumno, self.otro):

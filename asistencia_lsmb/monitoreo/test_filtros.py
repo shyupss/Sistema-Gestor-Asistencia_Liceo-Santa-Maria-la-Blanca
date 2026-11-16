@@ -30,7 +30,7 @@ class FiltrosDashboardTests(TestCase):
         )
         self.curso_1a = Curso.objects.create(periodo=self.periodo, nivel=1, grupo="A")
         self.curso_2b = Curso.objects.create(periodo=self.periodo, nivel=2, grupo="B")
-        self.estado_mat = EstadoMatricula.objects.create(nombre="vigente")
+        self.estado_mat = EstadoMatricula.objects.get_or_create(nombre="vigente")[0]
 
         self.alumno_1 = Alumno.objects.create(nombre="Alumno Uno", rut="11111111-1")
         self.alumno_2 = Alumno.objects.create(nombre="Alumno Dos", rut="22222222-2")
