@@ -2,21 +2,9 @@ from django.db import transaction
 from django.db.models import Q
 
 from academico.models import Alumno, PeriodoAcademico
+from asistencia.constantes import ESTADO_ACEPTADA, ESTADOS_SOLICITUD, TIPOS_ASISTENCIA
 from asistencia.models import Asistencia_Alumnos, Estados_Solicitud, Justificaciones, Tipos_Asistencia
 from asistencia.services.asistencia_service import recalcular_estado_alumno
-
-
-TIPOS_ASISTENCIA = {
-    "presente": False,
-    "ausente": True,
-    "atrasado": True,
-    "justificado": False,
-}
-ESTADOS_SOLICITUD = {
-    "pendiente": (False, False, "Solicitud pendiente de revisión."),
-    "aceptada": (True, True, "Solicitud aceptada; cubre la ausencia."),
-    "rechazada": (True, False, "Solicitud rechazada; no cubre la ausencia."),
-}
 
 
 def _guardar(modelo, nombre, valores, descripcion=None):
@@ -50,8 +38,8 @@ def cargar_catalogos_asistencia():
         anterior = Estados_Solicitud.objects.get(nombre__iexact="aprobada")
     except Estados_Solicitud.DoesNotExist:
         anterior = None
-    if anterior and not Estados_Solicitud.objects.filter(nombre__iexact="aceptada").exists():
-        anterior.nombre = "aceptada"
+    if anterior and not Estados_Solicitud.objects.filter(nombre__iexact=ESTADO_ACEPTADA).exists():
+        anterior.nombre = ESTADO_ACEPTADA
         if anterior.descripcion == "Solicitud aprobada; cubre la ausencia.":
             anterior.descripcion = "Solicitud aceptada; cubre la ausencia."
         anterior.save(update_fields=["nombre", "descripcion"])
@@ -78,7 +66,7 @@ def cargar_catalogos_asistencia():
             estados_modificados.append(registro.pk)
 
     if anterior:
-        aceptada = Estados_Solicitud.objects.get(nombre__iexact="aceptada")
+        aceptada = Estados_Solicitud.objects.get(nombre__iexact=ESTADO_ACEPTADA)
         Justificaciones.objects.filter(estado_solicitud=anterior).update(estado_solicitud=aceptada)
         anterior.delete()
         estados_modificados.append(aceptada.pk)

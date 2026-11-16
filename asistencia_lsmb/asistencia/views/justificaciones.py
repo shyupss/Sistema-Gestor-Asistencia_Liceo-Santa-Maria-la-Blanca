@@ -4,6 +4,7 @@ from django.db.models import Prefetch, Q
 from datetime import timedelta
 
 from academico.models import Matricula
+from asistencia.constantes import ESTADO_ACEPTADA, ESTADO_PENDIENTE, ESTADO_RECHAZADA
 from asistencia.models import Justificaciones
 
 def pagina_justificaciones(request):
@@ -80,8 +81,8 @@ def pagina_justificaciones(request):
         "orden": orden,
         "mostrando": total,
         "total": total,
-        "pendientes_count": Justificaciones.objects.filter(estado_solicitud__nombre__iexact = 'pendiente').count(),
-        "aceptadas_count": Justificaciones.objects.filter(estado_solicitud__nombre__iexact = 'aceptada').count(),
-        "rechazadas_count": Justificaciones.objects.filter(estado_solicitud__nombre__iexact = 'rechazada').count(),
+        "pendientes_count": Justificaciones.objects.filter(estado_solicitud__nombre__iexact=ESTADO_PENDIENTE).count(),
+        "aceptadas_count": Justificaciones.objects.filter(estado_solicitud__nombre__iexact=ESTADO_ACEPTADA).count(),
+        "rechazadas_count": Justificaciones.objects.filter(estado_solicitud__nombre__iexact=ESTADO_RECHAZADA).count(),
     }
     return render(request, "justificaciones/base.html", contexto)

@@ -32,6 +32,7 @@ from .services.carga_archivos import (
     validar_archivo_carga,
 )
 from .models import CargaDatos
+from academico.constantes import ESTADO_MATRICULA_VIGENTE, ESTADOS_MATRICULA
 from .tasks import procesar_carga_datos
 
 from .forms import (
@@ -511,8 +512,8 @@ def matricular_alumno(request):
             try:
                 alumno = alumno_form.save()
                 estado_vigente, _ = EstadoMatricula.objects.get_or_create(
-                    nombre="vigente",
-                    defaults={"descripcion": "Alumno con matrícula vigente"},
+                    nombre=ESTADO_MATRICULA_VIGENTE,
+                    defaults={"descripcion": ESTADOS_MATRICULA[ESTADO_MATRICULA_VIGENTE]},
                 )
                 matricula = matricula_form.save(commit=False)
                 matricula.alumno = alumno

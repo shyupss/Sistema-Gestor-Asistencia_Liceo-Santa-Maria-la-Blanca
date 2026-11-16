@@ -23,6 +23,8 @@ from academico.models import (
 )
 from alertas.models import Funcionario
 from asistencia.models import Asistencia_Alumnos, Paso_Lista, Tipos_Asistencia
+from academico.constantes import ESTADO_MATRICULA_VIGENTE
+from asistencia.constantes import TIPO_AUSENTE, TIPO_PRESENTE
 from asistencia.services.asistencia_service import (
     obtener_justificacion_aplicable,
     recalcular_estado_alumno,
@@ -582,7 +584,7 @@ def _preparar_asistencia(rows, data_rows, headers):
 @transaction.atomic
 def cargar_matriculas(registros, progress_callback=None):
     # Toda la carga se confirma o revierte completa si ocurre un error.
-    estado_vigente, _ = EstadoMatricula.objects.get_or_create(nombre="vigente")
+    estado_vigente, _ = EstadoMatricula.objects.get_or_create(nombre=ESTADO_MATRICULA_VIGENTE)
     # Estos contadores se muestran en el reporte final de la importación.
     conteo = {"alumnos_creados": 0, "alumnos_actualizados": 0,
               "apoderados_creados": 0, "apoderados_actualizados": 0,
@@ -670,8 +672,8 @@ def cargar_asistencia(registros, progress_callback=None):
         tipo.nombre.casefold(): tipo
         for tipo in Tipos_Asistencia.objects.all()
     }
-    tipo_presente = tipos.get("presente")
-    tipo_ausente = tipos.get("ausente")
+    tipo_presente = tipos.get(TIPO_PRESENTE)
+    tipo_ausente = tipos.get(TIPO_AUSENTE)
     if not tipo_presente or not tipo_ausente:
         raise ArchivoCargaError(
             "Debes cargar la configuración de asistencia con los tipos Presente y Ausente."

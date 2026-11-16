@@ -5,6 +5,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from academico.models import Curso, PeriodoAcademico
+from asistencia.constantes import ESTADO_ACEPTADA, ESTADO_RECHAZADA
 from alertas.models import Alerta, ConfigGeneral, Funcionario
 from asistencia.models import Justificaciones, Paso_Lista
 from monitoreo.services.niveles import nivel_alerta, umbral_critico
@@ -552,7 +553,7 @@ def calcular_actividad_reciente(periodo, fecha, filtros_act):
 
             # Evento B: Resolución (autor = Funcionario)
             estado = _nombre_normalizado(justificacion.estado_solicitud.nombre if justificacion.estado_solicitud else "")
-            if justificacion.fecha_resolucion and estado in {"aceptada", "rechazada"}:
+            if justificacion.fecha_resolucion and estado in {ESTADO_ACEPTADA, ESTADO_RECHAZADA}:
                 f_resuelve = justificacion.funcionario_resuelve
                 puede_mostrar_func = (actor != "sistema")
 

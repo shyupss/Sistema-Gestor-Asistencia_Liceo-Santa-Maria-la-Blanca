@@ -1,6 +1,7 @@
 from django.db.models import Count, Q
 
 from academico.models import Curso, Matricula
+from asistencia.constantes import ESTADO_PENDIENTE
 from alertas.models import Alerta, EstadoAlumno, HistorialEstadoAlumno
 from asistencia.models import Asistencia_Alumnos, Justificaciones, Paso_Lista
 
@@ -77,7 +78,7 @@ def contar_matriculas_activas(curso, fecha):
 
 def obtener_justificaciones_pendientes(fecha):
     return Justificaciones.objects.filter(
-        estado_solicitud__nombre__iexact="pendiente",
+        estado_solicitud__nombre__iexact=ESTADO_PENDIENTE,
         fecha_registro__date__lte=fecha,
     ).select_related(
         "alumno", "estado_solicitud"

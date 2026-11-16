@@ -17,6 +17,7 @@ from academico.services.academico_service import (
     porcentaje_asistencia,
 )
 from alertas.models import Alerta, ConfigGeneral, EstadoAlumno, HistorialEstadoAlumno
+from asistencia.constantes import ESTADO_ACEPTADA, ESTADO_PENDIENTE
 from asistencia.models import Asistencia_Alumnos, Justificaciones, Paso_Lista
 from asistencia.queries.asistencia_queries import obtener_alumnos_curso
 
@@ -346,7 +347,7 @@ def perfil_curso(request, curso_id):
         ]
     solicitudes_aceptadas = Justificaciones.objects.filter(
         alumno_id=OuterRef("alumno_id"),
-        estado_solicitud__nombre__iexact="aceptada",
+        estado_solicitud__nombre__iexact=ESTADO_ACEPTADA,
         fecha_inicio__lte=OuterRef("paso_lista__fecha"),
         fecha_fin__gte=OuterRef("paso_lista__fecha"),
     )
@@ -362,7 +363,7 @@ def perfil_curso(request, curso_id):
     ).distinct().order_by("-fecha_registro", "-id")
     total_solicitudes = justificaciones.count()
     solicitudes_pendientes = justificaciones.filter(
-        estado_solicitud__nombre__iexact="pendiente"
+        estado_solicitud__nombre__iexact=ESTADO_PENDIENTE
     ).count()
     alertas = Alerta.objects.filter(
         alumno__matriculas__curso=curso,
@@ -553,7 +554,7 @@ def perfil_alumno(request, alumno_id):
     ).count()
     solicitudes_aceptadas = Justificaciones.objects.filter(
         alumno_id=OuterRef("alumno_id"),
-        estado_solicitud__nombre__iexact="aceptada",
+        estado_solicitud__nombre__iexact=ESTADO_ACEPTADA,
         fecha_inicio__lte=OuterRef("paso_lista__fecha"),
         fecha_fin__gte=OuterRef("paso_lista__fecha"),
     )
@@ -594,7 +595,7 @@ def perfil_alumno(request, alumno_id):
     ).order_by("-fecha_registro", "-id")
     total_solicitudes = justificaciones.count()
     solicitudes_pendientes = justificaciones.filter(
-        estado_solicitud__nombre__iexact="pendiente"
+        estado_solicitud__nombre__iexact=ESTADO_PENDIENTE
     ).count()
     alertas = Alerta.objects.filter(alumno=alumno).select_related(
         "estado", "periodo"

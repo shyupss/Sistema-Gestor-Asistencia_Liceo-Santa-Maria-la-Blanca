@@ -8,6 +8,7 @@ from babel.dates import format_datetime, format_date
 
 from asistencia.models import Estados_Solicitud, Justificaciones
 from asistencia.models import Asistencia_Alumnos
+from asistencia.constantes import ESTADO_ACEPTADA, ESTADO_RECHAZADA
 from asistencia.services.asistencia_service import recalcular_estado_alumno
 from academico.models import PeriodoAcademico
 
@@ -23,8 +24,8 @@ def pagina_justificaciones_ficha(request):
     if request.method == 'POST':
         accion = request.POST.get('accion')
         nombre_estado = {
-            'aceptar': 'aceptada',
-            'rechazar': 'rechazada',
+            'aceptar': ESTADO_ACEPTADA,
+            'rechazar': ESTADO_RECHAZADA,
         }.get(accion)
 
         if nombre_estado and not justificacion.estado_solicitud.es_estado_final:

@@ -7,6 +7,7 @@ from django.utils.dateparse import parse_date
 from django.db.models import Prefetch, Q
 
 from academico.models import Alumno, Matricula
+from asistencia.constantes import ESTADO_PENDIENTE
 from asistencia.models import Adjunto_Justificacion, Estados_Solicitud, Justificaciones
 
 TIPOS_VALIDOS = { 'justificacion', 'retiro' }
@@ -75,12 +76,12 @@ def pagina_justificaciones_formulario(request):
             errores.append('El tipo de registro no es válido.')
 
         estado = (
-            Estados_Solicitud.objects.filter(nombre__iexact='pendiente')
+            Estados_Solicitud.objects.filter(nombre__iexact=ESTADO_PENDIENTE)
             .order_by('id')
             .first()
         )
         if estado is None:
-            errores.append('No existe el estado inicial "pendiente".')
+            errores.append(f'No existe el estado inicial "{ESTADO_PENDIENTE}".')
 
         if not errores:
             with transaction.atomic():

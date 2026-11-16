@@ -7,6 +7,7 @@ from urllib.parse import urlencode
 
 from academico.models import Curso
 from alertas.models import Funcionario
+from asistencia.constantes import TIPO_ATRASADO, TIPO_AUSENTE, TIPO_PRESENTE
 from asistencia.models import (
     Asistencia_Alumnos,
     Paso_Lista,
@@ -58,9 +59,9 @@ def pagina_registrar_asistencia(request):
                 pk=funcionario_id,
             )
             tipos = {tipo.nombre.casefold(): tipo for tipo in tipos_asistencia}
-            tipo_presente = tipos.get("presente")
-            tipo_ausente = tipos.get("ausente")
-            tipo_atrasado = tipos.get("atrasado")
+            tipo_presente = tipos.get(TIPO_PRESENTE)
+            tipo_ausente = tipos.get(TIPO_AUSENTE)
+            tipo_atrasado = tipos.get(TIPO_ATRASADO)
             presentes = set(request.POST.getlist("presentes"))
             error = None
             try:
@@ -99,7 +100,7 @@ def pagina_registrar_asistencia(request):
                     tipo = tipo_ausente
                     if str(matricula.alumno_id) in presentes:
                         anterior = tipos_por_id.get(anteriores.get(matricula.alumno_id))
-                        if anterior and (not anterior.cuenta_como_ausencia or anterior.nombre.casefold() == "atrasado"):
+                        if anterior and (not anterior.cuenta_como_ausencia or anterior.nombre.casefold() == TIPO_ATRASADO):
                             # Guardar otra vez no cambia la llegada ya registrada.
                             tipo = anterior
                         # elif despues_del_corte:
@@ -164,7 +165,7 @@ def pagina_registrar_asistencia(request):
             tipo = tipos_por_id.get(tipo_id)
             if not matricula or not tipo:
                 continue
-            if tipo.nombre.casefold() == "atrasado":
+            if tipo.nombre.casefold() == TIPO_ATRASADO:
                 registro_atrasados.append(matricula)
             elif tipo.cuenta_como_ausencia:
                 registro_ausentes.append(matricula)
@@ -173,14 +174,14 @@ def pagina_registrar_asistencia(request):
 
         tipos_presentes = {
             tipo.pk for tipo in tipos_asistencia
-            if not tipo.cuenta_como_ausencia or tipo.nombre.casefold() == "atrasado"
+            if not tipo.cuenta_como_ausencia or tipo.nombre.casefold() == TIPO_ATRASADO
         }
         for matricula in alumnos:
             matricula.tipo_asistencia_id = asistencias_guardadas.get(
                 matricula.alumno_id
             )
             tipo_guardado = tipos_por_id.get(matricula.tipo_asistencia_id)
-            matricula.es_atrasado = bool(tipo_guardado and tipo_guardado.nombre.casefold() == "atrasado")
+            matricula.es_atrasado = bool(tipo_guardado and tipo_guardado.nombre.casefold() == TIPO_ATRASADO)
             matricula.es_presente = (
                 matricula.tipo_asistencia_id in tipos_presentes
             )

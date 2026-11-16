@@ -5,6 +5,7 @@ from django.utils import timezone
 from django.urls import reverse
 
 from alertas.models import ConfigGeneral
+from asistencia.constantes import ESTADO_ACEPTADA, ESTADO_RECHAZADA
 from monitoreo.services.niveles import nivel_alerta, umbral_critico
 from monitoreo.queries.monitoreo_queries import (
     contar_asistencias,
@@ -132,7 +133,7 @@ def preparar_actividad_reciente(fecha):
         })
 
         estado = _nombre_normalizado(justificacion.estado_solicitud.nombre)
-        if justificacion.fecha_resolucion and estado in {"aceptada", "rechazada"}:
+        if justificacion.fecha_resolucion and estado in {ESTADO_ACEPTADA, ESTADO_RECHAZADA}:
             eventos.append({
                 "fecha": justificacion.fecha_resolucion,
                 "tipo": f"{tipo_registro}.{estado}",
