@@ -5,7 +5,7 @@ ideal (Estado.es_no_ideal); el índice único uq_alerta_vigente_alumno_periodo
 garantiza que no haya dos. No depende de nombres de estados.
 """
 from django.db import IntegrityError, transaction
-from django.db.models import Q
+from django.db.models import Exists, OuterRef, Q
 from django.utils import timezone
 
 from academico.models import Matricula
@@ -18,6 +18,8 @@ SIN_CAMBIO = "sin_cambio"
 
 MOTIVO_RECUPERADO = "recuperado"
 MOTIVO_CAMBIO_ESTADO = "cambio_estado"
+MOTIVO_FIN_PERIODO = "fin_periodo"
+MOTIVO_FIN_MATRICULA = "fin_matricula"
 MOTIVOS_VALIDOS = {motivo for motivo, _ in Alerta.MOTIVOS_CIERRE}
 
 
@@ -113,3 +115,59 @@ def sincronizar_alerta(alumno, periodo, estado=None, ahora=None):
             # Otra transacción creó la vigente entre la lectura y el create:
             # se relee y se reevalúa una sola vez.
             return _aplicar(alumno, periodo, estado, ahora)
+
+
+def barrido_cierres(ahora=None, periodo=None):
+    """Cierra las alertas vigentes cuyo período terminó o cuyo alumno ya no está matriculado.
+
+    1. fin_periodo: periodo.fecha_fin < hoy (un período que termina hoy aún no).
+    2. fin_matricula: de las que quedan, el alumno no tiene matrícula activa en
+       el período de la alerta (misma definición que S1: fecha_termino nula o
+       posterior a hoy). Un cambio de curso dentro del período no la cierra.
+    Si aplican ambos motivos gana fin_periodo. Cierra revisadas y no revisadas,
+    con fecha_cierre = `ahora` (por defecto timezone.now()). `periodo` (instancia
+    o id) limita el barrido. Idempotente.
+    Devuelve {"fin_periodo": n, "fin_matricula": m}.
+    """
+    ahora = ahora or timezone.now()
+    hoy = timezone.localdate(ahora)
+    vigentes = Alerta.objects.filter(fecha_cierre__isnull=True)
+    if periodo is not None:
+        vigentes = vigentes.filter(periodo=periodo)
+    matricula_activa = Matricula.objects.filter(
+        alumno=OuterRef("alumno_id"), periodo=OuterRef("periodo_id"),
+    ).filter(Q(fecha_termino__isnull=True) | Q(fecha_termino__gt=hoy))
+
+    with transaction.atomic():
+        # Updates condicionados a fecha_cierre nula: lo que cierra el paso 1 (o
+        # sincronizar_alerta en paralelo) ya no entra en el paso 2.
+        fin_periodo = vigentes.filter(periodo__fecha_fin__lt=hoy).update(
+            fecha_cierre=ahora, motivo_cierre=MOTIVO_FIN_PERIODO,
+        )
+        fin_matricula = (
+            vigentes.filter(periodo__fecha_fin__gte=hoy)
+            .filter(~Exists(matricula_activa))
+            .update(fecha_cierre=ahora, motivo_cierre=MOTIVO_FIN_MATRICULA)
+        )
+    return {MOTIVO_FIN_PERIODO: fin_periodo, MOTIVO_FIN_MATRICULA: fin_matricula}
+
+
+def reconciliar_alertas(periodo=None, ahora=None):
+    """Sincroniza la alerta de cada EstadoAlumno de los períodos no terminados (fecha_fin >= hoy).
+
+    Sirve de backfill (crea las alertas que faltan) y de red de seguridad (cierra
+    las que ya no corresponden). `periodo` (instancia o id) la limita a ese
+    período; si ya terminó, no hace nada. Recorre en orden de id y cada alumno
+    se sincroniza en su propia transacción; una excepción se propaga.
+    Idempotente. Devuelve {"creada": n, "cambio_estado": n, "recuperada": n, "sin_cambio": n}.
+    """
+    ahora = ahora or timezone.now()
+    hoy = timezone.localdate(ahora)
+    estados = EstadoAlumno.objects.filter(periodo__fecha_fin__gte=hoy)
+    if periodo is not None:
+        estados = estados.filter(periodo=periodo)
+    conteo = dict.fromkeys((CREADA, CAMBIO_ESTADO, RECUPERADA, SIN_CAMBIO), 0)
+    for estado_alumno in estados.select_related("alumno", "periodo").order_by("pk").iterator():
+        resultado = sincronizar_alerta(estado_alumno.alumno, estado_alumno.periodo, ahora=ahora)
+        conteo[resultado] += 1
+    return conteo
