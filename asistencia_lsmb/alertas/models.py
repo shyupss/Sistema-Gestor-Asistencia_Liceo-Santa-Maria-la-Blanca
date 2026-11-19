@@ -217,15 +217,36 @@ class NotificacionCurso(models.Model):
 
 
 class ConfigGeneral(models.Model):
-    """Configuración global del sistema: existe una sola fila (id=1)."""
+    """Configuración global del sistema: existe una sola fila (id=1).
+
+    Cuándo se envían las notificaciones, según `modo` (siempre a `hora_envio`).
+    Aquí solo se documenta; el envío todavía no está implementado:
+    - diario: cada día hábil. Si el día no es hábil, se salta (no se pospone).
+    - semanal: el día de la semana `dia_semana_envio`. Si no es hábil, pasa al
+      siguiente día hábil.
+    - mensual: el día del mes `dia_mes_envio` (1 a 31). Si el mes no tiene ese
+      día, se usa el último día del mes; y si ese día no es hábil, pasa al
+      siguiente día hábil.
+    """
+    MODO_DIARIO = 'diario'
+    MODO_SEMANAL = 'semanal'
+    MODO_MENSUAL = 'mensual'
+    MODOS = [
+        (MODO_DIARIO, 'Diario'),
+        (MODO_SEMANAL, 'Semanal'),
+        (MODO_MENSUAL, 'Mensual'),
+    ]
+
     id = models.PositiveSmallIntegerField(primary_key=True, default=1, editable=False)
     activa = models.BooleanField(default=True)
-    frecuencia_dias = models.PositiveSmallIntegerField(
-        default=7, validators=[MinValueValidator(1)]
-    )
-    # 1 = lunes ... 7 = domingo (isoweekday)
+    modo = models.CharField(max_length=10, choices=MODOS, default=MODO_SEMANAL)
+    # Solo para modo semanal. 1 = lunes ... 7 = domingo (isoweekday)
     dia_semana_envio = models.PositiveSmallIntegerField(
         default=5, validators=[MinValueValidator(1), MaxValueValidator(7)]
+    )
+    # Solo para modo mensual.
+    dia_mes_envio = models.PositiveSmallIntegerField(
+        default=1, validators=[MinValueValidator(1), MaxValueValidator(31)]
     )
     hora_envio = models.TimeField(default=datetime.time(16, 0))
     # Meta de asistencia (%). Entera a propósito: los servicios la devuelven en
@@ -239,12 +260,18 @@ class ConfigGeneral(models.Model):
         verbose_name_plural = 'Configuración general'
         constraints = [
             models.CheckConstraint(condition=Q(id=1), name='ck_config_general_singleton'),
+            # Los valores deben coincidir con MODOS (Meta no ve los atributos de la clase).
             models.CheckConstraint(
-                condition=Q(frecuencia_dias__gte=1), name='ck_config_general_frecuencia',
+                condition=Q(modo__in=['diario', 'semanal', 'mensual']),
+                name='ck_config_general_modo',
             ),
             models.CheckConstraint(
                 condition=Q(dia_semana_envio__gte=1, dia_semana_envio__lte=7),
                 name='ck_config_general_dia_semana',
+            ),
+            models.CheckConstraint(
+                condition=Q(dia_mes_envio__gte=1, dia_mes_envio__lte=31),
+                name='ck_config_general_dia_mes',
             ),
             models.CheckConstraint(
                 condition=Q(meta_asistencia__gte=0, meta_asistencia__lte=100),

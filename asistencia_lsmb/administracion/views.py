@@ -415,12 +415,21 @@ def preparar_ambiente_prueba(request):
         messages.error(request, str(exc))
     else:
         if any(creados.values()):
-            messages.success(
-                request,
-                "Ambiente de prueba listo: "
-                f"{creados['roles']} roles, {creados['cargos']} cargos, "
-                f"{creados['funcionarios']} funcionarios y {creados['cuentas']} cuentas creados.",
+            mensaje = (
+                "Ambiente de prueba listo. Registros creados — "
+                f"períodos: {creados['periodos']}, cursos: {creados['cursos']}, "
+                f"profesores jefe: {creados['profesores_jefe']}, "
+                f"cursos asignados a inspectores: {creados['funcionario_cursos']}, "
+                f"roles: {creados['roles']}, permisos: {creados['permisos']}, "
+                f"permisos de roles: {creados['permisos_rol']}, "
+                f"estados que notifican a roles: {creados['estados_rol']}, "
+                f"cargos: {creados['cargos']}, funcionarios: {creados['funcionarios']}, "
+                f"cuentas: {creados['cuentas']}."
             )
+            aviso = servicio_ambiente_prueba.aviso_sin_estados(creados)
+            if aviso:
+                mensaje = f"{mensaje} {aviso}"
+            messages.success(request, mensaje)
         else:
             messages.success(request, "El ambiente de prueba ya estaba preparado; no se creó nada.")
     return redirect("administracion")

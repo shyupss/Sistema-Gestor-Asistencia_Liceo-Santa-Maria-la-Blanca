@@ -1,13 +1,19 @@
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 
-from administracion.services.ambiente_prueba import AmbientePruebaError, preparar_ambiente_prueba
+from administracion.services.ambiente_prueba import (
+    AmbientePruebaError,
+    aviso_sin_estados,
+    preparar_ambiente_prueba,
+)
 
 
 class Command(BaseCommand):
     help = (
-        "Crea roles, cargos, funcionarios y cuentas de prueba que falten "
-        "(idempotente; no modifica lo existente). Requiere PERMITIR_AMBIENTE_PRUEBA=1."
+        "Prepara el ambiente de prueba: período del año actual, 12 cursos, roles con sus "
+        "permisos, funcionarios de prueba con cuenta, profesor jefe de cada curso y cursos "
+        "de los Inspectores (idempotente; no modifica lo existente). "
+        "Requiere PERMITIR_AMBIENTE_PRUEBA=1."
     )
 
     def handle(self, *args, **options):
@@ -23,3 +29,6 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS("Ambiente de prueba listo. Registros creados:"))
         for tipo, cantidad in creados.items():
             self.stdout.write(f"  {tipo}: {cantidad}")
+        aviso = aviso_sin_estados(creados)
+        if aviso:
+            self.stdout.write(self.style.WARNING(aviso))

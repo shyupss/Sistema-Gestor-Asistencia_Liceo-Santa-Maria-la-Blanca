@@ -104,8 +104,9 @@ class DefaultsTests(TestCase):
         config = ConfigGeneral.obtener()
         self.assertEqual(config.pk, 1)
         self.assertTrue(config.activa)
-        self.assertEqual(config.frecuencia_dias, 7)
+        self.assertEqual(config.modo, ConfigGeneral.MODO_SEMANAL)
         self.assertEqual(config.dia_semana_envio, 5)
+        self.assertEqual(config.dia_mes_envio, 1)
         self.assertEqual(config.hora_envio, datetime.time(16, 0))
 
 
@@ -123,9 +124,13 @@ class ConfigGeneralSingletonTests(TestCase):
                 ConfigGeneral.objects.create(pk=2)
         self.assertEqual(ConfigGeneral.objects.count(), 1)
 
-    def test_validaciones_de_dia_y_frecuencia(self):
+    def test_validaciones_de_dias_y_modo(self):
         config = ConfigGeneral.obtener()
-        for campo, valor in (("dia_semana_envio", 0), ("dia_semana_envio", 8), ("frecuencia_dias", 0)):
+        casos = (
+            ("dia_semana_envio", 0), ("dia_semana_envio", 8),
+            ("dia_mes_envio", 0), ("dia_mes_envio", 32), ("modo", "quincenal"),
+        )
+        for campo, valor in casos:
             with self.subTest(campo=campo, valor=valor):
                 setattr(config, campo, valor)
                 with self.assertRaises(ValidationError):
@@ -133,6 +138,8 @@ class ConfigGeneralSingletonTests(TestCase):
                 ConfigGeneral.obtener().refresh_from_db()
                 config = ConfigGeneral.obtener()
         config.dia_semana_envio = 7
+        config.dia_mes_envio = 31
+        config.modo = ConfigGeneral.MODO_MENSUAL
         config.full_clean()
 
     def test_la_base_de_datos_rechaza_dia_fuera_de_rango(self):
@@ -183,18 +190,35 @@ class CuentaTests(TestCase):
             rol.delete()
 
 
+class _ManagerConfigSinCamposEliminados:
+    """get_or_create de ConfigGeneral que descarta los defaults de campos que ya no existen.
+
+    La 0006 siembra frecuencia_dias, que la 0010 eliminó del modelo. Contra el
+    modelo actual ese default haría fallar get_or_create, así que se filtra.
+    """
+
+    def get_or_create(self, defaults=None, **kwargs):
+        campos = {campo.name for campo in ConfigGeneral._meta.concrete_fields}
+        defaults = {campo: valor for campo, valor in (defaults or {}).items() if campo in campos}
+        return ConfigGeneral.objects.get_or_create(defaults=defaults, **kwargs)
+
+
+class _ConfigGeneralSinCamposEliminados:
+    objects = _ManagerConfigSinCamposEliminados()
+
+
 class _AppsConConfigRenombrada:
     """`apps` mínimo para ejecutar la migración 0006 tal como fue escrita.
 
     La 0006 hace apps.get_model('alertas', 'ConfigNotificaciones'), pero ese
     modelo se renombró a ConfigGeneral en la 0009 y ya no existe en el registro
-    real. Como la 0006 no se edita, se resuelve el nombre antiguo al nuevo y
-    todo lo demás se delega en el registro real.
+    real. Como la 0006 no se edita, se resuelve el nombre antiguo al nuevo (con
+    los defaults filtrados, ver arriba) y todo lo demás se delega en el registro real.
     """
 
     def get_model(self, app_label, model_name=None):
         if (app_label, model_name) == ('alertas', 'ConfigNotificaciones'):
-            return ConfigGeneral
+            return _ConfigGeneralSinCamposEliminados
         return apps_reales.get_model(app_label, model_name)
 
 
@@ -213,16 +237,23 @@ class DatosInicialesTests(TestCase):
         modulo.crear_datos_iniciales(apps_migracion_0006, None)
         self.assertEqual(Permiso.objects.filter(codigo="revisar_alertas").count(), 1)
         self.assertEqual(ConfigGeneral.objects.count(), 1)
-        self.assertEqual(ConfigGeneral.objects.get().pk, 1)
+        config = ConfigGeneral.objects.get()
+        self.assertEqual(config.pk, 1)
+        self.assertEqual(config.dia_semana_envio, 5)
+        self.assertEqual(config.hora_envio, datetime.time(16, 0))
+        self.assertEqual(config.modo, ConfigGeneral.MODO_SEMANAL)  # default del modelo actual
         self.assertEqual(Rol.objects.count(), roles_antes)  # esta migración no crea roles
 
     def test_no_pisa_valores_existentes(self):
         modulo = importlib.import_module("alertas.migrations.0006_datos_iniciales_roles_notificaciones")
         config = ConfigGeneral.obtener()
-        config.frecuencia_dias = 14
+        config.dia_semana_envio = 2
+        config.hora_envio = datetime.time(9, 30)
         config.save()
         modulo.crear_datos_iniciales(apps_migracion_0006, None)
-        self.assertEqual(ConfigGeneral.obtener().frecuencia_dias, 14)
+        config = ConfigGeneral.obtener()
+        self.assertEqual(config.dia_semana_envio, 2)
+        self.assertEqual(config.hora_envio, datetime.time(9, 30))
 
 
 class MigracionCorreosTests(TransactionTestCase):
