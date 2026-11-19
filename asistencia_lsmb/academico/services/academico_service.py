@@ -1,4 +1,4 @@
-from academico.queries.academico_queries import obtener_asistencia_curso
+from academico.queries.academico_queries import obtener_resumen_asistencia_cursos
 from alertas.models import ConfigGeneral
 
 
@@ -29,6 +29,17 @@ def promedio_asistencia(alumnos):
 def preparar_alumnos(alumnos, estados):
     alumnos_con_datos = []
     for alumno in alumnos:
+        asistencias = getattr(alumno, "asistencias_del_anio", [])
+        alumno.total_asistencias = len(asistencias)
+        alumno.total_ausencias = sum(
+            1
+            for asistencia in asistencias
+            if asistencia.tipo_asistencia.cuenta_como_ausencia
+            and (
+                asistencia.justificacion is None
+                or not asistencia.justificacion.estado_solicitud.cubre_ausencia
+            )
+        )
         if alumno.estado_alumno_porcentaje is not None:
             alumno.porcentaje_asistencia = round(
                 float(alumno.estado_alumno_porcentaje)
@@ -36,7 +47,15 @@ def preparar_alumnos(alumnos, estados):
             alumno.estado_asistencia = alumno.estado_alumno_nombre or "Sin configurar"
             alumno.genera_alerta = bool(alumno.estado_alumno_alerta)
         else:
-            alumno.porcentaje_asistencia = None
+            alumno.porcentaje_asistencia = (
+                round(
+                    (alumno.total_asistencias - alumno.total_ausencias)
+                    * 100
+                    / alumno.total_asistencias
+                )
+                if alumno.total_asistencias
+                else None
+            )
             alumno.estado_asistencia = "Sin datos"
             alumno.genera_alerta = False
         alumnos_con_datos.append(alumno)
@@ -69,12 +88,9 @@ def preparar_alumnos(alumnos, estados):
 
 def preparar_cursos(cursos, fecha, estados):
     cursos = list(cursos)
+    resumenes = obtener_resumen_asistencia_cursos(cursos, fecha)
     for curso in cursos:
-        alumno_ids = [
-            matricula.alumno_id
-            for matricula in curso.matriculas_activas
-        ]
-        datos_asistencia = obtener_asistencia_curso(curso, fecha, alumno_ids)
+        datos_asistencia = resumenes[curso.pk]
         curso.total_registros = datos_asistencia["total"]
         curso.total_ausencias = datos_asistencia["ausencias"]
         curso.asistencia = promedio_asistencia(

@@ -1,4 +1,13 @@
-from django.db.models import Count, Exists, OuterRef, Prefetch, Q
+from django.db.models import (
+    Count,
+    Exists,
+    IntegerField,
+    OuterRef,
+    Prefetch,
+    Q,
+    Subquery,
+)
+from django.db.models.functions import Coalesce
 from django.utils import timezone
 
 from academico.models import Curso, Matricula
@@ -20,44 +29,63 @@ def obtener_cursos(fecha=None):
         curso=OuterRef("pk"),
         fecha=fecha,
     )
+    inicio_anio = fecha.replace(month=1, day=1)
+    inicio_siguiente_anio = inicio_anio.replace(year=fecha.year + 1)
+    total_estudiantes = (
+        Matricula.objects.filter(
+            curso=OuterRef("pk"),
+            periodo__anio=fecha.year,
+        )
+        .filter(matricula_vigente)
+        .order_by()
+        .values("curso_id")
+        .annotate(total=Count("pk"))
+        .values("total")[:1]
+    )
+    asistencias_curso = (
+        Asistencia_Alumnos.objects.filter(
+            paso_lista__curso=OuterRef("pk"),
+            paso_lista__fecha__gte=inicio_anio,
+            paso_lista__fecha__lt=inicio_siguiente_anio,
+            paso_lista__fecha__lte=fecha,
+        )
+        .order_by()
+        .values("paso_lista__curso_id")
+        .annotate(total=Count("pk"))
+        .values("total")[:1]
+    )
+    ausencias_curso = (
+        Asistencia_Alumnos.objects.filter(
+            paso_lista__curso=OuterRef("pk"),
+            paso_lista__fecha__gte=inicio_anio,
+            paso_lista__fecha__lt=inicio_siguiente_anio,
+            paso_lista__fecha__lte=fecha,
+            tipo_asistencia__cuenta_como_ausencia=True,
+        )
+        .filter(
+            Q(justificacion__isnull=True)
+            | Q(justificacion__estado_solicitud__cubre_ausencia=False)
+        )
+        .order_by()
+        .values("paso_lista__curso_id")
+        .annotate(total=Count("pk"))
+        .values("total")[:1]
+    )
 
     return Curso.objects.prefetch_related(
         matriculas_activas
     ).annotate(
-        total_estudiantes=Count(
-            "matriculas",
-            filter=Q(matriculas__periodo__anio=fecha.year)
-            & (Q(matriculas__fecha_termino__isnull=True) | Q(matriculas__fecha_termino__gt=fecha)),
-            distinct=True,
+        total_estudiantes=Coalesce(
+            Subquery(total_estudiantes, output_field=IntegerField()),
+            0,
         ),
-        total_registros=Count(
-            "paso_lista__asistencia_alumnos",
-            filter=Q(paso_lista__fecha__year=fecha.year)
-            & Q(paso_lista__asistencia_alumnos__alumno__matriculas__periodo__anio=fecha.year)
-            & (Q(paso_lista__asistencia_alumnos__alumno__matriculas__fecha_termino__isnull=True)
-               | Q(paso_lista__asistencia_alumnos__alumno__matriculas__fecha_termino__gt=fecha)),
-            distinct=True,
+        total_registros=Coalesce(
+            Subquery(asistencias_curso, output_field=IntegerField()),
+            0,
         ),
-        total_ausencias=Count(
-            "paso_lista__asistencia_alumnos",
-            filter=Q(paso_lista__fecha__year=fecha.year)
-            & Q(paso_lista__asistencia_alumnos__tipo_asistencia__cuenta_como_ausencia=True)
-            & (
-                Q(paso_lista__asistencia_alumnos__justificacion__isnull=True)
-                | Q(paso_lista__asistencia_alumnos__justificacion__estado_solicitud__cubre_ausencia=False)
-            )
-            & Q(paso_lista__asistencia_alumnos__alumno__matriculas__periodo__anio=fecha.year)
-            & (Q(paso_lista__asistencia_alumnos__alumno__matriculas__fecha_termino__isnull=True)
-               | Q(paso_lista__asistencia_alumnos__alumno__matriculas__fecha_termino__gt=fecha)),
-            distinct=True,
-        ),
-        registros_hoy=Count(
-            "paso_lista__asistencia_alumnos",
-            filter=Q(paso_lista__fecha=fecha)
-            & Q(paso_lista__asistencia_alumnos__alumno__matriculas__periodo__anio=fecha.year)
-            & (Q(paso_lista__asistencia_alumnos__alumno__matriculas__fecha_termino__isnull=True)
-               | Q(paso_lista__asistencia_alumnos__alumno__matriculas__fecha_termino__gt=fecha)),
-            distinct=True,
+        total_ausencias=Coalesce(
+            Subquery(ausencias_curso, output_field=IntegerField()),
+            0,
         ),
         registrada_hoy=Exists(paso_lista_hoy),
     ).filter(periodo__anio=fecha.year).order_by("nivel", "grupo")
