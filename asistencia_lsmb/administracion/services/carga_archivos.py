@@ -668,6 +668,8 @@ def cargar_matriculas(registros, progress_callback=None):
 
 @transaction.atomic
 def cargar_asistencia(registros, progress_callback=None):
+    from alertas.services.alertas_service import sincronizar_alerta
+
     tipos = {
         tipo.nombre.casefold(): tipo
         for tipo in Tipos_Asistencia.objects.all()
@@ -870,6 +872,7 @@ def cargar_asistencia(registros, progress_callback=None):
         )
 
     guardado_actual = 0
+    pares_tocados = {}  # (alumno.pk, periodo_id) -> (alumno, periodo), en orden de inserción
     for (curso_id, fecha), filas in agrupados.items():
         curso = filas[0][2]
         paso, creado = Paso_Lista.objects.update_or_create(
@@ -892,7 +895,10 @@ def cargar_asistencia(registros, progress_callback=None):
                 },
             )
             conteo["asistencias_creadas" if creada else "asistencias_actualizadas"] += 1
-            recalcular_estado_alumno(alumno=alumno, periodo=curso.periodo)
+            recalcular_estado_alumno(
+                alumno=alumno, periodo=curso.periodo, sincronizar_alertas=False
+            )
+            pares_tocados[(alumno.pk, curso.periodo_id)] = (alumno, curso.periodo)
             if progress_callback:
                 guardado_actual += 1
                 progress_callback(
@@ -900,6 +906,9 @@ def cargar_asistencia(registros, progress_callback=None):
                     "Guardando asistencias en la base de datos...",
                     guardado_actual,
                 )
+    # Una sincronización por alumno y período, con el estado final de la carga.
+    for alumno, periodo in pares_tocados.values():
+        sincronizar_alerta(alumno, periodo)
     return conteo
 
 
