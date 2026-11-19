@@ -4,6 +4,7 @@ from django.db.models import Count, Q
 
 from alertas.models import Estado
 from alertas.models import EstadoAlumno, HistorialEstadoAlumno
+from alertas.services.alertas_service import sincronizar_alerta
 from asistencia.models import Asistencia_Alumnos, Justificaciones
 
 
@@ -73,7 +74,7 @@ def obtener_justificacion_aplicable(alumno, fecha):
     )
 
 
-def recalcular_estado_alumno(alumno, periodo):
+def recalcular_estado_alumno(alumno, periodo, sincronizar_alertas=True):
     resumen = Asistencia_Alumnos.objects.filter(
         alumno=alumno,
         paso_lista__curso__periodo=periodo,
@@ -127,5 +128,8 @@ def recalcular_estado_alumno(alumno, periodo):
             estado_nuevo=estado,
             estado_anterior=estado_anterior.estado if estado_anterior else None,
         )
+
+    if sincronizar_alertas:
+        sincronizar_alerta(alumno, periodo, estado)
 
     return estado_alumno
