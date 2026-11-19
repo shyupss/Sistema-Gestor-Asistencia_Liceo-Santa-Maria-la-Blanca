@@ -94,9 +94,28 @@
         </div>
         <div class="mt-3 flex flex-col items-center justify-between gap-3 sm:flex-row">
             <span class="text-xs text-gris-texto">Vista previa de los cursos incluidos según los filtros aplicados.</span>
-            <button type="button" disabled title="La generación estará disponible en una próxima etapa"
-                class="cursor-not-allowed rounded-full bg-gris-claro px-6 py-2 text-sm font-semibold text-gris-texto"><i
-                    data-lucide="download" class="mr-1 inline h-4 w-4"></i>Generar reporte (próximamente)</button></div>
+            <form method="post" action="{% url 'generar_reporte' %}">
+                {% csrf_token %}
+                <input type="hidden" name="reporte" value="planilla">
+                <input type="hidden" name="formato" value="Excel">
+                <input type="hidden" name="anio" value="{{ periodo_seleccionado.anio }}">
+                <input type="hidden" name="semestre" value="{{ semestre_seleccionado }}">
+                {% for curso in cursos_seleccionados %}
+                <input type="hidden" name="curso" value="{{ curso.pk }}">
+                {% endfor %}
+                {% if hay_datos %}
+                <button type="submit"
+                    class="rounded-full bg-azul px-6 py-2 text-sm font-semibold text-white shadow hover:bg-azul-oscuro">
+                    <i data-lucide="download" class="mr-1 inline h-4 w-4"></i>Generar Excel
+                </button>
+                {% else %}
+                <button type="button" disabled title="No hay datos para generar el reporte"
+                    class="cursor-not-allowed rounded-full bg-gris-claro px-6 py-2 text-sm font-semibold text-gris-texto">
+                    <i data-lucide="download" class="mr-1 inline h-4 w-4"></i>Generar Excel
+                </button>
+                {% endif %}
+            </form>
+        </div>
 
         <h2 class="mb-3 mt-6 text-sm font-bold text-azul">4. Reportes generados</h2>
         <div class="overflow-x-auto rounded-lg border border-gris-claro">
@@ -114,15 +133,19 @@
                     {% for reporte_generado in reportes_generados %}
                     <tr>
                         <td class="px-3 py-2">{{ reporte_generado.nombre }}</td>
-                        <td class="px-3 py-2">{{ reporte_generado.usuario }}</td>
-                        <td class="px-3 py-2">{{ reporte_generado.fecha }}</td>
+                        <td class="px-3 py-2">{{ reporte_generado.generado_por.nombre|default:"Sistema" }}</td>
+                        <td class="px-3 py-2">{{ reporte_generado.creado_en|date:"d/m/Y H:i" }}</td>
                         <td class="px-3 py-2">
                             <span class="rounded bg-verde-fondo px-2 py-1 text-verde-oscuro">
                             {{ reporte_generado.estado }}
                             </span>
                         </td>
                         <td class="px-3 py-2 text-right text-azul">
+                            {% if reporte_generado.archivo %}
+                            <a href="{{ reporte_generado.archivo.url }}" title="Descargar">
                             <i data-lucide="download" class="h-4 w-4"></i>
+                            </a>
+                            {% endif %}
                         </td>
                     </tr>
                     {% endfor %}

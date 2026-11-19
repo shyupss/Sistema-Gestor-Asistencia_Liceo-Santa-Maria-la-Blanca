@@ -32,7 +32,13 @@ def obtener_resumen_por_curso(periodo, fecha_inicio, fecha_fin, cursos):
                 total=Count("id"),
                 ausencias=Count(
                     "id",
-                    filter=Q(tipo_asistencia__cuenta_como_ausencia=True),
+                    filter=(
+                        Q(tipo_asistencia__cuenta_como_ausencia=True)
+                        & (
+                            Q(justificacion__isnull=True)
+                            | Q(justificacion__estado_solicitud__cubre_ausencia=False)
+                        )
+                    ),
                 ),
                 dias=Count("paso_lista__fecha", distinct=True),
             )
