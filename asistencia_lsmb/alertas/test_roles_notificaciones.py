@@ -260,8 +260,18 @@ class MigracionCorreosTests(TransactionTestCase):
     """La migración 0005 aborta con mensaje claro si hay correos duplicados o vacíos."""
 
     def _destino_previo(self):
-        hojas = MigrationExecutor(connection).loader.graph.leaf_nodes()
-        return [n for n in hojas if n[0] != "alertas"] + [("alertas", "0004_alerta_modelo_nuevo")]
+        nodo_alertas = ("alertas", "0004_alerta_modelo_nuevo")
+        grafo = MigrationExecutor(connection).loader.graph
+        # Se deshacen las migraciones de alertas posteriores a nodo_alertas y
+        # todo lo que depende de ellas, aunque sea de otra app (p. ej. reportes 0001).
+        deshechas = {
+            nodo
+            for hijo in grafo.node_map[nodo_alertas].children
+            if hijo[0] == "alertas"
+            for nodo in grafo.backwards_plan(hijo)
+        }
+        otras = [n for n in grafo.leaf_nodes() if n[0] != "alertas" and n not in deshechas]
+        return otras + [nodo_alertas]
 
     def _migrar(self, destino):
         executor = MigrationExecutor(connection)

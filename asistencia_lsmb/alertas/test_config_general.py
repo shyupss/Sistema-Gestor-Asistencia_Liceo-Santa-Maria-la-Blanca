@@ -138,8 +138,17 @@ class MigracionModoTests(TransactionTestCase):
     TABLA = "alertas_configgeneral"
 
     def _destino(self, nodo_alertas):
-        hojas = MigrationExecutor(connection).loader.graph.leaf_nodes()
-        return [n for n in hojas if n[0] != "alertas"] + [nodo_alertas]
+        grafo = MigrationExecutor(connection).loader.graph
+        # Se deshacen las migraciones de alertas posteriores a nodo_alertas y
+        # todo lo que depende de ellas, aunque sea de otra app (p. ej. reportes 0001).
+        deshechas = {
+            nodo
+            for hijo in grafo.node_map[nodo_alertas].children
+            if hijo[0] == "alertas"
+            for nodo in grafo.backwards_plan(hijo)
+        }
+        otras = [n for n in grafo.leaf_nodes() if n[0] != "alertas" and n not in deshechas]
+        return otras + [nodo_alertas]
 
     def _migrar(self, nodo_alertas):
         destino = self._destino(nodo_alertas)
