@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block title %}{{page_title}}{% endblock %}
+
+{% block content %}
+
+<!-- Contenedor principal del contenido -->
+<div class="mx-auto max-w-[98%] lg:max-w-[90%] px-4 py-5 sm:px-6 sm:py-8">
+    <!-- Encabezado -->
+    {% include 'components/global/child_page_title.html' with parent_page_title=volver_label url=volver_url %}
+    
+    <!-- Contenido -->
+    
+</div>
+
+{% endblock %}
