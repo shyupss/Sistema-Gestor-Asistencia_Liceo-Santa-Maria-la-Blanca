@@ -5,16 +5,16 @@ ideal (Estado.es_no_ideal); el índice único uq_alerta_vigente_alumno_periodo
 garantiza que no haya dos. No depende de nombres de estados.
 """
 from django.db import IntegrityError, transaction
-from django.db.models import Exists, OuterRef, Q
+from django.db.models import Exists, OuterRef
 from django.utils import timezone
 
-from academico.models import Matricula
 from alertas.models import Alerta, EstadoAlumno
 from alertas.queries.alcance_queries import (
     curso_del_alumno_en_periodo,
     cursos_en_alcance,
     tiene_permiso,
 )
+from alertas.queries.matricula_queries import matriculas_activas
 
 CREADA = "creada"
 CAMBIO_ESTADO = "cambio_estado"
@@ -79,9 +79,7 @@ def _puede_crear(alumno, periodo, hoy):
     """S1: el período no terminó y el alumno tiene una matrícula activa hoy en ese período."""
     if hoy > periodo.fecha_fin:
         return False
-    return Matricula.objects.filter(alumno=alumno, periodo=periodo).filter(
-        Q(fecha_termino__isnull=True) | Q(fecha_termino__gt=hoy),
-    ).exists()
+    return matriculas_activas(hoy).filter(alumno=alumno, periodo=periodo).exists()
 
 
 def _vigente_bloqueada(alumno, periodo):
@@ -166,9 +164,9 @@ def barrido_cierres(ahora=None, periodo=None):
     vigentes = Alerta.objects.filter(fecha_cierre__isnull=True)
     if periodo is not None:
         vigentes = vigentes.filter(periodo=periodo)
-    matricula_activa = Matricula.objects.filter(
+    matricula_activa = matriculas_activas(hoy).filter(
         alumno=OuterRef("alumno_id"), periodo=OuterRef("periodo_id"),
-    ).filter(Q(fecha_termino__isnull=True) | Q(fecha_termino__gt=hoy))
+    )
 
     with transaction.atomic():
         # Updates condicionados a fecha_cierre nula: lo que cierra el paso 1 (o

@@ -8,6 +8,7 @@ from django.db.models import Q
 
 from academico.models import Curso, Matricula
 from alertas.models import Cuenta, FuncionarioCurso, Rol
+from alertas.queries.matricula_queries import matriculas_activas
 
 
 def _cuentas_con_acceso(funcionario):
@@ -48,13 +49,15 @@ def curso_del_alumno_en_periodo(alumno, periodo, hoy):
     ninguna (p. ej. el barrido aún no cerró la alerta), usa la más reciente del
     período. Entre varias, gana la de mayor fecha_matricula y luego la de mayor id.
     """
-    matriculas = (
-        Matricula.objects.filter(alumno=alumno, periodo=periodo)
-        .select_related("curso")
-        .order_by("-fecha_matricula", "-pk")
-    )
+    def del_periodo_ordenadas(matriculas):
+        return (
+            matriculas.filter(alumno=alumno, periodo=periodo)
+            .select_related("curso")
+            .order_by("-fecha_matricula", "-pk")
+        )
+
     matricula = (
-        matriculas.filter(Q(fecha_termino__isnull=True) | Q(fecha_termino__gt=hoy)).first()
-        or matriculas.first()
+        del_periodo_ordenadas(matriculas_activas(hoy)).first()
+        or del_periodo_ordenadas(Matricula.objects.all()).first()
     )
     return matricula.curso if matricula else None
