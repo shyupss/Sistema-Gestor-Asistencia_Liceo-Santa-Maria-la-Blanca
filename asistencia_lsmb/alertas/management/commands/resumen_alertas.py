@@ -8,14 +8,47 @@ from alertas.models import Funcionario
 from alertas.queries.destinatario_queries import funcionarios_con_permiso
 from alertas.queries.periodo_queries import periodo_actual
 from alertas.services.alertas_service import PERMISO_REVISAR_ALERTAS
+from alertas.services.formato import formatear_porcentaje
 from alertas.services.resumen_alertas import construir_resumenes
 
 
-def _fecha(valor):
+# --- Selección de destinatarios: también la usa enviar_resumenes_alertas ---
+
+def fecha_iso(valor):
+    """Tipo de argparse para --hoy (AAAA-MM-DD)."""
     try:
         return datetime.date.fromisoformat(valor)
     except ValueError:
         raise argparse.ArgumentTypeError(f"Fecha inválida: {valor!r}. Usa AAAA-MM-DD.")
+
+
+def agregar_argumentos_de_seleccion(parser):
+    """Agrega --email y --hoy."""
+    parser.add_argument(
+        "--email", metavar="CORREO",
+        help="Solo el destinatario con ese correo (sin distinguir mayúsculas).",
+    )
+    parser.add_argument(
+        "--hoy", type=fecha_iso, metavar="AAAA-MM-DD",
+        help="Fecha a usar como hoy (por defecto, la fecha local actual).",
+    )
+
+
+def seleccionar_destinatarios(correo=None):
+    """Lista de destinatarios, o solo el del `correo`; CommandError si no existe o no es destinatario."""
+    destinatarios = funcionarios_con_permiso(PERMISO_REVISAR_ALERTAS)
+    if not correo:
+        return list(destinatarios)
+    correo = correo.strip()
+    destinatarios = list(destinatarios.filter(email__iexact=correo))
+    if destinatarios:
+        return destinatarios
+    if Funcionario.objects.filter(email__iexact=correo).exists():
+        raise CommandError(
+            f"{correo} no es destinatario: necesita estar activo, con cuenta activa "
+            f"y un rol con el permiso {PERMISO_REVISAR_ALERTAS}."
+        )
+    raise CommandError(f"No existe ningún funcionario con el correo {correo}.")
 
 
 class Command(BaseCommand):
@@ -25,18 +58,11 @@ class Command(BaseCommand):
     )
 
     def add_arguments(self, parser):
-        parser.add_argument(
-            "--email", metavar="CORREO",
-            help="Solo el destinatario con ese correo (sin distinguir mayúsculas).",
-        )
-        parser.add_argument(
-            "--hoy", type=_fecha, metavar="AAAA-MM-DD",
-            help="Fecha a usar como hoy (por defecto, la fecha local actual).",
-        )
+        agregar_argumentos_de_seleccion(parser)
 
     def handle(self, *args, **options):
         hoy = options["hoy"] or timezone.localdate()
-        destinatarios = self._destinatarios(options["email"])
+        destinatarios = seleccionar_destinatarios(options["email"])
 
         fecha = hoy.strftime("%d/%m/%Y")
         periodo = periodo_actual(hoy)
@@ -60,21 +86,6 @@ class Command(BaseCommand):
             f"Sin contenido: {len(destinatarios) - len(resumenes)}."
         )
 
-    def _destinatarios(self, correo):
-        destinatarios = funcionarios_con_permiso(PERMISO_REVISAR_ALERTAS)
-        if not correo:
-            return list(destinatarios)
-        correo = correo.strip()
-        destinatarios = list(destinatarios.filter(email__iexact=correo))
-        if destinatarios:
-            return destinatarios
-        if Funcionario.objects.filter(email__iexact=correo).exists():
-            raise CommandError(
-                f"{correo} no es destinatario: necesita estar activo, con cuenta activa "
-                f"y un rol con el permiso {PERMISO_REVISAR_ALERTAS}."
-            )
-        raise CommandError(f"No existe ningún funcionario con el correo {correo}.")
-
     def _imprimir(self, resumen):
         funcionario = resumen.funcionario
         self.stdout.write("")
@@ -83,13 +94,11 @@ class Command(BaseCommand):
         )
         for curso in resumen.cursos:
             alumnos = "alumno" if curso.total_alumnos == 1 else "alumnos"
-            self.stdout.write(
-                f"  {curso.curso.nivel}°{curso.curso.grupo}, {curso.total_alumnos} {alumnos}"
-            )
+            self.stdout.write(f"  {curso.nombre}, {curso.total_alumnos} {alumnos}")
             for alumno in curso.alumnos:
-                porcentaje = "sin datos" if alumno.porcentaje is None else f"{alumno.porcentaje:.1f} %"
                 self.stdout.write(
-                    f"    - {alumno.nombre} · {alumno.estado} · {porcentaje} · "
+                    f"    - {alumno.nombre} · {alumno.estado} · "
+                    f"{formatear_porcentaje(alumno.porcentaje)} · "
                     f"alerta del {alumno.fecha_alerta:%d/%m/%Y}"
                 )
             if curso.restantes:

@@ -1,0 +1,11 @@
+{% autoescape off %}Hola, {{ nombre }}:
+
+{{ frase_total }}
+{% for curso in cursos %}
+{{ curso.etiqueta }}, {{ curso.total }}
+{% for alumno in curso.alumnos %}  - {{ alumno.nombre }} · {{ alumno.estado }} · nivel {{ alumno.nivel }} · {{ alumno.porcentaje }} · alerta del {{ alumno.fecha }}
+{% endfor %}{% if curso.restantes %}  y {{ curso.restantes }} más
+{% endif %}{% endfor %}{% if link %}
+Puedes revisarlas en: {{ link }}
+{% endif %}
+Este correo se envió automáticamente desde el sistema de asistencia.{% endautoescape %}

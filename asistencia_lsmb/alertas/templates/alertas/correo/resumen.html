@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ asunto }}</title>
+</head>
+<body style="margin:0;padding:16px;background-color:#f4f4f5;font-family:Arial,Helvetica,sans-serif;color:#1f2937;">
+<div style="max-width:640px;margin:0 auto;background-color:#ffffff;border:1px solid #e5e7eb;border-radius:8px;padding:24px;">
+<p style="margin:0 0 12px 0;font-size:16px;">Hola, {{ nombre }}:</p>
+<p style="margin:0 0 8px 0;font-size:15px;">{{ frase_total }}</p>
+{% for curso in cursos %}
+<h2 style="margin:24px 0 8px 0;font-size:17px;color:#111827;">{{ curso.etiqueta }}, {{ curso.total }}</h2>
+<table role="presentation" style="width:100%;border-collapse:collapse;font-size:14px;">
+<tr>
+<th style="text-align:left;padding:6px 8px;border-bottom:2px solid #e5e7eb;">Alumno</th>
+<th style="text-align:left;padding:6px 8px;border-bottom:2px solid #e5e7eb;">Estado</th>
+<th style="text-align:left;padding:6px 8px;border-bottom:2px solid #e5e7eb;">Nivel</th>
+<th style="text-align:right;padding:6px 8px;border-bottom:2px solid #e5e7eb;">Asistencia</th>
+<th style="text-align:left;padding:6px 8px;border-bottom:2px solid #e5e7eb;">Alerta del</th>
+</tr>
+{% for alumno in curso.alumnos %}<tr>
+<td style="padding:6px 8px;border-bottom:1px solid #f3f4f6;">{{ alumno.nombre }}</td>
+<td style="padding:6px 8px;border-bottom:1px solid #f3f4f6;">{{ alumno.estado }}</td>
+<td style="padding:6px 8px;border-bottom:1px solid #f3f4f6;{% if alumno.critico %}color:#b91c1c;font-weight:bold;{% else %}color:#b45309;{% endif %}">{{ alumno.nivel }}</td>
+<td style="padding:6px 8px;border-bottom:1px solid #f3f4f6;text-align:right;white-space:nowrap;">{{ alumno.porcentaje }}</td>
+<td style="padding:6px 8px;border-bottom:1px solid #f3f4f6;white-space:nowrap;">{{ alumno.fecha }}</td>
+</tr>
+{% endfor %}</table>
+{% if curso.restantes %}<p style="margin:8px 0 0 0;font-size:14px;color:#6b7280;">y {{ curso.restantes }} más</p>{% endif %}
+{% endfor %}
+{% if link %}<p style="margin:24px 0 0 0;font-size:15px;">Puedes revisarlas en: <a href="{{ link }}" style="color:#1d4ed8;">{{ link }}</a></p>{% endif %}
+<p style="margin:24px 0 0 0;font-size:12px;color:#6b7280;">Este correo se envió automáticamente desde el sistema de asistencia.</p>
+</div>
+</body>
+</html>

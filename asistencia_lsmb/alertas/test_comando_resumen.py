@@ -42,17 +42,17 @@ class ComandoResumenAlertasTests(ResumenBase):
     def test_imprime_lo_esperado(self):
         fecha = self._fecha()
         alumnos_2a = [
-            f"    - Alumno {n} · Leve · {49 + n:.1f} % · alerta del {fecha}" for n in range(1, 6)
+            f"    - Alumno {n} · Leve · {49 + n},0 % · alerta del {fecha}" for n in range(1, 6)
         ]
         self.assertEqual(self._comando(), [
             f"Resumen de alertas al {fecha} (período {self.periodo.anio}). "
             "Solo lectura: no se envía nada.",
             "",
             "Ana Funcionaria <funcionario1@liceo.cl> — rol: Rol general",
-            "  1°A, 2 alumnos",
-            f"    - Beto · Grave · 40.5 % · alerta del {fecha}",
+            "  I°A, 2 alumnos",
+            f"    - Beto · Grave · 40,5 % · alerta del {fecha}",
             f"    - Carla · Leve · sin datos · alerta del {fecha}",
-            "  2°A, 7 alumnos",
+            "  II°A, 7 alumnos",
             *alumnos_2a,
             "    ... y 2 más",
             "",

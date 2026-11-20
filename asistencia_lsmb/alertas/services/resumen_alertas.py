@@ -9,7 +9,6 @@ de alertas_vigentes y aplica, por destinatario:
 import datetime
 from dataclasses import dataclass
 
-from django.db.models import prefetch_related_objects
 from django.utils import timezone
 
 from academico.models import Curso, PeriodoAcademico
@@ -22,6 +21,7 @@ from alertas.queries.destinatario_queries import (
 )
 from alertas.queries.periodo_queries import periodo_actual
 from alertas.services.alertas_service import PERMISO_REVISAR_ALERTAS
+from alertas.services.formato import etiqueta_curso
 
 ALUMNOS_POR_CURSO = 5
 
@@ -70,7 +70,7 @@ def _curso(curso, alertas):
     listados = tuple(_alumno(alerta) for alerta in alertas[:ALUMNOS_POR_CURSO])
     return CursoResumen(
         curso=curso,
-        nombre=str(curso),
+        nombre=etiqueta_curso(curso),
         total_alumnos=len(alertas),
         alumnos=listados,
         restantes=max(len(alertas) - len(listados), 0),
@@ -104,8 +104,6 @@ def construir_resumen(funcionario, periodo=None, hoy=None):
     grupos = alertas_por_curso(periodo, solo_sin_revisar=True, hoy=hoy, **filtros)
     if not grupos:
         return None
-    # str(curso) lee curso.periodo: se trae para todos en una sola consulta.
-    prefetch_related_objects([curso for curso, _ in grupos], "periodo")
     cursos = tuple(_curso(curso, alertas) for curso, alertas in grupos)
     return ResumenDestinatario(
         funcionario=funcionario,

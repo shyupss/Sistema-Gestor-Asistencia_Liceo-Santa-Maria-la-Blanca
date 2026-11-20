@@ -272,7 +272,7 @@ class ResumenContenidoTests(ResumenBase):
     def test_campos_de_cada_alumno_y_curso(self):
         alerta = self._caso(self.c1a, self.grave, Decimal("62.50"), "Ana Pérez")
         [curso] = self._construir(self.general).cursos
-        self.assertEqual(curso.nombre, str(self.c1a))
+        self.assertEqual(curso.nombre, "I°A")
         [alumno] = curso.alumnos
         self.assertEqual(alumno.alerta_id, alerta.pk)
         self.assertEqual(alumno.nombre, "Ana Pérez")

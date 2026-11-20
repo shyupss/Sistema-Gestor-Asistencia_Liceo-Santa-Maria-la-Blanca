@@ -182,3 +182,20 @@ FERIADOS_API_URL = os.getenv(
 # Correo del funcionario que revisa alertas mientras no exista el login
 # (alertas/services/identidad.py). Vacío: la revisión responde 401 a todos.
 FUNCIONARIO_REVISOR_PRUEBA_EMAIL = os.getenv("FUNCIONARIO_REVISOR_PRUEBA_EMAIL", "").strip()
+
+# Correo saliente (resúmenes de alertas). Una variable vacía cuenta como no definida.
+EMAIL_HOST = os.getenv("EMAIL_HOST", "").strip()
+EMAIL_PORT = int(os.getenv("EMAIL_PORT", "").strip() or 587)
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "").strip()
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
+EMAIL_USE_TLS = (os.getenv("EMAIL_USE_TLS", "").strip().lower() or "true") in {"1", "true", "yes"}
+DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "").strip() or "asistencia@lsmb.cl"
+# Backend explícito si viene en el entorno; si no, SMTP con EMAIL_HOST y consola sin él.
+EMAIL_BACKEND = os.getenv("EMAIL_BACKEND", "").strip() or (
+    "django.core.mail.backends.smtp.EmailBackend"
+    if EMAIL_HOST
+    else "django.core.mail.backends.console.EmailBackend"
+)
+# URL base del sistema para los links de los correos (p. ej. https://asistencia.lsmb.cl).
+# Vacía: los correos salen sin link.
+SITE_BASE_URL = os.getenv("SITE_BASE_URL", "").strip()
