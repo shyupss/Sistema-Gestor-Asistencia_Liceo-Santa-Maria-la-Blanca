@@ -6,7 +6,7 @@ está activo y tiene una cuenta activa.
 """
 from django.db.models import Q
 
-from academico.models import Curso
+from academico.models import Curso, Matricula
 from alertas.models import Cuenta, FuncionarioCurso, Rol
 
 
@@ -39,3 +39,22 @@ def cursos_en_alcance(funcionario, periodo):
     # distinct() y el QuerySet se puede seguir filtrando o agregando.
     asignados = FuncionarioCurso.objects.filter(funcionario=funcionario).values("curso_id")
     return cursos.filter(Q(pk__in=asignados) | Q(profesor_jefe=funcionario))
+
+
+def curso_del_alumno_en_periodo(alumno, periodo, hoy):
+    """Curso del alumno en el período (instancia o id), o None si no tiene matrícula en él.
+
+    Usa la matrícula activa (fecha_termino nula o posterior a `hoy`). Si no hay
+    ninguna (p. ej. el barrido aún no cerró la alerta), usa la más reciente del
+    período. Entre varias, gana la de mayor fecha_matricula y luego la de mayor id.
+    """
+    matriculas = (
+        Matricula.objects.filter(alumno=alumno, periodo=periodo)
+        .select_related("curso")
+        .order_by("-fecha_matricula", "-pk")
+    )
+    matricula = (
+        matriculas.filter(Q(fecha_termino__isnull=True) | Q(fecha_termino__gt=hoy)).first()
+        or matriculas.first()
+    )
+    return matricula.curso if matricula else None

@@ -10,6 +10,11 @@ from django.utils import timezone
 
 from academico.models import Matricula
 from alertas.models import Alerta, EstadoAlumno
+from alertas.queries.alcance_queries import (
+    curso_del_alumno_en_periodo,
+    cursos_en_alcance,
+    tiene_permiso,
+)
 
 CREADA = "creada"
 CAMBIO_ESTADO = "cambio_estado"
@@ -21,6 +26,33 @@ MOTIVO_CAMBIO_ESTADO = "cambio_estado"
 MOTIVO_FIN_PERIODO = "fin_periodo"
 MOTIVO_FIN_MATRICULA = "fin_matricula"
 MOTIVOS_VALIDOS = {motivo for motivo, _ in Alerta.MOTIVOS_CIERRE}
+
+PERMISO_REVISAR_ALERTAS = "revisar_alertas"
+NOTA_MAXIMA = 1000
+
+
+class AlertaError(Exception):
+    """Base de los errores al revisar una alerta."""
+
+
+class SinPermiso(AlertaError):
+    """El funcionario no tiene acceso o su rol no tiene el permiso de revisar alertas."""
+
+
+class FueraDeAlcance(AlertaError):
+    """El curso del alumno no está entre los cursos que ve el funcionario."""
+
+
+class NotaInvalida(AlertaError):
+    """La nota no es texto o supera NOTA_MAXIMA caracteres (ya recortada)."""
+
+
+class AlertaCerrada(AlertaError):
+    """La alerta ya no está vigente."""
+
+
+class AlertaYaRevisada(AlertaError):
+    """La alerta ya fue revisada."""
 
 
 def cerrar_alerta(alerta, motivo, ahora=None):
@@ -171,3 +203,48 @@ def reconciliar_alertas(periodo=None, ahora=None):
         resultado = sincronizar_alerta(estado_alumno.alumno, estado_alumno.periodo, ahora=ahora)
         conteo[resultado] += 1
     return conteo
+
+
+def _normalizar_nota(nota):
+    if nota is None:
+        return None
+    if not isinstance(nota, str):
+        raise NotaInvalida("La nota debe ser texto.")
+    nota = nota.strip()
+    if len(nota) > NOTA_MAXIMA:
+        raise NotaInvalida(f"La nota no puede superar {NOTA_MAXIMA} caracteres.")
+    return nota or None
+
+
+def marcar_revisada(alerta, funcionario, nota=None, ahora=None):
+    """Marca la alerta como revisada por `funcionario` y devuelve la alerta actualizada.
+
+    Verifica, en este orden: permiso (SinPermiso), que el curso del alumno en el
+    período esté en el alcance del funcionario (FueraDeAlcance), la nota
+    (NotaInvalida: se recorta y vacía queda en None) y, con la alerta bloqueada,
+    que siga vigente (AlertaCerrada) y sin revisar (AlertaYaRevisada).
+    `ahora` (por defecto timezone.now()) es la fecha de revisión y define "hoy".
+    No cierra la alerta, no cambia EstadoAlumno ni toca otras alertas. Devuelve
+    la alerta releída de la BD; la instancia recibida no se modifica.
+    """
+    ahora = ahora or timezone.now()
+    hoy = timezone.localdate(ahora)
+    if not tiene_permiso(funcionario, PERMISO_REVISAR_ALERTAS):
+        raise SinPermiso("El funcionario no tiene permiso para revisar alertas.")
+    curso = curso_del_alumno_en_periodo(alerta.alumno_id, alerta.periodo_id, hoy)
+    if curso is None or not cursos_en_alcance(funcionario, alerta.periodo_id).filter(pk=curso.pk).exists():
+        raise FueraDeAlcance("El curso del alumno no está en el alcance del funcionario.")
+    nota = _normalizar_nota(nota)
+
+    with transaction.atomic():
+        actual = Alerta.objects.select_for_update().get(pk=alerta.pk)
+        if actual.fecha_cierre is not None:
+            raise AlertaCerrada("La alerta está cerrada.")
+        if actual.revisada:
+            raise AlertaYaRevisada("La alerta ya fue revisada.")
+        actual.revisada = True
+        actual.funcionario_revisa = funcionario
+        actual.fecha_revision = ahora
+        actual.nota = nota
+        actual.save(update_fields=["revisada", "funcionario_revisa", "fecha_revision", "nota"])
+    return actual

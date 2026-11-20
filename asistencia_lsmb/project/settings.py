@@ -178,3 +178,7 @@ FERIADOS_API_URL = os.getenv(
     "FERIADOS_API_URL",
     "https://date.nager.at/api/v3/PublicHolidays",
 )
+
+# Correo del funcionario que revisa alertas mientras no exista el login
+# (alertas/services/identidad.py). Vacío: la revisión responde 401 a todos.
+FUNCIONARIO_REVISOR_PRUEBA_EMAIL = os.getenv("FUNCIONARIO_REVISOR_PRUEBA_EMAIL", "").strip()
