@@ -1,0 +1,45 @@
+{% with c=alerta.nivel.color %}
+<article class="flex flex-col rounded-lg border border-gris-iconos border-l-[6px] border-l-{{ c }} bg-blanco-tarjeta shadow-sm">
+    <!-- Header de la tarjeta -->
+    <div class="flex items-center justify-between gap-3 border-b border-gris-claro px-3 py-2.5">
+        <div class="flex min-w-0 items-center gap-2.5">
+            <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-{{ c }}-claro">
+                <i data-lucide="triangle-alert" class="h-5 w-5 text-{{ c }}"></i>
+            </span>
+            <div class="min-w-0">
+                <a href="{% url 'perfil_alumno' alerta.alumno.id %}?tab=alertas&next={{ request.get_full_path|urlencode }}"
+                    class="block truncate text-[15px] font-semibold leading-tight text-negro-texto hover:text-azul">
+                    {{ alerta.alumno.nombre }}
+                </a>
+                <p class="text-xs text-gris-texto">
+                    {{ alerta.curso.nivel_romano }}° Medio {{ alerta.curso.grupo }} · {{ alerta.alumno.rut }}
+                </p>
+            </div>
+        </div>
+        <span class="inline-flex shrink-0 items-center rounded-full bg-{{ c }}-fondo px-2.5 py-0.5 text-xs font-medium text-{{ c }}-oscuro">
+            {{ alerta.nivel.nombre }}
+        </span>
+    </div>
+
+    <!-- Información de la alerta -->
+    <div class="flex-1 space-y-1.5 border-b border-gris-claro px-3 py-2.5">
+        <p class="text-[13px] text-negro-texto">{{ alerta.mensaje }}</p>
+        <p class="flex items-center gap-1.5 text-xs text-gris-texto">
+            <i data-lucide="calendar" class="h-3.5 w-3.5"></i>
+            {{ alerta.fecha|date:"d/m/Y" }}
+        </p>
+        <p class="flex items-center gap-1.5 text-xs font-medium text-{{ c }}-oscuro">
+            <i data-lucide="trending-down" class="h-3.5 w-3.5"></i>
+            {{ alerta.nivel_anterior }} &rarr; {{ alerta.nivel.nombre }}
+        </p>
+    </div>
+
+    <!-- Botón ver perfil -->
+    <a href="{% url 'perfil_alumno' alerta.alumno.id %}?tab=alertas&next={{ request.get_full_path|urlencode }}"
+        class="flex items-center justify-center gap-1 rounded-b-lg py-2.5 text-sm font-medium text-azul transition-colors bg-azul-claro/50 hover:bg-azul hover:text-blanco"
+    >
+        Ver perfil
+        <i data-lucide="arrow-right" class="h-3 w-3"></i>
+    </a>
+</article>
+{% endwith %}

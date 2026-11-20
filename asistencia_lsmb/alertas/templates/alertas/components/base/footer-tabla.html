@@ -1,0 +1,74 @@
+<div class="flex flex-col items-center justify-between gap-4 p-2 pt-4 text-sm text-gris-texto md:flex-row">
+
+    <!-- Texto de conteo -->
+    <div class="pl-3 md:pb-2">
+        {% if page_obj.paginator.count %}
+            Mostrando {{ page_obj.start_index }}-{{ page_obj.end_index }} de {{ page_obj.paginator.count }}
+            {{ page_title|lower }}
+        {% else %}
+            No hay {{ page_title|lower }} que mostrar
+        {% endif %}
+    </div>
+
+    <!-- Selector de elementos por página -->
+    <div class="flex items-center gap-2 md:pb-2">
+        <span>Por página</span>
+        <select name="per_page" form="filtro-form" onchange="this.form.submit()"
+            class="bg-blanco border border-gris-claro rounded-lg px-2.5 py-1 text-sm text-gris-texto focus:outline-none focus:ring-1 focus:ring-azul">
+            {% for opcion in opciones_por_pagina %}
+                <option value="{{ opcion }}" {% if opcion == per_page %}selected{% endif %}>{{ opcion }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <!-- Botones de paginación numérica -->
+    <div class="flex items-center gap-1 pr-3 md:pb-2">
+        <!-- Botón Anterior -->
+        {% if page_obj.has_previous %}
+        <a href="{% querystring page=page_obj.previous_page_number %}" aria-label="Página anterior"
+            class="p-2 border border-gris-claro rounded-lg text-gris-texto hover:bg-gris-claro">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg>
+        </a>
+        {% else %}
+        <span aria-disabled="true" class="p-2 border border-gris-ultraclaro rounded-lg text-gris-claro cursor-not-allowed">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg>
+        </span>
+        {% endif %}
+
+        <!-- Números de página (elididos: primera, última, la actual y 1 a cada lado) -->
+        {% for num in paginas %}
+        {% if num is None %}
+            <span aria-hidden="true" class="px-2 text-gris-texto">&hellip;</span>
+        {% elif num == page_obj.number %}
+            <span aria-current="page" class="px-3.5 py-1.5 border border-azul bg-azul-claro text-azul font-semibold rounded-lg">
+                {{ num }}
+            </span>
+        {% else %}
+            <a href="{% querystring page=num %}"
+                class="px-3.5 py-1.5 border border-gris-claro text-gris-texto hover:bg-gris-claro rounded-lg">
+                {{ num }}
+            </a>
+        {% endif %}
+        {% endfor %}
+
+        <!-- Botón Siguiente -->
+        {% if page_obj.has_next %}
+            <a href="{% querystring page=page_obj.next_page_number %}" aria-label="Página siguiente"
+                class="p-2 border border-gris-claro rounded-lg text-gris-texto hover:bg-gris-claro">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+            </a>
+        {% else %}
+            <span aria-disabled="true" class="p-2 border border-gris-ultraclaro rounded-lg text-gris-claro cursor-not-allowed">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+            </span>
+        {% endif %}
+    </div>
+</div>

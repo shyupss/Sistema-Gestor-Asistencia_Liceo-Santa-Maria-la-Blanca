@@ -1,0 +1,41 @@
+{% url 'alertas_configuracion' as configuracion %}
+
+<div class="space-y-3 p-2 md:p-3 lg:px-4 lg:py-3">
+    <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <!-- Botones de filtro -->
+        <div class="flex flex-wrap items-center gap-y-3 gap-x-1.5">
+            {% for nivel in niveles_filtros %}
+                {% include 'alertas/components/base/pastilla-filtro.html' with nivel=nivel %}
+            {% endfor %}
+            {% if niveles_extras %}
+                {# TODO: Sin funcionalidad por ahora (mostrar los niveles ocultos) #}
+                <button type="button" aria-label="Mostrar {{ niveles_extras }} niveles más"
+                    class="inline-flex items-center rounded-full bg-gris-ultraclaro px-2 py-1 text-xs md:text-sm font-medium text-gris-texto
+                    transition-colors hover:bg-gris-claro focus:outline-none focus:ring-1 focus:ring-azul"
+                >
+                    +{{ niveles_extras }} más
+                </button>
+            {% endif %}
+        </div>
+
+        <a href="{{ configuracion }}"
+            class="flex w-full items-center justify-center gap-2 rounded-lg bg-azul px-3 py-2.5 lg:w-auto lg:py-2 
+            text-sm font-semibold text-blanco shadow-sm transition-colors hover:bg-azul-oscuro"
+        >
+            <i data-lucide="settings" class="h-4 w-4"></i>
+            Configuración de alertas y umbrales
+        </a>
+    </div>
+
+    <form method="get" id="filtro-form"
+        class="grid grid-cols-2 gap-3 lg:flex lg:items-center"
+    >
+        {% if nivel_actual %}
+            <input type="hidden" name="nivel" value="{{ nivel_actual }}">
+        {% endif %}
+        {% include 'alertas/components/base/input-filtro.html' with name='curso' icono='book-open' opciones=opciones_curso seleccionado=curso_actual clase='order-2 lg:order-1 lg:flex-1' %}
+        {% include 'alertas/components/base/input-filtro.html' with name='rango' icono='calendar' opciones=opciones_rango seleccionado=rango_actual clase='order-1 lg:order-2 lg:w-[13.25rem]' %}
+        {% include 'alertas/components/base/input-filtro.html' with name='orden' icono='arrow-up-down' opciones=opciones_orden seleccionado=orden_actual clase='order-3 col-span-2 lg:col-span-1 lg:w-[13.25rem]' %}
+    </form>
+
+</div>

@@ -1,0 +1,16 @@
+{% with c=nivel.color %}
+<a href="{% if nivel_actual == nivel.slug %}{% querystring nivel=None page=None %}{% else %}{% querystring nivel=nivel.slug page=None %}{% endif %}"
+    class="inline-flex items-center gap-1.5 rounded-full border px-2 py-1 text-sm font-medium shadow-sm
+    bg-{{ c }}-fondo text-{{ c }}-oscuro
+    {% if nivel_actual == nivel.slug %}border-{{ c }}{% else %}border-transparent{% endif %}
+    transition duration-200 ease-out hover:scale-105 origin-center active:scale-95"
+>
+    <i data-lucide="triangle-alert" class="h-3 w-3"></i>
+    {{ nivel.nombre }}
+    <span class="font-semibold text-xs bg-{{ c }}-contraste/60
+        flex items-center justify-center w-auto h-5 p-1 min-w-5 rounded-full"
+    >
+        {{ nivel.cuenta|default:0 }}
+    </span>
+</a>
+{% endwith %}

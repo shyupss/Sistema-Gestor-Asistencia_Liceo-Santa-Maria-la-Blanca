@@ -5,12 +5,16 @@
 {% block content %}
 
 <!-- Contenedor principal del contenido -->
-<div class="mx-auto max-w-[90%] px-4 py-5 sm:px-6 sm:py-8">
+<div class="mx-auto max-w-[98%] lg:max-w-[90%] px-4 py-5 sm:px-6 sm:py-8">
     <!-- Encabezado -->
     {% include 'components/global/page_title.html' with page_title=page_title today=fecha_hoy %}
     
     <!-- Contenido -->
-
+    <div class="mt-2 rounded-lg border border-gris-claro bg-blanco-tarjeta">
+        {% include 'alertas/components/base/header-tabla.html' %}
+        {% include 'alertas/components/base/body-tabla.html' %}
+        {% include 'alertas/components/base/footer-tabla.html' %}
+    </div>
 </div>
 
 {% endblock %}

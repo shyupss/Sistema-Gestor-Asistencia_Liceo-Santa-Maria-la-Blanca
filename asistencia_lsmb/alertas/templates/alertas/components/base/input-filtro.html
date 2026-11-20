@@ -1,0 +1,51 @@
+{% comment %}
+    Selector de filtro (Alpine).
+    Parámetros: name, icono, clase,
+      opciones: lista de pares (valor, etiqueta). El input oculto envía el valor; el botón muestra la etiqueta.
+      seleccionado: valor actual (debe ser uno de los valores de `opciones`).
+{% endcomment %}
+<div class="relative {{ clase }}"
+    x-data="{ open: false, selected: '{{ seleccionado|escapejs }}', etiqueta: '{% for valor, etiqueta in opciones %}{% if valor == seleccionado %}{{ etiqueta|escapejs }}{% endif %}{% endfor %}' }"
+    @click.outside="open = false"
+    @keydown.escape.window="open = false"
+>
+    <input type="hidden" name="{{ name }}" :value="selected">
+
+    <button type="button"
+        @click="open = !open"
+        class="relative flex w-full items-center justify-between gap-3 rounded-xl border border-gris-iconos bg-blanco
+        py-2.5 pl-10 pr-3.5 text-xs md:text-sm text-negro-texto shadow-sm transition-colors
+        hover:border-azul focus:border-azul focus:outline-none focus:ring-1 focus:ring-azul"
+    >
+        <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-gris-texto">
+            <i data-lucide="{{ icono }}" class="h-4 w-4"></i>
+        </span>
+
+        <span x-text="etiqueta" class="truncate font-normal text-negro-texto"></span>
+
+        <i data-lucide="chevron-down"
+            class="h-4 w-4 shrink-0 text-gris-texto transition-transform duration-200 origin-center"
+            :class="open ? 'rotate-180' : ''">
+        </i>
+    </button>
+
+    <div x-show="open" x-cloak
+        x-transition:enter="transition ease-out duration-100"
+        x-transition:enter-start="opacity-0 scale-95"
+        x-transition:enter-end="opacity-100 scale-100"
+        x-transition:leave="transition ease-in duration-75"
+        x-transition:leave-start="opacity-100 scale-100"
+        x-transition:leave-end="opacity-0 scale-95"
+        class="absolute left-0 z-30 mt-1.5 max-h-64 w-full min-w-[160px] overflow-y-auto rounded-xl border border-gris-claro bg-blanco py-1 shadow-lg"
+    >
+        {% for valor, etiqueta in opciones %}
+            <button type="button"
+                @click="selected = '{{ valor|escapejs }}'; etiqueta = '{{ etiqueta|escapejs }}'; open = false; $nextTick(() => $root.closest('form').submit())"
+                class="flex w-full items-center px-4 py-2 text-left text-xs md:text-sm transition-colors hover:bg-gris-ultraclaro"
+                :class="selected === '{{ valor|escapejs }}' ? 'font-medium text-azul-oscuro bg-azul-fondo/30' : 'text-negro-texto'"
+            >
+                {{ etiqueta }}
+            </button>
+        {% endfor %}
+    </div>
+</div>
